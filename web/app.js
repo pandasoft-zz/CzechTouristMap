@@ -139,5 +139,103 @@ map.on('mousemove', (e) => {
   coordInfo.textContent = `lat: ${lat.toFixed(5)}  lng: ${lng.toFixed(5)}`;
 });
 
+// ── Locations ──────────────────────────────────────────────────────────────────
+
+const locSelect       = document.getElementById('loc-select');
+const locEditBtn      = document.getElementById('loc-edit-btn');
+const locEditControls = document.getElementById('loc-edit-controls');
+const locRemoveBtn    = document.getElementById('loc-remove-btn');
+const locAddBtn       = document.getElementById('loc-add-btn');
+const locOverlay      = document.getElementById('loc-overlay');
+const locFormCoords   = document.getElementById('loc-form-coords');
+const locFormMsg      = document.getElementById('loc-form-msg');
+
+let locations = [];
+
+async function loadLocations() {
+  try {
+    const res = await fetch(`${API}/locations`);
+    locations = await res.json();
+    const prev = locSelect.value;
+    locSelect.innerHTML = locations.map((l, i) => `<option value="${i}">${l.name}</option>`).join('');
+    const prevIdx = prev !== '' ? parseInt(prev, 10) : -1;
+    if (prevIdx >= 0 && locations[prevIdx]) {
+      locSelect.value = prevIdx;
+    } else if (locations.length > 0) {
+      locSelect.value = '0';
+      map.setView([locations[0].lat, locations[0].lng], locations[0].zoom);
+    }
+  } catch (e) {
+    console.warn('Could not load locations', e);
+  }
+}
+
+locSelect.addEventListener('change', () => {
+  const idx = parseInt(locSelect.value, 10);
+  if (isNaN(idx)) return;
+  const loc = locations[idx];
+  if (loc) map.setView([loc.lat, loc.lng], loc.zoom);
+});
+
+locEditBtn.addEventListener('click', () => {
+  const open = locEditControls.classList.toggle('open');
+  locEditBtn.classList.toggle('tb-btn-active', open);
+});
+
+locRemoveBtn.addEventListener('click', async () => {
+  const idx = parseInt(locSelect.value, 10);
+  if (isNaN(idx)) { alert('Select a location first.'); return; }
+  const loc = locations[idx];
+  if (!confirm(`Remove "${loc.name}"?`)) return;
+  const res = await fetch(`${API}/locations?name=${encodeURIComponent(loc.name)}`, { method: 'DELETE' });
+  if (res.ok) await loadLocations();
+  else alert('Delete failed: ' + res.statusText);
+});
+
+locAddBtn.addEventListener('click', () => {
+  const center = map.getCenter();
+  locFormCoords.textContent =
+    `lat ${center.lat.toFixed(5)}, lng ${center.lng.toFixed(5)}, zoom ${map.getZoom()}`;
+  locFormMsg.textContent = '';
+  document.getElementById('lf-name').value = '';
+  document.getElementById('lf-note').value = '';
+  locOverlay.style.display = 'flex';
+  document.getElementById('lf-name').focus();
+});
+
+document.getElementById('lf-cancel').addEventListener('click', () => {
+  locOverlay.style.display = 'none';
+});
+
+document.getElementById('lf-save').addEventListener('click', async () => {
+  const name = document.getElementById('lf-name').value.trim();
+  if (!name) { locFormMsg.textContent = 'Name is required.'; locFormMsg.style.color = '#f88'; return; }
+
+  const center = map.getCenter();
+  const body = new URLSearchParams({
+    name,
+    lat:  center.lat.toFixed(6),
+    lng:  center.lng.toFixed(6),
+    zoom: map.getZoom(),
+    note: document.getElementById('lf-note').value.trim(),
+  }).toString();
+
+  const res  = await fetch(`${API}/locations`, {
+    method: 'POST', body,
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  });
+  const data = await res.json();
+  if (res.ok && data.success) {
+    locOverlay.style.display = 'none';
+    await loadLocations();
+    const newIdx = locations.findIndex(l => l.name === name);
+    if (newIdx >= 0) locSelect.value = newIdx;
+  } else {
+    locFormMsg.textContent = data.error || 'Save failed.';
+    locFormMsg.style.color = '#f88';
+  }
+});
+
 // ── Start ─────────────────────────────────────────────────────────────────────
 init();
+loadLocations();

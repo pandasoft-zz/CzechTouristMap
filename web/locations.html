@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Locations of Interest</title>
+<style>
+  * { box-sizing: border-box; }
+  body { background: #111; color: #eee; font-family: sans-serif; margin: 0; padding: 16px; }
+  h1 { font-size: 18px; margin: 0 0 16px; }
+
+  /* Controls bar */
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  select {
+    background: #1e1e1e;
+    border: 1px solid #444;
+    border-radius: 4px;
+    color: #eee;
+    font-size: 14px;
+    padding: 6px 10px;
+    min-width: 260px;
+  }
+  select:focus { border-color: #666; outline: none; }
+  #loc-note { font-size: 12px; color: #888; font-style: italic; }
+
+  /* Map */
+  #map-wrap { position: relative; display: inline-block; }
+  #map-img { display: block; border: 1px solid #333; max-width: 100%; }
+  #map-caption { font-size: 12px; color: #666; margin-top: 5px; }
+  #map-placeholder {
+    width: 900px; max-width: 100%;
+    height: 500px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+    font-size: 14px;
+  }
+
+  /* Add form */
+  details { margin-top: 28px; }
+  summary {
+    cursor: pointer;
+    font-size: 14px;
+    color: #aaa;
+    user-select: none;
+    margin-bottom: 12px;
+  }
+  summary:hover { color: #eee; }
+  form { display: flex; flex-direction: column; gap: 10px; max-width: 400px; }
+  label { font-size: 13px; color: #aaa; display: flex; flex-direction: column; gap: 3px; }
+  input {
+    background: #1e1e1e;
+    border: 1px solid #444;
+    border-radius: 4px;
+    color: #eee;
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+  input:focus { border-color: #666; outline: none; }
+  .hint { font-size: 11px; color: #555; }
+  #submit-btn {
+    background: #2a5caa;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 8px 18px;
+    align-self: flex-start;
+  }
+  #submit-btn:hover { background: #3a6cba; }
+  #form-msg { font-size: 13px; }
+  .ok  { color: #5c5; }
+  .err { color: #c55; }
+</style>
+</head>
+<body>
+<h1>Locations of Interest</h1>
+
+<div class="controls">
+  <select id="loc-select" onchange="onSelect()" disabled>
+    <option value="">Loading…</option>
+  </select>
+  <span id="loc-note"></span>
+</div>
+
+<div id="map-placeholder">Select a location above</div>
+<img id="map-img" style="display:none" src="" alt="map render">
+<div id="map-caption"></div>
+
+<details>
+  <summary>+ Add new location</summary>
+  <form id="add-form" onsubmit="submitLocation(event)">
+    <label>Name *
+      <input type="text" name="name" required placeholder="e.g. Olomouc centrum">
+    </label>
+    <label>Latitude *
+      <input type="number" name="lat" step="any" required placeholder="49.5938">
+    </label>
+    <label>Longitude *
+      <input type="number" name="lng" step="any" required placeholder="17.2509">
+    </label>
+    <label>Zoom *
+      <input type="number" name="zoom" min="2" max="18" required placeholder="14">
+      <span class="hint">Single zoom level (2–18)</span>
+    </label>
+    <label>Note (optional)
+      <input type="text" name="note" placeholder="Short description">
+    </label>
+    <button type="submit" id="submit-btn">Add location</button>
+    <div id="form-msg"></div>
+  </form>
+</details>
+
+<script>
+const IMG_W = 900;
+const IMG_H = 500;
+let locations = [];
+
+async function loadLocations() {
+  const sel = document.getElementById('loc-select');
+  try {
+    const res = await fetch('/api/locations');
+    locations = await res.json();
+    sel.innerHTML = locations.map((loc, i) =>
+      `<option value="${i}">${esc(loc.name)} — zoom ${loc.zoom}</option>`
+    ).join('');
+    sel.disabled = false;
+    if (locations.length > 0) {
+      sel.value = '0';
+      onSelect();
+    }
+  } catch (e) {
+    sel.innerHTML = '<option>Failed to load</option>';
+  }
+}
+
+function onSelect() {
+  const sel = document.getElementById('loc-select');
+  const idx = parseInt(sel.value, 10);
+  if (isNaN(idx)) return;
+  const loc = locations[idx];
+
+  document.getElementById('loc-note').textContent = loc.note || '';
+  showMap(loc);
+}
+
+function showMap(loc) {
+  const img = document.getElementById('map-img');
+  const ph  = document.getElementById('map-placeholder');
+  img.style.display = 'none';
+  ph.style.display  = 'flex';
+  ph.textContent    = 'Loading…';
+
+  const src = `/api/render?lat=${loc.lat}&lng=${loc.lng}&zoom=${loc.zoom}&width=${IMG_W}&height=${IMG_H}`;
+  img.onload = () => {
+    ph.style.display  = 'none';
+    img.style.display = 'block';
+  };
+  img.onerror = () => {
+    ph.textContent = 'Render failed — map file may not be loaded.';
+  };
+  img.src = src;
+  document.getElementById('map-caption').textContent =
+    `${loc.name} — lat ${loc.lat}, lng ${loc.lng}, zoom ${loc.zoom}`;
+}
+
+async function submitLocation(e) {
+  e.preventDefault();
+  const form = e.target;
+  const msg  = document.getElementById('form-msg');
+  msg.textContent = '';
+
+  const body = new URLSearchParams({
+    name: form.name.value,
+    lat:  form.lat.value,
+    lng:  form.lng.value,
+    zoom: form.zoom.value,
+    note: form.note.value,
+  }).toString();
+
+  try {
+    const res  = await fetch('/api/locations', {
+      method: 'POST', body,
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      msg.textContent = 'Location added.';
+      msg.className   = 'ok';
+      form.reset();
+      const prevName = locations[parseInt(document.getElementById('loc-select').value, 10)]?.name;
+      await loadLocations();
+      // re-select previously selected location
+      const idx = locations.findIndex(l => l.name === prevName);
+      if (idx >= 0) {
+        document.getElementById('loc-select').value = idx;
+        onSelect();
+      }
+    } else {
+      msg.textContent = 'Error: ' + (data.error || res.statusText);
+      msg.className   = 'err';
+    }
+  } catch (err) {
+    msg.textContent = 'Request failed: ' + err.message;
+    msg.className   = 'err';
+  }
+}
+
+function esc(s) {
+  return String(s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+loadLocations();
+</script>
+</body>
+</html>

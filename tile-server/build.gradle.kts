@@ -22,6 +22,14 @@ dependencies {
     implementation("org.mapsforge:mapsforge-map-reader:$mapsforgeVersion")
     implementation("org.mapsforge:mapsforge-map-awt:$mapsforgeVersion")
     implementation("org.slf4j:slf4j-simple:2.0.9")
+    implementation("org.yaml:snakeyaml:2.2")
+
+    testImplementation(kotlin("test"))
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 kotlin {
