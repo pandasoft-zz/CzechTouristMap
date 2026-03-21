@@ -7,7 +7,7 @@ Run from project root:
 import os
 import glob
 
-THEMES_DIR = "themes"
+THEMES_DIR = "../themes"
 OUT_FILE = "docs/SYMBOLS.md"
 
 ICON_NAMES = {
@@ -186,7 +186,7 @@ def generate():
 
     # Main sections
     for folder, title, subtitle in SECTIONS:
-        folder_path = os.path.join(THEMES_DIR, folder)
+        folder_path = os.path.join("themes", folder)
         if not os.path.isdir(folder_path):
             continue
         files = sorted(f for f in os.listdir(folder_path)
@@ -244,7 +244,7 @@ def generate():
     lines.append("\n## OSMC symboly\n")
     lines.append("_Mezinárodní standard pro turistické značení — [osmc:symbol](https://wiki.openstreetmap.org/wiki/Key:osmc:symbol)_\n")
 
-    sym_dir = os.path.join(THEMES_DIR, "symbols")
+    sym_dir = os.path.join("themes", "symbols")
     osmc_files = sorted(f for f in os.listdir(sym_dir) if f.startswith("osmc-"))
 
     lines.append("| Ikona | Soubor |")
