@@ -11,12 +11,15 @@ fun main() {
 
     val mapFilePath = System.getenv("MAP_FILE") ?: "/data/maps/czech-republic.map"
     val themesDirPath = System.getenv("THEMES_DIR") ?: "/data/themes"
+    val locationsFilePath = System.getenv("LOCATIONS_FILE") ?: "/data/config/locations.yaml"
 
     println("Starting map tile server...")
     println("Map:    $mapFilePath")
     println("Themes: $themesDirPath")
+    println("Locations: $locationsFilePath")
 
     val themeManager = ThemeManager(themesDirPath)
+    val locationManager = LocationManager(locationsFilePath)
 
     val tileRenderer: TileRenderer? = try {
         TileRenderer(mapFilePath, themeManager)
@@ -30,6 +33,7 @@ fun main() {
 
     server.createContext("/tiles/")         { handleTile(it, tileRenderer, themeManager) }
     server.createContext("/render")         { handleRender(it, tileRenderer) }
+    server.createContext("/locations")      { handleLocations(it, locationManager) }
     server.createContext("/themes/select/") { handleSelectTheme(it, themeManager) }
     server.createContext("/themes/current") { handleCurrentTheme(it, themeManager) }
     server.createContext("/themes")         { handleThemes(it, themeManager) }
@@ -124,6 +128,56 @@ private fun handleRender(exchange: HttpExchange, renderer: TileRenderer?) {
         exchange.sendError(500, e.message ?: "Render error")
     } finally {
         exchange.close()
+    }
+}
+
+// GET /locations          →  JSON array of all locations
+// POST /locations         →  body: name=…&lat=…&lng=…&zoom=…&note=…  →  appends entry
+private fun handleLocations(exchange: HttpExchange, locationManager: LocationManager) {
+    exchange.addCors()
+    if (exchange.requestMethod == "OPTIONS") { exchange.sendResponseHeaders(200, -1); exchange.close(); return }
+
+    when (exchange.requestMethod) {
+        "GET" -> {
+            val list = locationManager.list()
+            exchange.sendJson(200, locationManager.toJson(list))
+        }
+        "POST" -> {
+            try {
+                val body = exchange.requestBody.readBytes().toString(Charsets.UTF_8)
+                val params = body.split("&").associate {
+                    it.substringBefore("=") to java.net.URLDecoder.decode(it.substringAfter("="), "UTF-8")
+                }
+                val name = params["name"]?.takeIf { it.isNotBlank() }
+                    ?: throw IllegalArgumentException("name is required")
+                val lat  = params["lat"]?.toDoubleOrNull()
+                    ?: throw IllegalArgumentException("lat is required")
+                val lng  = params["lng"]?.toDoubleOrNull()
+                    ?: throw IllegalArgumentException("lng is required")
+                val zoom = params["zoom"]?.trim()?.toIntOrNull()
+                    ?: throw IllegalArgumentException("zoom is required and must be an integer")
+                val note = params["note"]?.takeIf { it.isNotBlank() }
+                locationManager.append(Location(name, lat, lng, zoom, note))
+                exchange.sendJson(201, """{"success":true}""")
+            } catch (e: IllegalArgumentException) {
+                exchange.sendError(400, e.message ?: "Bad request")
+            } catch (e: Exception) {
+                System.err.println("Locations POST error: ${e.message}")
+                exchange.sendError(500, e.message ?: "Server error")
+            }
+        }
+        "DELETE" -> {
+            val name = exchange.requestURI.query
+                ?.split("&")?.associate { it.substringBefore("=") to java.net.URLDecoder.decode(it.substringAfter("="), "UTF-8") }
+                ?.get("name")
+                ?: run { exchange.sendError(400, "name query param required"); return }
+            if (locationManager.delete(name)) {
+                exchange.sendJson(200, """{"success":true}""")
+            } else {
+                exchange.sendJson(404, """{"success":false,"error":"Not found"}""")
+            }
+        }
+        else -> exchange.sendError(405, "Method not allowed")
     }
 }
 
