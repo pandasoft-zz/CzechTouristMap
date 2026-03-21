@@ -142,7 +142,7 @@
 
 <!-- 
 <rule e="any" k="mountain_pass" v="yes" zoom-min="14">
-    <symbol id="pass" src="{$naturalIconPath}//mountain_pass.svg" />
+    <symbol id="pass" src="{$naturalIconPath}/mountain_pass.svg" />
     <rule e="any" k="*" v="*" zoom-min="15">
         <caption fill="#666666" font-size="12" font-style="bold" k="ele" position="above"
              stroke="#FFFFFF" stroke-width="2.0" symbol-id="pass" />
@@ -303,7 +303,7 @@
 <!-- 
 <rule e="node" k="natural" v="tree" zoom-min="16">
     <rule e="node" k="name" v="*">
-        <symbol id="tree" src="{$naturalIconPath}//tree.png" priority="{$pr-tree}"/>
+        <symbol id="tree" src="{$naturalIconPath}/tree.svg" priority="{$pr-tree}"/>
         <caption k="name" symbol-id="tree" position="below" 
         font-style="bold" font-size="10" fill="#666666" stroke="#ffffff" stroke-width="2" priority="{$pr-tree}"/>        
     </rule>
