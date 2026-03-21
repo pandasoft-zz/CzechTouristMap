@@ -28,7 +28,8 @@ fun main() {
 
     val server = HttpServer.create(InetSocketAddress(8080), 50)
 
-    server.createContext("/tiles/")       { handleTile(it, tileRenderer, themeManager) }
+    server.createContext("/tiles/")         { handleTile(it, tileRenderer, themeManager) }
+    server.createContext("/render")         { handleRender(it, tileRenderer) }
     server.createContext("/themes/select/") { handleSelectTheme(it, themeManager) }
     server.createContext("/themes/current") { handleCurrentTheme(it, themeManager) }
     server.createContext("/themes")         { handleThemes(it, themeManager) }
@@ -81,6 +82,44 @@ private fun handleTile(exchange: HttpExchange, renderer: TileRenderer?, themeMan
         exchange.sendError(400, "Invalid tile coordinates")
     } catch (e: Exception) {
         System.err.println("Tile render error: ${e.message}")
+        e.printStackTrace()
+        exchange.sendError(500, e.message ?: "Render error")
+    } finally {
+        exchange.close()
+    }
+}
+
+// GET /render?lat=49.95&lng=15.27&zoom=14&width=800&height=600  →  PNG image
+private fun handleRender(exchange: HttpExchange, renderer: TileRenderer?) {
+    exchange.addCors()
+    if (renderer == null) { exchange.sendError(503, "Map file not loaded"); return }
+
+    try {
+        val params = exchange.requestURI.query
+            ?.split("&")
+            ?.associate { it.substringBefore("=") to it.substringAfter("=") }
+            ?: emptyMap()
+
+        val lat    = params["lat"]?.toDouble()    ?: 49.8
+        val lng    = params["lng"]?.toDouble()    ?: 15.5
+        val zoom   = params["zoom"]?.toInt()      ?: 12
+        val width  = params["width"]?.toInt()     ?: 800
+        val height = params["height"]?.toInt()    ?: 600
+
+        require(zoom in 2..18)          { "zoom must be 2–18" }
+        require(width  in 64..4096)     { "width must be 64–4096" }
+        require(height in 64..4096)     { "height must be 64–4096" }
+
+        val png = renderer.renderArea(lat, lng, zoom, width, height)
+
+        exchange.responseHeaders.set("Content-Type", "image/png")
+        exchange.responseHeaders.set("Cache-Control", "no-cache")
+        exchange.sendResponseHeaders(200, png.size.toLong())
+        exchange.responseBody.write(png)
+    } catch (e: IllegalArgumentException) {
+        exchange.sendError(400, e.message ?: "Bad request")
+    } catch (e: Exception) {
+        System.err.println("Render error: ${e.message}")
         e.printStackTrace()
         exchange.sendError(500, e.message ?: "Render error")
     } finally {
