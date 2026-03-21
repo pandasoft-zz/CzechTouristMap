@@ -23,9 +23,10 @@ html, body {
   color: #f0f0f0;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
   padding: 0 16px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  overflow: visible;
 }
 
 #title {
@@ -93,6 +94,105 @@ html, body {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.3; }
 }
+
+/* ── Locations section ───────────────────────────────────────────────── */
+#loc-section {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+}
+
+#loc-select {
+  background: #3a3a3a;
+  color: #f0f0f0;
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 13px;
+  cursor: pointer;
+  min-width: 180px;
+  max-width: 220px;
+  outline: none;
+}
+#loc-select:hover, #loc-select:focus { border-color: #7ecef4; }
+
+.tb-btn {
+  background: #3a3a3a;
+  border: 1px solid #555;
+  border-radius: 4px;
+  color: #f0f0f0;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 5px 10px;
+  white-space: nowrap;
+  line-height: 1;
+}
+.tb-btn:hover      { background: #4a4a4a; border-color: #888; }
+.tb-btn-active     { border-color: #7ecef4; color: #7ecef4; }
+.tb-btn-danger     { border-color: #a33; color: #f88; }
+.tb-btn-danger:hover { background: #4a2222; border-color: #f44; }
+.tb-btn-ok         { border-color: #2a6; color: #6f6; }
+.tb-btn-ok:hover   { background: #1a3a2a; border-color: #4c4; }
+
+/* Edit controls drop down below toolbar */
+#loc-edit-controls {
+  display: none;
+  position: absolute;
+  top: 40px;
+  left: 0;
+  background: #2c2c2c;
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 6px 8px;
+  gap: 8px;
+  z-index: 1100;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+#loc-edit-controls.open { display: flex; }
+
+/* ── Add-location overlay ────────────────────────────────────────────── */
+#loc-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 80px;
+}
+#loc-form-box {
+  background: #2c2c2c;
+  border: 1px solid #555;
+  border-radius: 6px;
+  padding: 20px;
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+#loc-form-title { font-size: 14px; font-weight: 600; color: #7ecef4; }
+#loc-form-box label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: #aaa;
+}
+#loc-form-box input {
+  background: #1e1e1e;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #eee;
+  font-size: 13px;
+  padding: 5px 8px;
+  outline: none;
+}
+#loc-form-box input:focus { border-color: #7ecef4; }
+#loc-form-coords { font-size: 11px; color: #666; }
+#loc-form-actions { display: flex; gap: 8px; justify-content: flex-end; }
+#loc-form-msg { font-size: 12px; min-height: 16px; }
 
 /* ── Map ─────────────────────────────────────────────────────────────── */
 #map {

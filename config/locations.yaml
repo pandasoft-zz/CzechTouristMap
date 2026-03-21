@@ -1,0 +1,32 @@
+locations:
+  - name: Brno centrum
+    lat: 49.1951
+    lng: 16.6068
+    zoom: 14
+    note: Main test area — city center, good mix of roads and buildings
+  - name: Praha — Staré Město
+    lat: 50.088
+    lng: 14.4208
+    zoom: 14
+    note: Historic center, dense POI labels
+  - name: Krkonoše — Sněžka
+    lat: 50.7364
+    lng: 15.7411
+    zoom: 12
+    note: Highest peak, mountain terrain and hiking trails
+  - name: Šumava — Boubín
+    lat: 48.9747
+    lng: 13.8175
+    zoom: 12
+    note: Forest and national park area
+  - name: Moravský kras
+    lat: 49.3792
+    lng: 16.7292
+    zoom: 13
+    note: Karst terrain — caves, sinkholes
+
+  - name: Vyskov
+    lat: 49.279259
+    lng: 17.011084
+    zoom: 14
+    note: Male mesto + dalnice

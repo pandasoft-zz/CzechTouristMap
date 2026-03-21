@@ -13,10 +13,12 @@ import org.mapsforge.map.model.DisplayModel
 import org.mapsforge.map.reader.MapFile
 import org.mapsforge.map.rendertheme.ExternalRenderTheme
 import org.mapsforge.map.rendertheme.rule.RenderThemeFuture
+import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import javax.imageio.ImageIO
+import kotlin.math.*
 
 class TileRenderer(mapFilePath: String, private val themeManager: ThemeManager) {
 
@@ -65,6 +67,51 @@ class TileRenderer(mapFilePath: String, private val themeManager: ThemeManager) 
         rendererCache[themeName] = renderer
         println("Renderer ready for theme: $themeName")
         return renderer
+    }
+
+    /**
+     * Renders a map area centered on (lat, lng) at the given zoom.
+     * Returns a PNG of exactly (width x height) pixels.
+     */
+    fun renderArea(lat: Double, lng: Double, zoom: Int, width: Int, height: Int): ByteArray {
+        // Fractional tile coordinates of the center point
+        val n = 2.0.pow(zoom)
+        val centerTileX = (lng + 180.0) / 360.0 * n
+        val latRad = Math.toRadians(lat)
+        val centerTileY = (1.0 - ln(tan(latRad) + 1.0 / cos(latRad)) / PI) / 2.0 * n
+
+        // Pixel offset of center within its tile
+        val centerPixelX = (centerTileX - floor(centerTileX)) * 256.0
+        val centerPixelY = (centerTileY - floor(centerTileY)) * 256.0
+
+        // Tile range needed to cover the output image
+        val tileX0 = floor(centerTileX).toInt() - ceil((width  / 2.0 - centerPixelX) / 256).toInt()
+        val tileY0 = floor(centerTileY).toInt() - ceil((height / 2.0 - centerPixelY) / 256).toInt()
+        val tileX1 = floor(centerTileX).toInt() + ceil((width  / 2.0 + (256 - centerPixelX)) / 256).toInt()
+        val tileY1 = floor(centerTileY).toInt() + ceil((height / 2.0 + (256 - centerPixelY)) / 256).toInt()
+
+        val canvasW = (tileX1 - tileX0 + 1) * 256
+        val canvasH = (tileY1 - tileY0 + 1) * 256
+        val canvas = BufferedImage(canvasW, canvasH, BufferedImage.TYPE_INT_ARGB)
+        val g = canvas.createGraphics()
+
+        for (ty in tileY0..tileY1) {
+            for (tx in tileX0..tileX1) {
+                val png = renderTile(tx, ty, zoom.toByte()) ?: continue
+                val img = ImageIO.read(png.inputStream())
+                g.drawImage(img, (tx - tileX0) * 256, (ty - tileY0) * 256, null)
+            }
+        }
+        g.dispose()
+
+        // Crop to exactly (width x height) centered on lat/lng
+        val centerCanvasX = ((centerTileX - tileX0) * 256).toInt()
+        val centerCanvasY = ((centerTileY - tileY0) * 256).toInt()
+        val cropX = (centerCanvasX - width  / 2).coerceIn(0, canvasW - width)
+        val cropY = (centerCanvasY - height / 2).coerceIn(0, canvasH - height)
+        val cropped = canvas.getSubimage(cropX, cropY, width, height)
+
+        return ByteArrayOutputStream().also { ImageIO.write(cropped, "png", it) }.toByteArray()
     }
 
     /**

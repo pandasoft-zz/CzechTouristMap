@@ -6,9 +6,11 @@ services:
     environment:
       MAP_FILE: /data/maps/czech-republic.map
       THEMES_DIR: /data/themes
+      LOCATIONS_FILE: /data/config/locations.yaml
     volumes:
       - ./maps:/data/maps:ro
       - ./themes:/data/themes:ro
+      - ./config:/data/config
     ports:
       - "8080:8080"       # optional: direct access for debugging
     restart: unless-stopped
