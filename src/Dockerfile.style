@@ -1,0 +1,46 @@
+#######################################################
+# CzechTouristMap
+#
+# Minimal Docker image for map style XML rendering
+# Only requires xsltproc + zip + make
+#
+# Usage (from project root):
+#   docker build -f src/Dockerfile.style -t czechtouristmap-style src/
+#   docker run --rm -v $(pwd)/themes:/data/work czechtouristmap-style
+#
+# Based on OpenHiking build system
+# Copyright (c) 2021-2025 OpenHiking contributors
+# SPDX-License-Identifier: GPL-3.0-only
+#
+########################################################
+
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+    make \
+    xsltproc \
+    zip \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY . /app/
+
+# Dummy values for env vars required by environment.mk but not used by 'style' target
+ENV MKG_OSM_CACHE_DIR=/tmp/osm
+ENV MKG_DEM_DIR=/tmp/dem
+ENV MKG_CONTOUR_DIR=/tmp/contour
+ENV MKG_COASTLINES_DIR=/tmp/coastlines
+
+# Working dir where output XML will be written (mount this volume)
+ENV MKG_WORKING_DIR=/data/work
+
+ENV MKG_XSLTPROC=xsltproc
+ENV MKG_ZIP=zip
+ENV STYLE=CzechTouristMap
+
+# Run xsltproc and write XML to stdout.
+# The build script captures stdout and writes it to themes/STYLE.xml on the host.
+# This avoids Docker volume write issues on Windows.
+CMD ["sh", "-c", "xsltproc styles/${STYLE}/${STYLE}.xslt"]

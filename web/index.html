@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MapRender – Mapsforge Viewer</title>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Top toolbar -->
+  <div id="toolbar">
+    <span id="title">MapRender</span>
+
+    <div id="theme-section">
+      <label for="theme-select">Render téma:</label>
+      <select id="theme-select">
+        <option value="">-- načítám --</option>
+      </select>
+    </div>
+
+    <div id="status-bar">
+      <span id="status-dot" class="dot dot-loading"></span>
+      <span id="status-text">Připojování...</span>
+    </div>
+  </div>
+
+  <!-- Map container -->
+  <div id="map"></div>
+
+  <!-- Tile info overlay -->
+  <div id="info-box">
+    <div id="zoom-info">zoom: –</div>
+    <div id="coords-info">lat/lng: –</div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

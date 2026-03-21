@@ -1,0 +1,30 @@
+services:
+
+  tile-server:
+    build: ./tile-server
+    container_name: maprender-tile-server
+    environment:
+      MAP_FILE: /data/maps/czech-republic.map
+      THEMES_DIR: /data/themes
+    volumes:
+      - ./maps:/data/maps:ro
+      - ./themes:/data/themes:ro
+    ports:
+      - "8080:8080"       # optional: direct access for debugging
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s   # Gradle build + JVM startup takes a moment
+
+  web:
+    build: ./web
+    container_name: maprender-web
+    ports:
+      - "80:80"
+    depends_on:
+      tile-server:
+        condition: service_healthy
+    restart: unless-stopped

@@ -1,0 +1,51 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# XSLT / XML — 4-space indent
+[*.{xslt,xml,xsd}]
+indent_style = space
+indent_size = 4
+
+# Kotlin
+[*.{kt,kts}]
+indent_style = space
+indent_size = 4
+max_line_length = 120
+
+# Python (PEP 8)
+[*.py]
+indent_style = space
+indent_size = 4
+max_line_length = 88
+
+# JavaScript / CSS / HTML
+[*.{js,css,html}]
+indent_style = space
+indent_size = 2
+
+# YAML / Docker Compose
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+# Makefile — tabs required
+[Makefile]
+indent_style = tab
+
+# Markdown — preserve trailing spaces (line breaks)
+[*.md]
+trim_trailing_whitespace = false
+
+# INI / config files
+[*.{cfg,ini}]
+indent_style = space
+indent_size = 4
+
+# CSV — no indent rules, just encoding
+[*.csv]
+trim_trailing_whitespace = false
