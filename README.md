@@ -54,8 +54,13 @@ mapRender/
 │   ├── Makefile
 │   └── Dockerfile.style          # Build image
 │
-├── themes/                       # Generated XML (build output, do not edit manually)
-│   └── CzechTouristMap.xml
+├── themes/                       # Generated XML + icon assets
+│   ├── CzechTouristMap.xml       # Generated (build output, do not edit manually)
+│   ├── accomodation/             # SVG icons by category
+│   ├── hiking/
+│   ├── natural/
+│   ├── symbols/                  # KCT trail markers + OSMC symbols
+│   └── …
 │
 ├── maps/                         # Mapsforge .map files (downloaded, not in git)
 │   └── czech-republic.map
@@ -75,6 +80,10 @@ mapRender/
 ├── docker-compose.yml
 └── README.md
 ```
+
+## Icon reference
+
+[**docs/SYMBOLS.md**](docs/SYMBOLS.md) — visual table of all map symbols organized by category (hiking infrastructure, natural features, accommodation, transport, trail markers…).
 
 ## Sources
 
