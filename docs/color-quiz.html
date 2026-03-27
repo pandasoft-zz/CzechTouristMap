@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CzechTouristMap — Style Quiz</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: #fff;
+  }
+  .subtitle {
+    font-size: 0.9rem;
+    color: #888;
+    margin-bottom: 32px;
+  }
+
+  #progress-bar-wrap {
+    width: 100%;
+    max-width: 680px;
+    background: #2a2a3e;
+    border-radius: 8px;
+    height: 6px;
+    margin-bottom: 32px;
+    overflow: hidden;
+  }
+  #progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #4fc3f7, #81c784);
+    border-radius: 8px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  #card {
+    background: #16213e;
+    border-radius: 16px;
+    padding: 32px 28px;
+    max-width: 680px;
+    width: 100%;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  .q-meta {
+    font-size: 0.75rem;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+  .q-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+  .q-desc {
+    font-size: 0.85rem;
+    color: #888;
+    margin-bottom: 28px;
+    line-height: 1.5;
+  }
+
+  .options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+
+  .option {
+    background: #0f3460;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 16px 12px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    text-align: center;
+    user-select: none;
+  }
+  .option:hover {
+    border-color: #4fc3f7;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(79,195,247,0.2);
+  }
+  .option.selected {
+    border-color: #81c784;
+    background: #1a3a20;
+    box-shadow: 0 4px 20px rgba(129,199,132,0.3);
+  }
+
+  .swatch {
+    width: 100%;
+    height: 72px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .swatch-road {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+  }
+  .road-casing {
+    width: 90%;
+    border-radius: 3px;
+  }
+  .road-fill {
+    position: absolute;
+    top: 50%;
+    left: 5%;
+    right: 5%;
+    transform: translateY(-50%);
+    border-radius: 2px;
+  }
+
+  .option-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #aaa;
+    margin-bottom: 4px;
+  }
+  .option-hex {
+    font-size: 0.72rem;
+    font-family: 'Courier New', monospace;
+    color: #666;
+  }
+  .option.selected .option-label { color: #81c784; }
+  .option.selected .option-hex { color: #81c784aa; }
+
+  /* Map mini-preview swatches */
+  .swatch-map {
+    display: grid;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  #nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid #2a2a3e;
+  }
+  #counter {
+    font-size: 0.85rem;
+    color: #555;
+  }
+  .btn {
+    padding: 10px 24px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+  .btn-primary {
+    background: #4fc3f7;
+    color: #000;
+  }
+  .btn-primary:hover { background: #81d4fa; }
+  .btn-primary:disabled { background: #2a2a3e; color: #444; cursor: not-allowed; }
+  .btn-skip {
+    background: transparent;
+    color: #555;
+    border: 1px solid #333;
+    font-size: 0.8rem;
+    padding: 8px 16px;
+  }
+  .btn-skip:hover { color: #888; border-color: #555; }
+
+  /* Results page */
+  #results {
+    display: none;
+    max-width: 780px;
+    width: 100%;
+  }
+  #results h2 {
+    font-size: 1.4rem;
+    color: #81c784;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+  #results .subtitle2 {
+    text-align: center;
+    color: #666;
+    font-size: 0.85rem;
+    margin-bottom: 32px;
+  }
+
+  .result-category {
+    background: #16213e;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 14px;
+  }
+  .result-category h3 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #555;
+    margin-bottom: 14px;
+  }
+  .result-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 10px;
+  }
+  .result-row:last-child { margin-bottom: 0; }
+  .result-swatch {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+  .result-info { flex: 1; }
+  .result-name { font-size: 0.85rem; color: #ccc; }
+  .result-hex { font-size: 0.75rem; font-family: monospace; color: #555; }
+  .result-source {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .src-project { background: #1a3a4a; color: #4fc3f7; }
+  .src-cuzk { background: #3a2a1a; color: #ffb74d; }
+  .src-mapycz { background: #1a3a20; color: #81c784; }
+
+  #copy-btn {
+    display: block;
+    margin: 24px auto 0;
+    padding: 14px 32px;
+    background: #81c784;
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  #copy-btn:hover { background: #a5d6a7; }
+
+  #output-area {
+    display: none;
+    background: #0a0a1a;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+    font-family: monospace;
+    font-size: 0.78rem;
+    color: #81c784;
+    white-space: pre;
+    overflow-x: auto;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .skip-note {
+    font-size: 0.72rem;
+    color: #444;
+    text-align: center;
+    margin-top: 6px;
+  }
+
+  /* Road preview helper */
+  .road-preview {
+    width: 100%;
+    height: 72px;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .road-preview canvas {
+    width: 100%;
+    height: 100%;
+  }
+</style>
+</head>
+<body>
+
+<h1>CzechTouristMap — Style Quiz</h1>
+<p class="subtitle">Klikni na možnost která se ti líbí nejvíc. Na konci dostaneš svůj design manual.</p>
+
+<div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+
+<div id="card">
+  <div class="q-meta" id="q-meta"></div>
+  <div class="q-title" id="q-title"></div>
+  <div class="q-desc" id="q-desc"></div>
+  <div class="options" id="options"></div>
+  <div id="nav">
+    <span id="counter"></span>
+    <div style="display:flex;gap:10px;align-items:center">
+      <button class="btn btn-skip" id="skip-btn">Přeskočit</button>
+      <button class="btn btn-primary" id="next-btn" disabled>Další →</button>
+    </div>
+  </div>
+  <div class="skip-note">Tip: můžeš přeskočit otázky které ti jsou jedno</div>
+</div>
+
+<div id="results">
+  <h2>Tvůj design manual je hotový!</h2>
+  <div class="subtitle2">Shrnutí tvých voleb podle kategorií</div>
+  <div id="results-body"></div>
+  <button id="copy-btn" onclick="generateOutput()">Zobrazit / Zkopírovat XSLT barvy</button>
+  <pre id="output-area"></pre>
+</div>
+
+<script>
+// ─── Quiz data ────────────────────────────────────────────────────────────────
+
+const QUESTIONS = [
+
+  // LAND COVER
+  {
+    category: "Krajina — pozadí",
+    title: "Základní pozadí mapy",
+    desc: "Barva \"prázdné\" půdy — to co vidíš všude tam kde nejsou jiné prvky.",
+    key: "land_base",
+    type: "solid",
+    options: [
+      { label: "Projekt", source: "project", hex: "#FDFDF0", note: "Teplá bílá" },
+      { label: "ČÚZK SM5", source: "cuzk",    hex: "#FFFFFF", note: "Čistá bílá" },
+      { label: "mapy.cz",  source: "mapycz",  hex: "#F2EFE6", note: "Teplý krém" },
+    ]
+  },
+  {
+    category: "Krajina — vegetace",
+    title: "Les (listnatý / smíšený)",
+    desc: "Barva lesních ploch — největší plocha na turistické mapě ČR.",
+    key: "forest",
+    type: "solid",
+    options: [
+      { label: "Projekt", source: "project", hex: "#C8E8A0", note: "Světle zelená" },
+      { label: "ČÚZK SM5", source: "cuzk",    hex: "#EBFFB2", note: "Velmi bledá žluto-zelená" },
+      { label: "mapy.cz",  source: "mapycz",  hex: "#A8D080", note: "Sytá střední zelená" },
+    ]
+  },
+  {
+    category: "Krajina — vegetace",
+    title: "Louka / trvalý travní porost",
+    desc: "Louky, pastviny, travnaté plochy.",
+    key: "grassland",
+    type: "solid",
+    options: [
+      { label: "Projekt", source: "project", hex: "#E4F5C0", note: "Světlá žluto-zelená" },
+      { label: "ČÚZK SM5", source: "cuzk",    hex: "#FFFFEA", note: "Téměř bílá žlutá" },
+      { label: "mapy.cz",  source: "mapycz",  hex: "#D6EDA0", note: "Čistá světlá zelená" },
+    ]
+  },
+  {
+    category: "Krajina — zástavba",
+    title: "Zástavba / obytná zóna",
+    desc: "Barva obytných čtvrtí a sídelních ploch.",
+    key: "residential",
+    type: "solid",
+    options: [
+      { label: "Projekt", source: "project", hex: "#F0D8B0", note: "Teplá oranžová béžová" },
+      { label: "ČÚZK SM5", source: "cuzk",    hex: "#FFFFFF", note: "Bílá (žádné rozlišení)" },
+      { label: "mapy.cz",  source: "mapycz",  hex: "#E8DFD0", note: "Chladná světlá béžová" },
+    ]
+  },
+
+  // WATER
+  {
+    category: "Voda",
+    title: "Vodní plocha (jezero, rybník)",
+    desc: "Barva stojatých vod — jezer, rybníků, nádrží.",
+    key: "water_body",
+    type: "solid",
+    options: [
+      { label: "Projekt", source: "project", hex: "#B8D8F0", note: "Jemná střední modrá" },
+      { label: "ČÚZK SM5", source: "cuzk",    hex: "#E0FFFF", note: "Modrobílá cyan" },
+      { label: "mapy.cz",  source: "mapycz",  hex: "#9EC8E8", note: "Čistá sytá modrá" },
+    ]
+  },
+  {
+    category: "Voda",
+    title: "Tok řeky / potoka",
+    desc: "Barva linie vodních toků.",
+    key: "waterway",
+    type: "solid",
+    options: [
+      { label: "Projekt", source: "project", hex: "#5080C0", note: "Střední modrá" },
+      { label: "ČÚZK SM5", source: "cuzk",    hex: "#4E4E4E", note: "Tmavě šedá" },
+      { label: "mapy.cz",  source: "mapycz",  hex: "#5090C8", note: "Jasná modrá" },
+    ]
+  },
+
+  // ROADS
+  {
+    category: "Silnice",
+    title: "Dálnice (D1, D2...)",
+    desc: "Barva dálniční sítě — nejdůležitější silniční prvek.",
+    key: "motorway",
+    type: "road",
+    options: [
+      { label: "Projekt", source: "project", hex: "#D42020", outline: "#880000", note: "Tmavší červená" },
+      { label: "ČÚZK SM5", source: "cuzk",    hex: "#FFFF99", outline: "#999900", note: "Žlutá (katastrální)" },
+      { label: "mapy.cz",  source: "mapycz",  hex: "#E8474A", outline: "#C02028", note: "Jasná světlá červená" },
+    ]
+  },
+  {
+    category: "Silnice",
+    title: "Silnice I. třídy",
+    desc: "Hlavní silniční síť mezi městy.",
+    key: "primary",
+    type: "road",
+    options: [
+      { label: "Projekt", source: "project", hex: "#E07820", outline: "#904400", note: "Střední oranžová" },
+      { label: "ČÚZK SM5", source: "cuzk",    hex: "#FFFF99", outline: "#999900", note: "Žlutá (katastrální)" },
+      { label: "mapy.cz",  source: "mapycz",  hex: "#F09030", outline: "#C06010", note: "Světlá teplá oranžová" },
+    ]
+  },
+  {
+    category: "Silnice",
+    title: "Silnice II. třídy",
+    desc: "Regionální silniční síť.",
+    key: "secondary",
+    type: "road",
+    options: [
+      { label: "Projekt", source: "project", hex: "#F0C000", outline: "#907000", note: "Zlatá žlutá" },
+      { label: "ČÚZK SM5", source: "cuzk",    hex: "#FFFF99", outline: "#999900", note: "Žlutá (katastrální)" },
+      { label: "mapy.cz",  source: "mapycz",  hex: "#F8D040", outline: "#C0A000", note: "Světlá žlutá" },
+    ]
+  },
+  {
+    category: "Silnice",
+    title: "Silnice III. třídy",
+    desc: "Místní a vedlejší silnice.",
+    key: "tertiary",
+    type: "road",
+    options: [
+      { label: "Projekt", source: "project", hex: "#F5E040", outline: "#909000", note: "Bledá žlutá" },
+      { label: "ČÚZK SM5", source: "cuzk",    hex: "#FFFF99", outline: "#999900", note: "Žlutá (katastrální)" },
+      { label: "mapy.cz",  source: "mapycz",  hex: "#FAEEA0", outline: "#C8C060", note: "Velmi bledá žlutá" },
+    ]
+  },
+
+  // CONTOURS
+  {
+    category: "Terén — vrstevnice",
+    title: "Zdůrazněná vrstevnice (index)",
+    desc: "Každá 5. vrstevnice — zvýrazněná čára s popisem výšky.",
+    key: "contour_major",
+    type: "line",
+    options: [
+      { label: "Projekt", source: "project", hex: "#C07030", note: "Teplá hnědá" },
+      { label: "ČÚZK SM5", source: "cuzk",    hex: "#F5BE40", note: "Zlatá jantar" },
+      { label: "mapy.cz",  source: "mapycz",  hex: "#C88820", note: "Jantarová hnědá" },
+    ]
+  },
+  {
+    category: "Terén — vrstevnice",
+    title: "Základní vrstevnice",
+    desc: "Běžné vrstevnice mezi zdůrazněnými.",
+    key: "contour_standard",
+    type: "line",
+    options: [
+      { label: "Projekt", source: "project", hex: "#D09060", note: "Světlá hnědá" },
+      { label: "ČÚZK SM5", source: "cuzk",    hex: "#F5BE40", note: "Zlatá (stejná jako index)" },
+      { label: "mapy.cz",  source: "mapycz",  hex: "#D4A040", note: "Teplá jantarová" },
+    ]
+  },
+
+  // BUILDINGS
+  {
+    category: "Zástavba — budovy",
+    title: "Běžné budovy",
+    desc: "Barva výplně budov viditelná od zoomu 15.",
+    key: "building_generic",
+    type: "solid",
+    options: [
+      { label: "Projekt", source: "project", hex: "#E0E0E0", note: "Neutrální světlá šedá" },
+      { label: "ČÚZK SM5", source: "cuzk",    hex: "#E3E3E3", note: "Neutrální šedá (standard)" },
+      { label: "mapy.cz",  source: "mapycz",  hex: "#C8C0B8", note: "Teplá střední šedá" },
+    ]
+  },
+
+  // HIKING
+  {
+    category: "Turistické trasy",
+    title: "KČT — červená trasa",
+    desc: "Hlavní turistické trasy, hřebenové trasy.",
+    key: "trail_red",
+    type: "line",
+    options: [
+      { label: "Projekt", source: "project", hex: "#DC0000", note: "Sytá červená" },
+      { label: "ČÚZK / KČT", source: "cuzk",hex: "#CC0000", note: "Tmavší červená" },
+      { label: "mapy.cz",  source: "mapycz",  hex: "#E0181C", note: "Jasná červená" },
+    ]
+  },
+  {
+    category: "Turistické trasy",
+    title: "KČT — modrá trasa",
+    desc: "Vedlejší turistické trasy.",
+    key: "trail_blue",
+    type: "line",
+    options: [
+      { label: "Projekt", source: "project", hex: "#0050C8", note: "Střední modrá" },
+      { label: "ČÚZK / KČT", source: "cuzk",hex: "#0033AA", note: "Tmavší modrá" },
+      { label: "mapy.cz",  source: "mapycz",  hex: "#1040C8", note: "Jasná modrá" },
+    ]
+  },
+  {
+    category: "Turistické trasy",
+    title: "KČT — zelená trasa",
+    desc: "Spojovací a kratší turistické trasy.",
+    key: "trail_green",
+    type: "line",
+    options: [
+      { label: "Projekt", source: "project", hex: "#007820", note: "Tmavá zelená" },
+      { label: "ČÚZK / KČT", source: "cuzk",hex: "#006600", note: "Tmavší zelená" },
+      { label: "mapy.cz",  source: "mapycz",  hex: "#108020", note: "Jasná zelená" },
+    ]
+  },
+  {
+    category: "Turistické trasy",
+    title: "KČT — žlutá trasa",
+    desc: "Kratší a místní turistické trasy.",
+    key: "trail_yellow",
+    type: "line",
+    options: [
+      { label: "Projekt", source: "project", hex: "#E8B400", note: "Zlatá žlutá" },
+      { label: "ČÚZK / KČT", source: "cuzk",hex: "#D4A000", note: "Tmavší zlatá" },
+      { label: "mapy.cz",  source: "mapycz",  hex: "#E8A800", note: "Jasná zlatá" },
+    ]
+  },
+
+  // PROTECTED
+  {
+    category: "Chráněná území",
+    title: "Hranice národního parku",
+    desc: "Linie a štítek hranic NP (Krkonoše, Šumava, atd.).",
+    key: "national_park",
+    type: "line",
+    options: [
+      { label: "Projekt", source: "project", hex: "#588d42", note: "Tmavá olivová zelená" },
+      { label: "ČÚZK SM5", source: "cuzk",    hex: "#00FF00", note: "Čistá zelená (tech.)" },
+      { label: "mapy.cz",  source: "mapycz",  hex: "#40A000", note: "Sytá čistá zelená" },
+    ]
+  },
+];
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let current = 0;
+let answers = {}; // key -> { hex, source, label }
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+function renderQuestion() {
+  const q = QUESTIONS[current];
+  document.getElementById('q-meta').textContent = q.category;
+  document.getElementById('q-title').textContent = q.title;
+  document.getElementById('q-desc').textContent = q.desc;
+  document.getElementById('counter').textContent = `${current + 1} / ${QUESTIONS.length}`;
+  document.getElementById('progress-bar').style.width = `${(current / QUESTIONS.length) * 100}%`;
+  document.getElementById('next-btn').disabled = !answers[q.key];
+
+  const container = document.getElementById('options');
+  container.innerHTML = '';
+
+  q.options.forEach((opt, i) => {
+    const div = document.createElement('div');
+    div.className = 'option' + (answers[q.key]?.hex === opt.hex ? ' selected' : '');
+
+    let swatchHtml = '';
+    if (q.type === 'solid') {
+      swatchHtml = `<div class="swatch" style="background:${opt.hex}"></div>`;
+    } else if (q.type === 'road') {
+      swatchHtml = `
+        <div class="swatch" style="background:#b8c8a0; position:relative;">
+          <div style="position:absolute;top:50%;left:5%;right:5%;transform:translateY(-50%);
+            height:16px;border-radius:3px;background:${opt.outline || '#555'}"></div>
+          <div style="position:absolute;top:50%;left:8%;right:8%;transform:translateY(-50%);
+            height:10px;border-radius:2px;background:${opt.hex}"></div>
+        </div>`;
+    } else if (q.type === 'line') {
+      swatchHtml = `
+        <div class="swatch" style="background:#e8e0d0; position:relative;">
+          <div style="position:absolute;top:50%;left:5%;right:5%;transform:translateY(-50%);
+            height:4px;border-radius:2px;background:${opt.hex}"></div>
+        </div>`;
+    }
+
+    div.innerHTML = `
+      ${swatchHtml}
+      <div class="option-label">${opt.label}</div>
+      <div class="option-hex">${opt.hex}</div>
+      <div style="font-size:0.7rem;color:#666;margin-top:3px">${opt.note}</div>
+    `;
+    div.addEventListener('click', () => selectOption(q.key, opt));
+    container.appendChild(div);
+  });
+}
+
+function selectOption(key, opt) {
+  const q = QUESTIONS[current];
+  answers[key] = { hex: opt.hex, source: opt.source, label: opt.label, outline: opt.outline };
+  document.getElementById('next-btn').disabled = false;
+  renderQuestion();
+}
+
+document.getElementById('next-btn').addEventListener('click', () => {
+  current++;
+  if (current >= QUESTIONS.length) {
+    showResults();
+  } else {
+    renderQuestion();
+  }
+});
+
+document.getElementById('skip-btn').addEventListener('click', () => {
+  current++;
+  if (current >= QUESTIONS.length) {
+    showResults();
+  } else {
+    renderQuestion();
+  }
+});
+
+// ─── Results ──────────────────────────────────────────────────────────────────
+const SOURCE_NAMES = { project: 'Projekt', cuzk: 'ČÚZK SM5', mapycz: 'mapy.cz' };
+const SOURCE_CLASS = { project: 'src-project', cuzk: 'src-cuzk', mapycz: 'src-mapycz' };
+
+const RESULT_CATEGORIES = [
+  { heading: "Krajina",     keys: ['land_base','forest','grassland','residential'] },
+  { heading: "Voda",        keys: ['water_body','waterway'] },
+  { heading: "Silnice",     keys: ['motorway','primary','secondary','tertiary'] },
+  { heading: "Vrstevnice",  keys: ['contour_major','contour_standard'] },
+  { heading: "Budovy",      keys: ['building_generic'] },
+  { heading: "Turistické trasy", keys: ['trail_red','trail_blue','trail_green','trail_yellow'] },
+  { heading: "Chráněná území",   keys: ['national_park'] },
+];
+
+const KEY_LABELS = {
+  land_base: 'Základní pozadí',
+  forest: 'Les',
+  grassland: 'Louka / tráva',
+  residential: 'Zástavba',
+  water_body: 'Vodní plocha',
+  waterway: 'Vodní tok (řeka)',
+  motorway: 'Dálnice',
+  primary: 'Silnice I. třídy',
+  secondary: 'Silnice II. třídy',
+  tertiary: 'Silnice III. třídy',
+  contour_major: 'Zdůrazněná vrstevnice',
+  contour_standard: 'Základní vrstevnice',
+  building_generic: 'Budovy',
+  trail_red: 'KČT červená',
+  trail_blue: 'KČT modrá',
+  trail_green: 'KČT zelená',
+  trail_yellow: 'KČT žlutá',
+  national_park: 'Hranice NP',
+};
+
+function showResults() {
+  document.getElementById('progress-bar').style.width = '100%';
+  document.getElementById('card').style.display = 'none';
+  const resultsEl = document.getElementById('results');
+  resultsEl.style.display = 'block';
+
+  const body = document.getElementById('results-body');
+  body.innerHTML = '';
+
+  RESULT_CATEGORIES.forEach(cat => {
+    const catEl = document.createElement('div');
+    catEl.className = 'result-category';
+    catEl.innerHTML = `<h3>${cat.heading}</h3>`;
+
+    cat.keys.forEach(key => {
+      const ans = answers[key];
+      if (!ans) return;
+      const row = document.createElement('div');
+      row.className = 'result-row';
+      row.innerHTML = `
+        <div class="result-swatch" style="background:${ans.hex}"></div>
+        <div class="result-info">
+          <div class="result-name">${KEY_LABELS[key]}</div>
+          <div class="result-hex">${ans.hex}</div>
+        </div>
+        <span class="result-source ${SOURCE_CLASS[ans.source]}">${SOURCE_NAMES[ans.source]}</span>
+      `;
+      catEl.appendChild(row);
+    });
+
+    if (catEl.querySelectorAll('.result-row').length > 0) {
+      body.appendChild(catEl);
+    }
+  });
+}
+
+function generateOutput() {
+  const lines = [
+    '<!-- ════════════════════════════════════════════════════════',
+    '     Tvůj vlastní design manual — CzechTouristMap',
+    '     Vygenerováno: ' + new Date().toLocaleDateString('cs-CZ'),
+    '     Vlož tyto proměnné do config-lines.xslt a poly-*.xslt',
+    '════════════════════════════════════════════════════════ -->',
+    '',
+    '<!-- Krajina -->',
+  ];
+
+  const xsltMap = {
+    land_base:         'lc-land-base',
+    forest:            'lc-forest',
+    grassland:         'lc-grassland',
+    residential:       'lc-residential',
+    water_body:        'lc-water',
+    waterway:          'stream-color',
+    motorway:          'lc-motorway',
+    primary:           'lc-primary',
+    secondary:         'lc-secondary',
+    tertiary:          'lc-tertiary',
+    contour_major:     'lc-contour-major',
+    contour_standard:  'lc-contour-standard',
+    building_generic:  'lc-building',
+    trail_red:         'lc-trail-red',
+    trail_blue:        'lc-trail-blue',
+    trail_green:       'lc-trail-green',
+    trail_yellow:      'lc-trail-yellow',
+    national_park:     'lc-protected',
+  };
+
+  QUESTIONS.forEach(q => {
+    const ans = answers[q.key];
+    if (!ans) return;
+    const varName = xsltMap[q.key] || q.key;
+    lines.push(`<xsl:variable name="${varName}">${ans.hex}</xsl:variable>` +
+               `  <!-- ${KEY_LABELS[q.key]} — ${SOURCE_NAMES[ans.source]} -->`);
+  });
+
+  const output = lines.join('\n');
+  const el = document.getElementById('output-area');
+  el.textContent = output;
+  el.style.display = 'block';
+
+  navigator.clipboard.writeText(output).then(() => {
+    document.getElementById('copy-btn').textContent = '✓ Zkopírováno do schránky!';
+    setTimeout(() => {
+      document.getElementById('copy-btn').textContent = 'Zobrazit / Zkopírovat XSLT barvy';
+    }, 2500);
+  }).catch(() => {});
+}
+
+// ─── Start ────────────────────────────────────────────────────────────────────
+renderQuestion();
+</script>
+</body>
+</html>
