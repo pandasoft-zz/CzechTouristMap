@@ -12,6 +12,7 @@ Each row shows the three approaches side by side with hex codes and a short note
 - **mapy.cz** = mapy.cz turistická mapa (visual reference, from observation)
 - ★ = recommended if you want to match mapy.cz closely
 - ☆ = recommended if you want a more paper-map / ČÚZK-faithful look
+- ✅ = choice applied to XSLT source
 
 ---
 
@@ -118,18 +119,44 @@ Each row shows the three approaches side by side with hex codes and a short note
 
 ---
 
-## 9. Protected areas
+## 9. Administrative boundaries ✅
 
-| Type | Project | mapy.cz | Notes |
-|---|---|---|---|
-| National park border | `#588d42` dark green | `#40A000` brighter green | mapy.cz more vivid |
-| NP glow/fill | `#40588d42` semi-transparent | subtle green wash | Similar approach |
-| Strict zone border | `#FF956A` salmon-orange | `#E06000` orange | Project: pinkish; mapy.cz: pure orange |
-| NP name label | `#588d42` bold-italic serif | `#008000` bold | mapy.cz darker/purer green |
+| Type | Original project | ČÚZK SM5 | mapy.cz | **Applied** |
+|---|---|---|---|---|
+| State border (admin=2) | `#E040C0` magenta | `#FF4CFF` pure magenta | `#9040C8` blue-violet | ✅ `#FF4CFF` ČÚZK SM5 |
+| State border darker (z14+) | `#C030A0` | `#FF4CFF` | `#7030B0` | ✅ `#CC00CC` |
+| Regional border (admin=4) | `#D060C0` 50% transparent | — | muted violet | ✅ unchanged |
 
 ---
 
-## 10. Typography
+## 10. Tracks, paths, cycleway ✅
+
+| Type | Original project | mapy.cz | **Applied** |
+|---|---|---|---|
+| Track grade 3–5 (polní cesta) | `#8C5A1E` solid brown | `#A07030` dashed | ✅ `#A07030` dashed |
+| Path / bridleway (pěšina) | `#8C5A1E` solid brown | `#C09050` dashed, thinner | ✅ `#C09050` dashed |
+| Footway / pedestrian (chodník) | `#606060`/`#707070` grey | `#909090` light grey dashed | ✅ `#909090` |
+| Cycleway (cyklostezka) | `#FFFFFF` fill + `#0040A0` border | `#E040B0` pink dashed | ✅ `#E040B0` pink dashed 8,4 |
+
+**Rationale:** mapy.cz distinguishes track/path visually by width and lightness, not just color.
+Cycleway uses distinctive pink to immediately identify cycling infrastructure.
+
+---
+
+## 11. Protected areas ✅
+
+| Type | Original project | mapy.cz | **Applied** |
+|---|---|---|---|
+| National park border | `#588d42` dark green | `#40A000` brighter green | ✅ `#40A000` mapy.cz vivid green |
+| NP glow/fill | `#40588d42` semi-transparent | subtle green wash | ✅ `#4040A000` |
+| Strict zone border (NPR, PR) | `#FF956A` salmon-orange | `#E06000` clean orange | ✅ `#E06000` mapy.cz orange |
+| Strict zone fill | `#40FF956A` | subtle orange wash | ✅ `#40E06000` |
+| NP name label | `#588d42` bold-italic serif | `#40A000` bold | ✅ `#40A000` |
+| Strict zone label | `#ff7f5a` / `#ff4a35` | orange | ✅ `#E06000` / `#B04000` |
+
+---
+
+## 12. Typography ✅
 
 | Element | Project | mapy.cz | Notes |
 |---|---|---|---|
@@ -144,7 +171,7 @@ Each row shows the three approaches side by side with hex codes and a short note
 
 ---
 
-## 11. Features present in mapy.cz but missing from project
+## 13. Features present in mapy.cz but missing from project
 
 | Feature | mapy.cz | Project | Impact |
 |---|---|---|---|
@@ -157,7 +184,7 @@ Each row shows the three approaches side by side with hex codes and a short note
 
 ---
 
-## 12. Summary — quick decision guide
+## 14. Summary — quick decision guide
 
 | I want to look like… | Key changes to make |
 |---|---|
@@ -167,7 +194,7 @@ Each row shows the three approaches side by side with hex codes and a short note
 
 ---
 
-## 13. Color palette overview
+## 15. Color palette overview
 
 ### Land cover
 ```
@@ -181,12 +208,23 @@ Residential:    #F0D8B0 ▒▒      #FFFFFF □□      #E8DFD0 ░░
 
 ### Roads
 ```
-                Project         mapy.cz
-Motorway:       #D42020 ██      #E8474A ██
-Primary:        #E07820 ██      #F09030 ██
-Secondary:      #F0C000 ██      #F8D040 ██
-Tertiary:       #F5E040 ▒▒      #FAEEA0 ░░
-Track:          #8C5A1E ▓▓      brown dashed
+                Applied         mapy.cz
+Motorway:       #E8474A ██      #E8474A ██  ✅
+Primary:        #F09030 ██      #F09030 ██  ✅
+Secondary:      #F8D040 ██      #F8D040 ██  ✅
+Tertiary:       #FAEEA0 ░░      #FAEEA0 ░░  ✅
+Track:          #A07030 dashed  #A07030     ✅
+Path:           #C09050 dashed  #C09050     ✅
+Footway:        #909090 dashed  #909090     ✅
+Cycleway:       #E040B0 dashed  pink dashed ✅
+```
+
+### Administrative & protected
+```
+                Applied         mapy.cz
+State border:   #FF4CFF         #FF4CFF     ✅ (ČÚZK SM5)
+NP border:      #40A000         #40A000     ✅
+Strict zone:    #E06000         #E06000     ✅
 ```
 
 ### Contours
