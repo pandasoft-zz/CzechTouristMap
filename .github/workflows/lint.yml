@@ -5,32 +5,44 @@ on:
   pull_request:
 
 jobs:
-  lint:
+
+  shell:
+    name: shellcheck
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - run: shellcheck build-theme.sh scripts/push-map-image.sh
 
-      # ── Shell ───────────────────────────────────────────────────────────────
-      - name: shellcheck
-        run: shellcheck build-theme.sh scripts/push-map-image.sh
+  yaml:
+    name: yamllint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install yamllint --quiet
+      - run: yamllint -c .yamllint.yml config/locations.yaml .github/workflows/*.yml
 
-      # ── YAML ────────────────────────────────────────────────────────────────
-      - name: yamllint
-        run: uvx yamllint -c .yamllint.yml config/locations.yaml .github/workflows/*.yml
+  python:
+    name: ruff
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install ruff --quiet
+      - run: ruff check scripts/ tests/
 
-      # ── Python ──────────────────────────────────────────────────────────────
-      - name: ruff
-        run: uvx ruff check scripts/ tests/
+  xml:
+    name: xmllint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: xmllint --noout src/styles/CzechTouristMap/*.xslt
 
-      # ── XSLT / XML ──────────────────────────────────────────────────────────
-      - name: xmllint (XSLT well-formedness)
-        run: xmllint --noout src/styles/CzechTouristMap/*.xslt
-
-      # ── Kotlin ──────────────────────────────────────────────────────────────
-      - name: ktlint
+  kotlin:
+    name: ktlint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download ktlint
         run: |
           curl -sSLO https://github.com/pinterest/ktlint/releases/download/1.5.0/ktlint
           chmod +x ktlint
-          ./ktlint "tile-server/src/**/*.kt"
+      - run: ./ktlint "tile-server/src/**/*.kt"
