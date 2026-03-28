@@ -12,27 +12,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # ── Python tools (yamllint + ruff) ───────────────────────────────────────
+      - name: Install Python linters
+        run: pip install --break-system-packages yamllint ruff --quiet
+
       # ── Shell ───────────────────────────────────────────────────────────────
       - name: shellcheck
-        run: |
-          shellcheck build-theme.sh scripts/push-map-image.sh
+        run: shellcheck build-theme.sh scripts/push-map-image.sh
 
       # ── YAML ────────────────────────────────────────────────────────────────
       - name: yamllint
-        run: |
-          pip install yamllint --quiet
-          yamllint -c .yamllint.yml config/locations.yaml .github/workflows/*.yml
+        run: yamllint -c .yamllint.yml config/locations.yaml .github/workflows/*.yml
 
       # ── Python ──────────────────────────────────────────────────────────────
       - name: ruff
-        run: |
-          pip install ruff --quiet
-          ruff check scripts/ tests/
+        run: ruff check scripts/ tests/
 
       # ── XSLT / XML ──────────────────────────────────────────────────────────
       - name: xmllint (XSLT well-formedness)
-        run: |
-          xmllint --noout src/styles/CzechTouristMap/*.xslt
+        run: xmllint --noout src/styles/CzechTouristMap/*.xslt
 
       # ── Kotlin ──────────────────────────────────────────────────────────────
       - name: ktlint
