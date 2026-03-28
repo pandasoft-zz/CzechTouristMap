@@ -56,10 +56,11 @@ jobs:
         if: steps.cache-map.outputs.cache-hit != 'true'
         run: |
           mkdir -p maps
+          MAP_IMAGE="ghcr.io/${{ github.repository_owner }}/czechtouristmap-mapdata:latest"
           echo "${{ secrets.GITHUB_TOKEN }}" \
             | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-          docker pull "${{ secrets.MAP_IMAGE }}"
-          id=$(docker create "${{ secrets.MAP_IMAGE }}")
+          docker pull "$MAP_IMAGE"
+          id=$(docker create "$MAP_IMAGE")
           docker cp "$id:/data/maps/czech-republic.map" maps/czech-republic.map
           docker rm "$id"
 
