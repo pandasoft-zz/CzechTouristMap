@@ -137,7 +137,7 @@
 <xsl:variable name="bc-residential">#707070</xsl:variable>
 <xsl:variable name="bc-living">#707070</xsl:variable>
 <xsl:variable name="bc-service">#707070</xsl:variable>
-<xsl:variable name="bc-cycleway">#0040A0</xsl:variable>
+<xsl:variable name="bc-cycleway">#E040B0</xsl:variable>
 <xsl:variable name="bc-macadam">#707070</xsl:variable>
 <xsl:variable name="bc-tunnel">#707070</xsl:variable>
 
@@ -156,15 +156,15 @@
 <xsl:variable name="lc-residential">#FFFFFF</xsl:variable>
 <xsl:variable name="lc-living">#FFFFFF</xsl:variable>
 <xsl:variable name="lc-service">#FFFFFF</xsl:variable>
-<xsl:variable name="lc-cycleway">#FFFFFF</xsl:variable>
+<xsl:variable name="lc-cycleway">#E040B0</xsl:variable>
 <xsl:variable name="lc-raceway">#909090</xsl:variable>
 <xsl:variable name="lc-macadam">#FFFFFF</xsl:variable>
-<!-- Field/forest tracks and paths — warm brown per Czech cartographic convention -->
-<xsl:variable name="lc-track">#8C5A1E</xsl:variable>
-<xsl:variable name="lc-pedestrian">#707070</xsl:variable>
-<xsl:variable name="lc-footway">#606060</xsl:variable>
-<xsl:variable name="lc-bridleway">#8C5A1E</xsl:variable>
-<xsl:variable name="lc-path">#8C5A1E</xsl:variable>
+<!-- Field/forest tracks and paths — mapy.cz style dashed warm brown/amber -->
+<xsl:variable name="lc-track">#A07030</xsl:variable>
+<xsl:variable name="lc-pedestrian">#909090</xsl:variable>
+<xsl:variable name="lc-footway">#909090</xsl:variable>
+<xsl:variable name="lc-bridleway">#A07030</xsl:variable>
+<xsl:variable name="lc-path">#C09050</xsl:variable>
 <xsl:variable name="lc-mountain-path">#6A4010</xsl:variable>
 <xsl:variable name="lc-alpine-path">#404040</xsl:variable>
 <xsl:variable name="lc-steps">#A02030</xsl:variable>

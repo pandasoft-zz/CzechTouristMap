@@ -13,10 +13,10 @@
 <xsl:variable name="prot-class-1-line-color">#FF956A</xsl:variable>
 <xsl:variable name="prot-class-2-line-color">#39CA20</xsl:variable>
 <!--#39CA20 #95588d42-->
-<xsl:variable name="lc-protected">#588d42</xsl:variable>
-<xsl:variable name="lc-protected-light">#40588d42</xsl:variable>
-<xsl:variable name="lc-protected-strictly">#FF956A</xsl:variable>
-<xsl:variable name="lc-protected-strictly-light">#40FF956A</xsl:variable>
+<xsl:variable name="lc-protected">#40A000</xsl:variable>
+<xsl:variable name="lc-protected-light">#4040A000</xsl:variable>
+<xsl:variable name="lc-protected-strictly">#E06000</xsl:variable>
+<xsl:variable name="lc-protected-strictly-light">#40E06000</xsl:variable>
 
 
 <rule cat="protected_area" e="way" k="boundary" v="national_park" >
@@ -37,7 +37,7 @@
         <line stroke="{$lc-protected}" stroke-width="{$lw-national-park-4}"/>          
     </rule> 
     <rule e="any" k="*" v="*" zoom-min="8"  >
-        <caption k="name" font-style="bold_italic" font-family="serif" font-size="14" fill="#588d42"  />
+        <caption k="name" font-style="bold_italic" font-family="serif" font-size="14" fill="#40A000"  />
     </rule>
 </rule>
 
@@ -61,7 +61,7 @@
             <line stroke="{$lc-protected}" stroke-width="{$lw-national-park-4}"/>          
         </rule> 
         <rule e="any" k="*" v="*"  >
-            <caption k="name" font-style="bold_italic" font-family="serif" font-size="14" fill="#588d42"  />
+            <caption k="name" font-style="bold_italic" font-family="serif" font-size="14" fill="#40A000"  />
         </rule>
     </rule> 
    <rule e="any" k="protected_area_importance" v="~">
@@ -79,10 +79,10 @@
                 <line stroke="{$lc-protected-strictly}" stroke-width="{$lw-protected-strictly-4}"/>                                      
             </rule>         
             <rule e="any" k="*" v="*" zoom-min="12" zoom-max="14"  >
-                <caption k="name" font-style="bold_italic" font-family="serif" font-size="11" stroke="#ff4a35" fill="#ff7f5a"  />
+                <caption k="name" font-style="bold_italic" font-family="serif" font-size="11" stroke="#B04000" fill="#E06000"  />
             </rule>
             <rule e="any" k="*" v="*" zoom-min="15"  >
-                <caption k="name" font-style="bold_italic" font-family="serif" font-size="12" stroke="#ff4a35" fill="#ff7f5a"  />
+                <caption k="name" font-style="bold_italic" font-family="serif" font-size="12" stroke="#B04000" fill="#E06000"  />
             </rule>
         </rule>        
         <rule e="any" k="protect_class" v="2|~" zoom-min="12">
@@ -99,10 +99,10 @@
                 <line stroke="{$lc-protected}" stroke-width="{$lw-protected-area-4}"/>          
             </rule> 
             <rule e="any" k="*" v="*" zoom-min="12"  zoom-max="14">
-                <caption k="name" font-style="bold_italic" font-family="serif" font-size="11" fill="#95588d42"  />
+                <caption k="name" font-style="bold_italic" font-family="serif" font-size="11" fill="#9540A000"  />
             </rule>
             <rule e="any" k="*" v="*" zoom-min="15"  >
-                <caption k="name" font-style="bold_italic" font-family="serif" font-size="12" fill="#95588d42"  />
+                <caption k="name" font-style="bold_italic" font-family="serif" font-size="12" fill="#9540A000"  />
             </rule>
         </rule>
     </rule>

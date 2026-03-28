@@ -130,9 +130,7 @@
             <line stroke="{$lc-raceway}" stroke-width="{$lw-raceway}" stroke-linecap="butt"/>          
         </rule>
         <rule e="way" k="highway" v="cycleway" zoom-min="{$zm-cycleway}">
-            <line stroke="{$bc-cycleway}" stroke-width="{$lw-cycleway}" stroke-linecap="butt"/>  
-            <line stroke="{$lc-cycleway}" stroke-width="{$lw-cycleway - 0.3 }" stroke-linecap="butt"/>   
-            <line stroke="{$bc-cycleway}" stroke-width="0.1" stroke-dasharray="4,3" stroke-linecap="butt"/>           
+            <line stroke="{$bc-cycleway}" stroke-width="{$lw-cycleway}" stroke-dasharray="8,4" stroke-linecap="butt"/>
         </rule>
         <rule e="way" k="highway" v="service" >
             <rule e="way" k="*" v="*"  zoom-max="{$zm-level2 - 1 }">           
