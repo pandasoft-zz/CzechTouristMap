@@ -5,7 +5,6 @@ Run from project root:
     python scripts/gen_symbols_md.py
 """
 import os
-import glob
 
 THEMES_DIR = "../themes"
 OUT_FILE = "docs/SYMBOLS.md"
@@ -50,7 +49,7 @@ ICON_NAMES = {
     "graveyard": "Hřbitov", "hillfort": "Hradiště", "kiln": "Milíř / pec",
     "lime_kiln": "Vápenka", "manor": "Tvrz / manský dvůr", "memorial": "Pomník / pamětní deska",
     "mine": "Důl (historický)", "palace": "Palác", "plaque": "Pamětní deska",
-    "quarry": "Lom (historický)", "ruins": "Zřícenina", "ruins_castle": "Zřícenina hradu",
+    "historic/quarry": "Lom (historický)", "ruins": "Zřícenina", "ruins_castle": "Zřícenina hradu",
     "ruins_church": "Zřícenina kostela", "ruins_manor": "Zřícenina tvrze",
     "tumulus": "Mohyla / tumulus", "water_well": "Studna", "watermill": "Vodní mlýn",
     "windmill": "Větrný mlýn",
@@ -74,7 +73,7 @@ ICON_NAMES = {
     "public_bath_hot": "Termální koupaliště", "shooting": "Střelnice",
     "skiing": "Lyžování", "soccer": "Fotbal", "spa": "Lázně / spa",
     "swimming": "Plavání / bazén", "tennis": "Tenis", "water_ski": "Vodní lyžování",
-    "zoo": "ZOO",
+    "leisure/zoo": "ZOO",
     # military
     "bunker": "Bunkr",
     # natural
@@ -162,7 +161,7 @@ SECTIONS = [
 
 def icon_row(folder, fname):
     name = os.path.splitext(fname)[0]
-    label = ICON_NAMES.get(name, name.replace("_", " ").title())
+    label = ICON_NAMES.get(f"{folder}/{name}", ICON_NAMES.get(name, name.replace("_", " ").title()))
     img = f'<img src="{THEMES_DIR}/{folder}/{fname}" width="32" height="32" alt="{name}">'
     return f"| {img} | {label} | `{folder}/{fname}` |"
 

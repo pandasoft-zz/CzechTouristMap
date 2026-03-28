@@ -2,8 +2,9 @@ package com.maprender
 
 import java.io.File
 
-class ThemeManager(themesDirPath: String) {
-
+class ThemeManager(
+    themesDirPath: String,
+) {
     private val themesDir = File(themesDirPath)
 
     @Volatile

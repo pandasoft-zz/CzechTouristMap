@@ -1,0 +1,42 @@
+name: Lint
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── Shell ───────────────────────────────────────────────────────────────
+      - name: shellcheck
+        run: |
+          shellcheck build-theme.sh scripts/push-map-image.sh
+
+      # ── YAML ────────────────────────────────────────────────────────────────
+      - name: yamllint
+        run: |
+          pip install yamllint --quiet
+          yamllint -c .yamllint.yml config/locations.yaml .github/workflows/*.yml
+
+      # ── Python ──────────────────────────────────────────────────────────────
+      - name: ruff
+        run: |
+          pip install ruff --quiet
+          ruff check scripts/ tests/
+
+      # ── XSLT / XML ──────────────────────────────────────────────────────────
+      - name: xmllint (XSLT well-formedness)
+        run: |
+          xmllint --noout src/styles/CzechTouristMap/*.xslt
+
+      # ── Kotlin ──────────────────────────────────────────────────────────────
+      - name: ktlint
+        run: |
+          curl -sSLO https://github.com/pinterest/ktlint/releases/download/1.5.0/ktlint
+          chmod +x ktlint
+          ./ktlint "tile-server/src/**/*.kt"
