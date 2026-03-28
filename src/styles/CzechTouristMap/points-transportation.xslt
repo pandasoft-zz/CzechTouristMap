@@ -19,7 +19,7 @@
     </rule>       
 </rule>        
 
-<rule  e="any" k="amenity" v="fuel" zoom-min="14">
+<rule  e="any" k="amenity" v="fuel" zoom-min="15">
     <symbol id="fuel" src="{$transportationIconPath}/fuel.svg" symbol-width="16" priority="{$pr-fuel}"/>
     <rule e="any" k="*" v="*" zoom-min="16">
         <caption k="name" symbol-id="fuel" 
@@ -28,7 +28,7 @@
 </rule>        
 
 
-<rule  e="any" k="railway" v="station|halt" zoom-min="14">
+<rule  e="any" k="railway" v="station|halt" zoom-min="13">
   <rule  e="any" k="station" v="~" >
     <rule  e="any" k="*" v="*" zoom-max="15">
       <symbol id="train" src="{$transportationIconPath}/train_station.svg" symbol-width="15" priority="{$pr-train-station}"/>
@@ -59,7 +59,7 @@
   </rule>
 </rule>
 
-<rule  e="any" k="station" v="funicular" zoom-min="14">
+<rule  e="any" k="station" v="funicular" zoom-min="13">
   <rule  e="any" k="*" v="*" zoom-max="15">
     <symbol id="funicular" src="{$transportationIconPath}/funicular.svg" symbol-width="18" priority="{$pr-train-station}"/>
   </rule>
@@ -100,7 +100,7 @@
 </rule>
 
 <rule  e="any" k="amenity" v="bus_station">
-  <rule  e="any" k="*" v="*" zoom-min="14" zoom-max="15">
+  <rule  e="any" k="*" v="*" zoom-min="13" zoom-max="15">
     <symbol id="bus_stop" src="{$transportationIconPath}/bus_stop.svg" symbol-width="14" priority="{$pr-bus-station}"/>
   </rule>
   <rule  e="any" k="*" v="*" zoom-min="16" >
@@ -113,7 +113,7 @@
 </rule>
 
 <rule  e="any" k="amenity" v="ferry_terminal">
-  <rule  e="any" k="*" v="*" zoom-min="14" zoom-max="15">
+  <rule  e="any" k="*" v="*" zoom-min="13" zoom-max="15">
     <symbol id="ferry_terminal" src="{$transportationIconPath}/ferry_terminal.svg" symbol-width="17" priority="{$pr-ferry-terminal}"/>
   </rule>
   <rule  e="any" k="*" v="*" zoom-min="16" >
