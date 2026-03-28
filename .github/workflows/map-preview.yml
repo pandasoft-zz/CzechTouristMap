@@ -1,0 +1,163 @@
+name: Map Preview
+
+on:
+  pull_request:
+    paths:
+      - "src/styles/**"
+      - "tile-server/**"
+      - "config/locations.yaml"
+
+permissions:
+  contents: write       # needed to push to gh-pages
+  pull-requests: write  # needed to post PR comment
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── 1. Build theme XML ─────────────────────────────────────────────────
+      - name: Build theme XML
+        run: ./build-theme.sh
+
+      # ── 2. Tile-server Docker image (BuildKit GHA cache) ──────────────────
+      #    Gradle build is cached — only rebuilt when tile-server/** changes.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build tile-server image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./tile-server
+          tags: tile-server:ci
+          load: true
+          cache-from: type=gha,scope=tile-server
+          cache-to: type=gha,mode=max,scope=tile-server
+
+      # ── 3. Map file (cached weekly) ────────────────────────────────────────
+      #    Set secret MAP_DOWNLOAD_URL in repo Settings → Secrets → Actions.
+      #    The file is re-downloaded at most once per week.
+      - name: Compute map cache key
+        id: map-key
+        run: echo "key=map-czech-republic-$(date +%Y-W%V)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore map file from cache
+        id: cache-map
+        uses: actions/cache@v4
+        with:
+          path: maps/czech-republic.map
+          key: ${{ steps.map-key.outputs.key }}
+          restore-keys: map-czech-republic-
+
+      - name: Download map file
+        if: steps.cache-map.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p maps
+          wget -q --show-progress \
+            -O maps/czech-republic.map \
+            "${{ secrets.MAP_DOWNLOAD_URL }}"
+
+      # ── 4. Start tile server ───────────────────────────────────────────────
+      - name: Start tile server
+        run: |
+          docker run -d --name tile-server \
+            -p 8080:8080 \
+            -v "$PWD/maps:/data/maps:ro" \
+            -v "$PWD/themes:/data/themes:ro" \
+            -v "$PWD/config:/data/config:ro" \
+            tile-server:ci
+
+      - name: Wait for tile server to be healthy
+        run: |
+          echo "Waiting for tile server..."
+          timeout 120 bash -c \
+            'until wget -q -O/dev/null http://localhost:8080/health 2>/dev/null; \
+             do sleep 5; printf "."; done'
+          echo " ready"
+
+      # ── 5. Render screenshots ──────────────────────────────────────────────
+      - name: Install PyYAML
+        run: pip install pyyaml --quiet
+
+      - name: Render screenshots
+        run: python scripts/ci-render.py
+        env:
+          OUTPUT_DIR: screenshots
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_BRANCH: ${{ github.head_ref }}
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+
+      # ── 6. Upload artifacts (always, no GitHub Pages needed) ──────────────
+      - name: Upload screenshots as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: map-preview-pr-${{ github.event.pull_request.number }}
+          path: screenshots/
+          retention-days: 30
+
+      # ── 7. Deploy to GitHub Pages ──────────────────────────────────────────
+      #    Enable GitHub Pages in repo Settings → Pages → Source: gh-pages branch.
+      #    Each PR gets its own subdirectory: /pr-{number}/
+      - name: Deploy to GitHub Pages
+        id: pages
+        continue-on-error: true
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: screenshots
+          destination_dir: pr-${{ github.event.pull_request.number }}
+          keep_files: true
+
+      # ── 8. Comment on PR ──────────────────────────────────────────────────
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const pr = context.payload.pull_request.number;
+            const sha = context.payload.pull_request.head.sha.substring(0, 7);
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const pagesUrl = `https://${context.repo.owner}.github.io/${context.repo.repo}/pr-${pr}/`;
+            const pagesOk = '${{ steps.pages.outcome }}' === 'success';
+
+            const manifest = JSON.parse(
+              fs.readFileSync('screenshots/manifest.json', 'utf8')
+            );
+
+            const lines = [
+              `## Map Preview — \`${sha}\``,
+              '',
+            ];
+
+            if (pagesOk) {
+              lines.push(`📍 **[Open full preview page](${pagesUrl})**`, '');
+              lines.push('| Location | Zoom |');
+              lines.push('|---|---|');
+              for (const loc of manifest) {
+                lines.push(`| ${loc.name} | z${loc.zoom} |`);
+                lines.push(`| ![${loc.name}](${pagesUrl}${loc.filename}.png) | |`);
+              }
+            } else {
+              lines.push(
+                '> ⚠️ GitHub Pages not configured — enable it in repo Settings → Pages → Source: `gh-pages` branch.',
+                '> Screenshots are available as workflow artifacts in the meantime.',
+                '',
+                `📦 **[Download screenshots (artifacts)](${runUrl})**`,
+                '',
+                '| Location | Zoom |',
+                '|---|---|',
+                ...manifest.map(loc => `| ${loc.name} | z${loc.zoom} |`),
+              );
+            }
+
+            lines.push('', `<sub>[Workflow run](${runUrl}) · Artifacts kept 30 days</sub>`);
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr,
+              body: lines.join('\n'),
+            });
