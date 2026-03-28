@@ -39,7 +39,7 @@
   </rule>
 </rule>
 
-<rule  e="any" k="leisure" v="playground" zoom-min="16">
+<rule  e="any" k="leisure" v="playground" zoom-min="14">
         <symbol id="playground" src="{$leisureIconPath}/playground.svg" symbol-width="23" priority="{$pr-playground}"/>
 </rule>
 
