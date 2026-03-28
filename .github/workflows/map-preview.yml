@@ -10,6 +10,7 @@ on:
 permissions:
   contents: write       # needed to push to gh-pages
   pull-requests: write  # needed to post PR comment
+  packages: read        # needed to pull map image from GHCR
 
 jobs:
   preview:
@@ -37,28 +38,45 @@ jobs:
           cache-from: type=gha,scope=tile-server
           cache-to: type=gha,mode=max,scope=tile-server
 
-      # ── 3. Map file (cached weekly) ────────────────────────────────────────
-      #    Set secret MAP_DOWNLOAD_URL in repo Settings → Secrets → Actions.
-      #    The file is re-downloaded at most once per week.
-      - name: Compute map cache key
-        id: map-key
-        run: echo "key=map-czech-republic-$(date +%Y-W%V)" >> "$GITHUB_OUTPUT"
+      # ── 3. Map file ────────────────────────────────────────────────────────
+      #    Option A — GHCR image (recommended, no repeated downloads):
+      #      1. Run scripts/push-map-image.sh once to build and push the image.
+      #      2. Set secret MAP_IMAGE = ghcr.io/your-org/czechtouristmap-mapdata:latest
+      #      The image layer is cached by Docker digest — re-pulled only when
+      #      you push a new image. Update config/map-version.txt + re-run the
+      #      script when you get a new map file.
+      #
+      #    Option B — Direct download (fallback when MAP_IMAGE is not set):
+      #      Set secret MAP_DOWNLOAD_URL. Cached by map-version.txt content —
+      #      re-downloaded only when that file changes, not on a time schedule.
 
       - name: Restore map file from cache
         id: cache-map
         uses: actions/cache@v4
         with:
           path: maps/czech-republic.map
-          key: ${{ steps.map-key.outputs.key }}
-          restore-keys: map-czech-republic-
+          key: map-czech-${{ hashFiles('config/map-version.txt') }}
+          restore-keys: map-czech-
 
-      - name: Download map file
+      - name: Get map file
         if: steps.cache-map.outputs.cache-hit != 'true'
         run: |
           mkdir -p maps
-          wget -q --show-progress \
-            -O maps/czech-republic.map \
-            "${{ secrets.MAP_DOWNLOAD_URL }}"
+          if [ -n "$MAP_IMAGE" ]; then
+            echo "Pulling map from GHCR image: $MAP_IMAGE"
+            echo "$GITHUB_TOKEN" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            docker pull "$MAP_IMAGE"
+            id=$(docker create "$MAP_IMAGE")
+            docker cp "$id:/data/maps/czech-republic.map" maps/czech-republic.map
+            docker rm "$id"
+          else
+            echo "Downloading map from URL..."
+            wget -q --show-progress -O maps/czech-republic.map "$MAP_DOWNLOAD_URL"
+          fi
+        env:
+          MAP_IMAGE: ${{ secrets.MAP_IMAGE }}
+          MAP_DOWNLOAD_URL: ${{ secrets.MAP_DOWNLOAD_URL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # ── 4. Start tile server ───────────────────────────────────────────────
       - name: Start tile server
