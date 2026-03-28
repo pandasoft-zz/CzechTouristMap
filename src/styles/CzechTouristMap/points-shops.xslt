@@ -12,7 +12,7 @@
 <xsl:template name="points-shops">
 
 
-<rule  e="any" k="shop" v="mall" zoom-min="14">
+<rule  e="any" k="shop" v="mall" zoom-min="15">
     <rule  e="any" k="*" v="*" zoom-max="15">
         <symbol id="shopping_center" src="{$shopIconPath}/shopping_center.svg" symbol-width="18" priority="{$pr-shopping-center}"/>
     </rule> 
@@ -25,7 +25,7 @@
     </rule>       
 </rule>
 
-<rule  e="any" k="shop" v="general|supermarket" zoom-min="14">
+<rule  e="any" k="shop" v="general|supermarket" zoom-min="15">
     <rule  e="any" k="*" v="*" zoom-max="15">
         <symbol id="supermarket" src="{$shopIconPath}/supermarket.svg" symbol-width="18" priority="{$pr-supermarket}"/>
     </rule> 
@@ -39,7 +39,7 @@
 </rule>
 
 
-<rule  e="any" k="shop" v="convenience" zoom-min="14">
+<rule  e="any" k="shop" v="convenience" zoom-min="15">
     <rule  e="any" k="*" v="*" zoom-max="15">
         <symbol id="convenience" src="{$shopIconPath}/convenience.svg" symbol-width="18" priority="{$pr-convenience}"/>
     </rule> 
@@ -52,7 +52,7 @@
     </rule>       
 </rule>
 
-<rule  e="any" k="shop" v="bakery" zoom-min="14">
+<rule  e="any" k="shop" v="bakery" zoom-min="15">
     <rule  e="any" k="*" v="*" zoom-max="15">
         <symbol id="bakery" src="{$shopIconPath}/bakery.svg" symbol-width="18" priority="{$pr-bakery}"/> 
     </rule> 
