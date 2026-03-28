@@ -126,13 +126,13 @@
 <xsl:variable name="lw-protected-strictly-4-wide">2</xsl:variable>
 
 <!-- Road border/outline colors — dark versions of fill for casing effect -->
-<xsl:variable name="bc-motorway">#880000</xsl:variable>
-<xsl:variable name="bc-motorway_link">#880000</xsl:variable>
-<xsl:variable name="bc-trunk">#880000</xsl:variable>
-<xsl:variable name="bc-trunk_link">#884400</xsl:variable>
-<xsl:variable name="bc-primary">#904400</xsl:variable>
-<xsl:variable name="bc-secondary">#907000</xsl:variable>
-<xsl:variable name="bc-tertiary">#909000</xsl:variable>
+<xsl:variable name="bc-motorway">#A82020</xsl:variable>
+<xsl:variable name="bc-motorway_link">#A82020</xsl:variable>
+<xsl:variable name="bc-trunk">#A82020</xsl:variable>
+<xsl:variable name="bc-trunk_link">#A04020</xsl:variable>
+<xsl:variable name="bc-primary">#A05010</xsl:variable>
+<xsl:variable name="bc-secondary">#B09000</xsl:variable>
+<xsl:variable name="bc-tertiary">#C0B020</xsl:variable>
 <xsl:variable name="bc-unclassified">#606060</xsl:variable>
 <xsl:variable name="bc-residential">#707070</xsl:variable>
 <xsl:variable name="bc-living">#707070</xsl:variable>
@@ -142,15 +142,15 @@
 <xsl:variable name="bc-tunnel">#707070</xsl:variable>
 
 
-<!-- Road fill colors — Czech tourist map hierarchy (mapy.cz / KČT style) -->
-<!-- Dálnice (motorway): red | Silnice I (primary): orange | Silnice II (secondary): yellow | Silnice III (tertiary): pale yellow | local: white -->
-<xsl:variable name="lc-motorway">#D42020</xsl:variable>
-<xsl:variable name="lc-motorway_link">#D42020</xsl:variable>
-<xsl:variable name="lc-trunk">#D42020</xsl:variable>
-<xsl:variable name="lc-trunk_link">#E07030</xsl:variable>
-<xsl:variable name="lc-primary">#E07820</xsl:variable>
-<xsl:variable name="lc-secondary">#F0C000</xsl:variable>
-<xsl:variable name="lc-tertiary">#F5E040</xsl:variable>
+<!-- Road fill colors — custom style (mapy.cz-inspired, ČÚZK KČT trails) -->
+<!-- Dálnice (motorway): bright red | Silnice I (primary): warm orange | Silnice II (secondary): yellow | Silnice III (tertiary): pale yellow | local: white -->
+<xsl:variable name="lc-motorway">#E8474A</xsl:variable>
+<xsl:variable name="lc-motorway_link">#E8474A</xsl:variable>
+<xsl:variable name="lc-trunk">#E8474A</xsl:variable>
+<xsl:variable name="lc-trunk_link">#EC6040</xsl:variable>
+<xsl:variable name="lc-primary">#F09030</xsl:variable>
+<xsl:variable name="lc-secondary">#F8D040</xsl:variable>
+<xsl:variable name="lc-tertiary">#FAEEA0</xsl:variable>
 <xsl:variable name="lc-4wd-road">#C8A060</xsl:variable>
 <xsl:variable name="lc-unclassified">#FFFFFF</xsl:variable>
 <xsl:variable name="lc-residential">#FFFFFF</xsl:variable>
@@ -171,13 +171,13 @@
 <xsl:variable name="lc-ferrata">#C00000</xsl:variable>
 
 <!-- Tunnel fill — lighter/desaturated versions of road colors -->
-<xsl:variable name="lc-motorway-tunnel">#E87070</xsl:variable>
-<xsl:variable name="lc-motorway_link-tunnel">#E87070</xsl:variable>
-<xsl:variable name="lc-trunk-tunnel">#E87070</xsl:variable>
-<xsl:variable name="lc-trunk_link-tunnel">#F0A878</xsl:variable>
-<xsl:variable name="lc-primary-tunnel">#F0B878</xsl:variable>
-<xsl:variable name="lc-secondary-tunnel">#F8E080</xsl:variable>
-<xsl:variable name="lc-tertiary-tunnel">#F8F090</xsl:variable>
+<xsl:variable name="lc-motorway-tunnel">#F09898</xsl:variable>
+<xsl:variable name="lc-motorway_link-tunnel">#F09898</xsl:variable>
+<xsl:variable name="lc-trunk-tunnel">#F09898</xsl:variable>
+<xsl:variable name="lc-trunk_link-tunnel">#F4A080</xsl:variable>
+<xsl:variable name="lc-primary-tunnel">#F8C090</xsl:variable>
+<xsl:variable name="lc-secondary-tunnel">#FBE880</xsl:variable>
+<xsl:variable name="lc-tertiary-tunnel">#FCF5C0</xsl:variable>
 <xsl:variable name="lc-unclassified-tunnel">#E8E8E8</xsl:variable>
 <xsl:variable name="lc-residential-tunnel">#E8E8E8</xsl:variable>
 <xsl:variable name="lc-living-tunnel">#E8E8E8</xsl:variable>

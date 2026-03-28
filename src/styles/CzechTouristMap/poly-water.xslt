@@ -19,18 +19,18 @@
 
 <!-- Water bodies — soft medium blue, Czech tourist map style -->
 <rule e="way" k="natural" v="water">
-    <area fill="#B8D8F0"/>
+    <area fill="#9EC8E8"/>
     <rule e="way" k="tidal" v="yes">
-        <area fill="#C8ECF0"/>
+        <area fill="#B0D8EE"/>
     </rule>
 </rule>
 
 <rule e="way" k="landuse" v="reservoir|basin">
-    <area fill="#B8D8F0"/>
+    <area fill="#9EC8E8"/>
 </rule>
 
 <rule  e="way" k="waterway" v="riverbank">
-    <area fill="#B8D8F0"/>
+    <area fill="#9EC8E8"/>
 </rule>
 
 <!-- Wetlands -->

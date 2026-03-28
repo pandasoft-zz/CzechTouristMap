@@ -19,9 +19,9 @@
   <area fill="#8CC5FF"/>
 </rule>
 
-<!-- Land background — slightly warm off-white, Czech map style -->
+<!-- Land background — warm cream, mapy.cz style -->
 <rule e="way" k="natural" v="land|nosea">
-  <area fill="#FDFDF0"/>
+  <area fill="#F2EFE6"/>
 </rule>
 
 <!-- Farmland — very light warm yellow per SM5 (255,255,230) -->
@@ -29,24 +29,24 @@
   <area fill="#FFFFE6"/>
 </rule>
 
-<!-- Residential areas — warm beige (SM5-ish, Czech maps show settlement as warm tone) -->
+<!-- Residential areas — cool beige, mapy.cz style -->
 <rule e="way" k="landuse" v="residential">
-  <area fill="#F0D8B0" stroke="#C8B080" stroke-width="0.2" scale="none" />
+  <area fill="#E8DFD0" stroke="#B0A898" stroke-width="0.2" scale="none" />
 </rule>
 <rule e="way" k="landuse" v="garages">
-  <area fill="#F0D8B0" stroke="#C8B080" stroke-width="0.2" scale="none" />
+  <area fill="#E8DFD0" stroke="#B0A898" stroke-width="0.2" scale="none" />
 </rule>
 
 <!-- Forest broadleaf — SM5: 235,255,178=#EBFFB2, Czech tourist map: slightly more saturated -->
 <rule e="way" k="landuse" v="forest" >
   <rule e="way" k="leaf_type" v="~|broadleaved" >
-    <area fill="#C8E8A0"/>
+    <area fill="#A8D080"/>
   </rule>
 </rule>
 
 <rule e="way" k="natural" v="wood"  >
   <rule e="way" k="leaf_type" v="~|broadleaved" >
-    <area fill="#C8E8A0"/>
+    <area fill="#A8D080"/>
   </rule>
 </rule>
 
@@ -76,13 +76,13 @@
 <!-- Forest needleleaf — slightly darker/cooler green to distinguish from broadleaf -->
 <rule e="way" k="landuse" v="forest" >
   <rule e="way" k="leaf_type" v="needleleaved" >
-    <area fill="#A8D880"/>
+    <area fill="#88C060"/>
   </rule>
 </rule>
 
 <rule e="way" k="natural" v="wood" >
   <rule e="way" k="leaf_type" v="needleleaved" >
-    <area fill="#A8D880"/>
+    <area fill="#88C060"/>
   </rule>
 </rule>
 
