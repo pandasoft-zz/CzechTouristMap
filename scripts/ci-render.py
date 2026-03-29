@@ -41,7 +41,7 @@ def slugify(name: str) -> str:
 
 def render_location(lat: float, lng: float, zoom: int, output_path: str) -> bool:
     url = (
-        f"{RENDER_URL}/api/render"
+        f"{RENDER_URL}/render"
         f"?lat={lat}&lng={lng}&zoom={zoom}&width={WIDTH}&height={HEIGHT}"
     )
     try:

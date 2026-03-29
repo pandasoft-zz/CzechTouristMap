@@ -1,4 +1,4 @@
-name: Map Preview
+name: Docs
 
 on:
   pull_request:
@@ -6,14 +6,18 @@ on:
       - "src/styles/**"
       - "tile-server/**"
       - "config/locations.yaml"
+      - "docs/design-manual-project.md"
+  push:
+    tags:
+      - '[0-9][0-9][0-9][0-9].[0-9][0-9].[0-9][0-9]'
 
 permissions:
-  contents: write       # needed to push to gh-pages
-  pull-requests: write  # needed to post PR comment
-  packages: read        # needed to pull map image from GHCR
+  contents: write       # push to gh-pages
+  pull-requests: write  # post PR comment
+  packages: read        # pull map image from GHCR
 
 jobs:
-  preview:
+  docs:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,7 +28,7 @@ jobs:
       - name: Build theme XML
         run: ./build-theme.sh
 
-      # ── 2. Tile-server Docker image (BuildKit GHA cache) ──────────────────
+      # ── 2. Tile-server image (BuildKit + GHA cache) ────────────────────────
       #    Gradle build is cached — only rebuilt when tile-server/** changes.
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -38,12 +42,7 @@ jobs:
           cache-from: type=gha,scope=tile-server
           cache-to: type=gha,mode=max,scope=tile-server
 
-      # ── 3. Map file from GHCR image ────────────────────────────────────────
-      #    Build and push the image once with: scripts/push-map-image.sh
-      #    Set secret MAP_IMAGE = ghcr.io/your-org/czechtouristmap-mapdata:latest
-      #    The layer is cached by Docker digest — never re-pulled unless you
-      #    push a new image (i.e. update config/map-version.txt + re-run script).
-
+      # ── 3. Map file (GHCR image, cached by map-version.txt hash) ──────────
       - name: Restore map file from cache
         id: cache-map
         uses: actions/cache@v4
@@ -82,41 +81,63 @@ jobs:
              do sleep 5; printf "."; done'
           echo " ready"
 
-      # ── 5. Render screenshots ──────────────────────────────────────────────
-      - name: Install PyYAML
-        run: pip install pyyaml --quiet
+      # ── 5. Generate site ───────────────────────────────────────────────────
+      - name: Install Python deps
+        run: pip install pyyaml markdown --quiet
 
-      - name: Render screenshots
+      - name: Render PR preview
+        if: github.ref_type != 'tag'
         run: python scripts/ci-render.py
         env:
-          OUTPUT_DIR: screenshots
+          OUTPUT_DIR: site
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_BRANCH: ${{ github.head_ref }}
           COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
 
-      # ── 6. Upload artifacts (always, no GitHub Pages needed) ──────────────
-      - name: Upload screenshots as artifacts
+      - name: Generate release docs
+        if: github.ref_type == 'tag'
+        run: python scripts/gen-docs.py
+        env:
+          OUTPUT_DIR: site
+          VERSION: ${{ github.ref_name }}
+
+      # ── 6. Upload artifacts ────────────────────────────────────────────────
+      - name: Upload screenshots
+        if: github.ref_type != 'tag'
         uses: actions/upload-artifact@v4
         with:
           name: map-preview-pr-${{ github.event.pull_request.number }}
-          path: screenshots/
+          path: site/
           retention-days: 30
 
       # ── 7. Deploy to GitHub Pages ──────────────────────────────────────────
-      #    Enable GitHub Pages in repo Settings → Pages → Source: gh-pages branch.
-      #    Each PR gets its own subdirectory: /pr-{number}/
-      - name: Deploy to GitHub Pages
-        id: pages
+      #    Enable Pages in repo Settings → Pages → Source: gh-pages branch.
+      #    PR previews: /pr-{number}/
+      #    Release docs: /
+      - name: Deploy PR preview to Pages
+        id: pages-pr
+        if: github.ref_type != 'tag'
         continue-on-error: true
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: screenshots
+          publish_dir: site
           destination_dir: pr-${{ github.event.pull_request.number }}
+          keep_files: true
+
+      - name: Deploy release docs to Pages
+        if: github.ref_type == 'tag'
+        continue-on-error: true
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: site
+          destination_dir: .
           keep_files: true
 
       # ── 8. Comment on PR ──────────────────────────────────────────────────
       - name: Comment on PR
+        if: github.ref_type != 'tag'
         uses: actions/github-script@v7
         with:
           script: |
@@ -125,34 +146,26 @@ jobs:
             const sha = context.payload.pull_request.head.sha.substring(0, 7);
             const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
             const pagesUrl = `https://${context.repo.owner}.github.io/${context.repo.repo}/pr-${pr}/`;
-            const pagesOk = '${{ steps.pages.outcome }}' === 'success';
+            const pagesOk = '${{ steps.pages-pr.outcome }}' === 'success';
 
-            const manifest = JSON.parse(
-              fs.readFileSync('screenshots/manifest.json', 'utf8')
-            );
+            const manifest = JSON.parse(fs.readFileSync('site/manifest.json', 'utf8'));
 
-            const lines = [
-              `## Map Preview — \`${sha}\``,
-              '',
-            ];
+            const lines = [`## Map Preview — \`${sha}\``, ''];
 
             if (pagesOk) {
-              lines.push(`📍 **[Open full preview page](${pagesUrl})**`, '');
-              lines.push('| Location | Zoom |');
-              lines.push('|---|---|');
+              lines.push(`**[Open full preview](${pagesUrl})**`, '');
+              lines.push('| Location | Zoom |', '|---|---|');
               for (const loc of manifest) {
                 lines.push(`| ${loc.name} | z${loc.zoom} |`);
                 lines.push(`| ![${loc.name}](${pagesUrl}${loc.filename}.png) | |`);
               }
             } else {
               lines.push(
-                '> ⚠️ GitHub Pages not configured — enable it in repo Settings → Pages → Source: `gh-pages` branch.',
-                '> Screenshots are available as workflow artifacts in the meantime.',
+                '> GitHub Pages not configured — screenshots available as artifacts.',
                 '',
-                `📦 **[Download screenshots (artifacts)](${runUrl})**`,
+                `**[Download screenshots](${runUrl})**`,
                 '',
-                '| Location | Zoom |',
-                '|---|---|',
+                '| Location | Zoom |', '|---|---|',
                 ...manifest.map(loc => `| ${loc.name} | z${loc.zoom} |`),
               );
             }
