@@ -19,19 +19,20 @@ REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 MAP_FILE="$REPO_ROOT/maps/czech-republic.map"
 ORG="${1:-$(git -C "$REPO_ROOT" remote get-url origin \
   | sed 's|.*[:/]\([^/]*\)/.*|\1|' | tr '[:upper:]' '[:lower:]')}"
-VERSION=$(cat "$REPO_ROOT/config/map-version.txt")
+VERSION=$(tr -d '[:space:]' < "$REPO_ROOT/config/map-version.txt")
+MAP_URL="https://ftp.gwdg.de/pub/misc/openstreetmap/openandromaps/maps${VERSION}/europe/Czech-Republic.zip"
 IMAGE_LATEST="ghcr.io/${ORG}/czechtouristmap-mapdata:latest"
 IMAGE_VERSIONED="ghcr.io/${ORG}/czechtouristmap-mapdata:${VERSION}"
 
 # ── Download map if not present ────────────────────────────────────────────
 if [ ! -f "$MAP_FILE" ]; then
-    echo "==> map file not found — downloading from OpenAndroMaps..."
+    echo "==> map file not found — downloading from OpenAndroMaps (${VERSION})..."
     mkdir -p "$REPO_ROOT/maps"
     TMPZIP=$(mktemp /tmp/czech-republic.XXXXXX.zip)
     trap 'rm -f "$TMPZIP"' EXIT
     wget -q --show-progress \
         -O "$TMPZIP" \
-        "https://ftp.gwdg.de/pub/misc/openandromaps/maps/europe/Czech_Republic.zip"
+        "$MAP_URL"
     echo "==> extracting..."
     unzip -p "$TMPZIP" "*.map" > "$MAP_FILE" || {
         # some archives use a flat layout
