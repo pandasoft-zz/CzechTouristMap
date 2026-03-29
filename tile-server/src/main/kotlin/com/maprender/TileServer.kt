@@ -93,6 +93,9 @@ private fun handleTile(
         exchange.responseBody.write(png)
     } catch (e: NumberFormatException) {
         exchange.sendError(400, "Invalid tile coordinates")
+    } catch (e: java.io.IOException) {
+        // Client disconnected before response was sent — not an error.
+        System.err.println("Tile aborted (client disconnected): ${e.message}")
     } catch (e: Exception) {
         System.err.println("Tile render error: ${e.message}")
         e.printStackTrace()
