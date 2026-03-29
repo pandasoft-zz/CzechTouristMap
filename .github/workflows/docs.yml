@@ -83,7 +83,7 @@ jobs:
 
       # ── 5. Generate site ───────────────────────────────────────────────────
       - name: Install Python deps
-        run: pip install pyyaml markdown --quiet
+        run: pip install -r requirements.txt --quiet
 
       - name: Render PR preview
         if: github.ref_type != 'tag'
