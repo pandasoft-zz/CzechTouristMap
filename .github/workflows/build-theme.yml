@@ -14,14 +14,14 @@ jobs:
     name: shellcheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: shellcheck build-theme.sh scripts/push-map-image.sh
 
   lint-yaml:
     name: yamllint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: pip install yamllint --quiet
       - run: yamllint -c .yamllint.yml config/locations.yaml .github/workflows/*.yml
 
@@ -29,7 +29,7 @@ jobs:
     name: ruff
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: pip install ruff --quiet
       - run: ruff check scripts/ tests/
 
@@ -37,7 +37,7 @@ jobs:
     name: xmllint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: sudo apt-get install -y libxml2-utils --no-install-recommends -q
       - run: xmllint --noout src/styles/CzechTouristMap/*.xslt
 
@@ -45,7 +45,7 @@ jobs:
     name: ktlint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Download ktlint
         run: |
           curl -sSLO https://github.com/pinterest/ktlint/releases/download/1.5.0/ktlint
@@ -63,7 +63,7 @@ jobs:
       pull-requests: read
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Compute version
         id: version
