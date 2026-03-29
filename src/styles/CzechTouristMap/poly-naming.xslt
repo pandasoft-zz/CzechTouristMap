@@ -6,8 +6,8 @@
 <rule e="way" k="natural"
     v="grassland|heath|marsh|wetland|scree|scrub|wood"
     zoom-min="15">
-    <caption fill="#202020" font-family="serif" font-size="12" font-style="italic" k="name"
-        priority="{$pr-poly-label-natural}" stroke="#FFFFFF" stroke-width="0.1" />
+    <caption fill="#407020" font-family="serif" font-size="12" font-style="bold_italic" k="name"
+        priority="{$pr-poly-label-natural}" stroke="#FFFFFF" stroke-width="2.0" />
 </rule>
 <!-- 
 <rule e="way" k="natural" v="mountain_range">
@@ -64,10 +64,16 @@
 
 
 <rule e="way" k="landuse"
-    v="forest|meadow|grass|orchard|vineyard|allotments|farmland|landfill|quarry|dog_park"
+    v="forest|meadow|grass|orchard|vineyard|allotments|farmland"
+    zoom-min="15">
+    <caption fill="#407020" font-family="serif" font-size="12" font-style="bold_italic" k="name"
+        priority="{$pr-poly-label-landuse}" stroke="#FFFFFF" stroke-width="2.0" />
+</rule>
+<rule e="way" k="landuse"
+    v="landfill|quarry|dog_park"
     zoom-min="15">
     <caption fill="#202020" font-family="serif" font-size="12" font-style="italic" k="name"
-        priority="{$pr-poly-label-landuse}" stroke="#FFFFFF" stroke-width="0.1" />
+        priority="{$pr-poly-label-landuse}" stroke="#FFFFFF" stroke-width="1.0" />
 </rule>
 
 <rule e="way" k="natural" v="glacier" zoom-min="9">

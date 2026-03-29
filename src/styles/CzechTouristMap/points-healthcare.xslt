@@ -10,7 +10,7 @@
 -->
 
 <xsl:template name="points-healthcare">
-<rule  e="any" k="amenity" v="hospital|clinic" zoom-min="14">
+<rule  e="any" k="amenity" v="hospital|clinic" zoom-min="15">
   <rule  e="any" k="*" v="*" zoom-max="15">
     <symbol id="hospital" src="{$healthcareIconPath}/hospital.svg" symbol-width="16" priority="{$pr-hospital}"/>
   </rule>
@@ -23,7 +23,7 @@
   </rule>       
 </rule>
 
-<rule  e="any" k="amenity" v="doctors" zoom-min="14">
+<rule  e="any" k="amenity" v="doctors" zoom-min="15">
   <rule  e="any" k="*" v="*" zoom-max="15">
     <symbol id="doctors" src="{$healthcareIconPath}/doctors.svg" symbol-width="16" priority="{$pr-doctors}"/>
   </rule>
@@ -36,7 +36,7 @@
   </rule>       
 </rule>
 
-<rule  e="any" k="amenity" v="dentist" zoom-min="14">
+<rule  e="any" k="amenity" v="dentist" zoom-min="15">
         <symbol id="dentist" src="{$healthcareIconPath}/dentist.svg" symbol-width="16" priority="{$pr-dentist}"/>
         <rule e="any" k="*" v="*" >
             <caption k="name" symbol-id="dentist" 

@@ -31,11 +31,11 @@
 <xsl:variable name="sw-hiking-s-z14">16</xsl:variable>
 <xsl:variable name="sw-hiking-s-z16">17</xsl:variable>
 
-<!-- KČT hiking trail colors — Klub českých turistů standard marker colors -->
-<xsl:variable name="lc-trail-blue">#0066FF</xsl:variable>
-<xsl:variable name="lc-trail-red">#E8000C</xsl:variable>
-<xsl:variable name="lc-trail-green">#00AA00</xsl:variable>
-<xsl:variable name="lc-trail-yellow">#DDBB00</xsl:variable>
+<!-- KČT hiking trail colors — ČÚZK standard marker colors -->
+<xsl:variable name="lc-trail-blue">#0033AA</xsl:variable>
+<xsl:variable name="lc-trail-red">#CC0000</xsl:variable>
+<xsl:variable name="lc-trail-green">#006600</xsl:variable>
+<xsl:variable name="lc-trail-yellow">#D4A000</xsl:variable>
 <xsl:variable name="lc-trail-purple">#8020A0</xsl:variable>
 <xsl:variable name="lc-trail-orange">#E06000</xsl:variable>
 <xsl:variable name="lc-trail-black">#303030</xsl:variable>

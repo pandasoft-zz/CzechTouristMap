@@ -18,10 +18,18 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import javax.imageio.ImageIO
-import kotlin.math.*
+import kotlin.math.PI
+import kotlin.math.ceil
+import kotlin.math.cos
+import kotlin.math.floor
+import kotlin.math.ln
+import kotlin.math.pow
+import kotlin.math.tan
 
-class TileRenderer(mapFilePath: String, private val themeManager: ThemeManager) {
-
+class TileRenderer(
+    mapFilePath: String,
+    private val themeManager: ThemeManager,
+) {
     private val graphicFactory: GraphicFactory = AwtGraphicFactory.INSTANCE
     private val displayModel = DisplayModel()
     private val mapDataStore: MapDataStore
@@ -52,16 +60,21 @@ class TileRenderer(mapFilePath: String, private val themeManager: ThemeManager) 
         val future = RenderThemeFuture(graphicFactory, renderTheme, displayModel)
 
         // Mapsforge requires running the future in a thread to compile the theme
-        Thread(future).also { it.start(); it.join() }
+        Thread(future).also {
+            it.start()
+            it.join()
+        }
 
-        val renderer = DatabaseRenderer(
-            mapDataStore, graphicFactory,
-            InMemoryTileCache(0),
-            TileBasedLabelStore(1000), // LabelStore pro text / popisky
-            true,  // renderLabels
-            true,  // cacheLabels
-            null   // HillsRenderConfig – stínování kopců nepotřebujeme
-        )
+        val renderer =
+            DatabaseRenderer(
+                mapDataStore,
+                graphicFactory,
+                InMemoryTileCache(0),
+                TileBasedLabelStore(1000), // LabelStore pro text / popisky
+                true, // renderLabels
+                true, // cacheLabels
+                null, // HillsRenderConfig – stínování kopců nepotřebujeme
+            )
 
         themeFutureCache[themeName] = future
         rendererCache[themeName] = renderer
@@ -73,7 +86,13 @@ class TileRenderer(mapFilePath: String, private val themeManager: ThemeManager) 
      * Renders a map area centered on (lat, lng) at the given zoom.
      * Returns a PNG of exactly (width x height) pixels.
      */
-    fun renderArea(lat: Double, lng: Double, zoom: Int, width: Int, height: Int): ByteArray {
+    fun renderArea(
+        lat: Double,
+        lng: Double,
+        zoom: Int,
+        width: Int,
+        height: Int,
+    ): ByteArray {
         // Fractional tile coordinates of the center point
         val n = 2.0.pow(zoom)
         val centerTileX = (lng + 180.0) / 360.0 * n
@@ -85,9 +104,9 @@ class TileRenderer(mapFilePath: String, private val themeManager: ThemeManager) 
         val centerPixelY = (centerTileY - floor(centerTileY)) * 256.0
 
         // Tile range needed to cover the output image
-        val tileX0 = floor(centerTileX).toInt() - ceil((width  / 2.0 - centerPixelX) / 256).toInt()
+        val tileX0 = floor(centerTileX).toInt() - ceil((width / 2.0 - centerPixelX) / 256).toInt()
         val tileY0 = floor(centerTileY).toInt() - ceil((height / 2.0 - centerPixelY) / 256).toInt()
-        val tileX1 = floor(centerTileX).toInt() + ceil((width  / 2.0 + (256 - centerPixelX)) / 256).toInt()
+        val tileX1 = floor(centerTileX).toInt() + ceil((width / 2.0 + (256 - centerPixelX)) / 256).toInt()
         val tileY1 = floor(centerTileY).toInt() + ceil((height / 2.0 + (256 - centerPixelY)) / 256).toInt()
 
         val canvasW = (tileX1 - tileX0 + 1) * 256
@@ -107,7 +126,7 @@ class TileRenderer(mapFilePath: String, private val themeManager: ThemeManager) 
         // Crop to exactly (width x height) centered on lat/lng
         val centerCanvasX = ((centerTileX - tileX0) * 256).toInt()
         val centerCanvasY = ((centerTileY - tileY0) * 256).toInt()
-        val cropX = (centerCanvasX - width  / 2).coerceIn(0, canvasW - width)
+        val cropX = (centerCanvasX - width / 2).coerceIn(0, canvasW - width)
         val cropY = (centerCanvasY - height / 2).coerceIn(0, canvasH - height)
         val cropped = canvas.getSubimage(cropX, cropY, width, height)
 
@@ -118,9 +137,14 @@ class TileRenderer(mapFilePath: String, private val themeManager: ThemeManager) 
      * Renders tile (x, y, zoom) with the currently selected theme.
      * Returns PNG bytes, or null when the tile has no map data.
      */
-    fun renderTile(x: Int, y: Int, zoom: Byte): ByteArray? {
-        val themeName = themeManager.currentTheme
-            ?: throw IllegalStateException("No theme selected")
+    fun renderTile(
+        x: Int,
+        y: Int,
+        zoom: Byte,
+    ): ByteArray? {
+        val themeName =
+            themeManager.currentTheme
+                ?: throw IllegalStateException("No theme selected")
 
         val renderer = getRenderer(themeName)
         val future = themeFutureCache[themeName]!!
@@ -128,9 +152,10 @@ class TileRenderer(mapFilePath: String, private val themeManager: ThemeManager) 
         val tile = Tile(x, y, zoom, 256)
         val job = RendererJob(tile, mapDataStore, future, displayModel, 1.0f, false, false)
 
-        val tileBitmap: TileBitmap? = synchronized(renderer) {
-            renderer.executeJob(job)
-        }
+        val tileBitmap: TileBitmap? =
+            synchronized(renderer) {
+                renderer.executeJob(job)
+            }
 
         tileBitmap ?: return null
 

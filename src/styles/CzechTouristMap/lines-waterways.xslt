@@ -4,7 +4,7 @@
 <!-- Waterway line colors — medium blue per Czech tourist map convention -->
 <!-- SM5 waterway line: RGB 0,255,255 — adapted to less saturated map-readable blue -->
 <xsl:template name="lines-waterways">
-<xsl:variable name="stream-color">#5080C0</xsl:variable>
+<xsl:variable name="stream-color">#5090C8</xsl:variable>
 <xsl:variable name="drain-color">#90C8E8</xsl:variable>
 
 <xsl:call-template name="create-waterway-rules">
@@ -65,10 +65,10 @@
 <xsl:param name="drift-width2" />
 <rule e="way" k="waterway" v="{$waterway}" zoom-min="{$zoom-min}"  >
     <rule e="way" k="*" v="*" zoom-min="{$zoom-label}" zoom-max="{$zoom-label + 1}">
-        <pathText k="name" font-style="italic" font-size="{$font-size}" fill="#3366CC" stroke="#FFFFFF" stroke-width="2" repeat-start="30" repeat-gap="150" priority="{$pr-waterway-name}" />
+        <pathText k="name" font-style="italic" font-size="{$font-size}" fill="#2060A0" stroke="#FFFFFF" stroke-width="2" repeat-start="30" repeat-gap="150" priority="{$pr-waterway-name}" />
     </rule>
      <rule e="way" k="*" v="*" zoom-min="{$zoom-label + 2}">
-        <pathText k="name" font-style="italic" font-size="{$font-size + 2}" fill="#3366CC" stroke="#FFFFFF" stroke-width="2" repeat-start="30" repeat-gap="150" priority="{$pr-waterway-name}" />
+        <pathText k="name" font-style="italic" font-size="{$font-size + 2}" fill="#2060A0" stroke="#FFFFFF" stroke-width="2" repeat-start="30" repeat-gap="150" priority="{$pr-waterway-name}" />
     </rule>   
     <rule e="way" k="tunnel" v="yes|culvert">
         <line stroke="{$stroke-color}" stroke-dasharray="1,0.4" stroke-width="{$stroke-width}" stroke-linecap="butt" scale="all"/>

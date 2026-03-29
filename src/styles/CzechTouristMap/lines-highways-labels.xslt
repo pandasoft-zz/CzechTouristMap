@@ -73,15 +73,18 @@
             </rule>
 
         </rule>
+        <!-- Primary ref — blue oval (silnice I. třídy) -->
         <rule e="way" k="highway" v="primary|primary_link" zoom-min="11">
-            <pathText k="name" dy="0.5" font-style="bold" font-size="11" stroke="#FFFFFF" stroke-width="3" repeat-gap="200"/>
-            <pathText k="ref"  font-style="bold" font-size="10" fill="#FFFFFF" stroke="#008700" stroke-width="3" repeat-gap="500.0" repeat-start="100.0" display="always"/>                         
+            <pathText k="name" dy="0.5" font-style="bold" font-size="11" stroke="#FFFFFF" stroke-width="2" repeat-gap="200"/>
+            <pathText k="ref"  font-style="bold" font-size="10" fill="#FFFFFF" stroke="#1040C8" stroke-width="4" repeat-gap="500.0" repeat-start="100.0" display="always"/>
         </rule>
+        <!-- Trunk ref — red shield (rychlostní silnice) -->
         <rule e="way" k="highway" v="trunk" zoom-min="11">
-            <caption k="ref" font-style="bold" font-size="9" fill="#FFFFFF" stroke="#1076BA" stroke-width="4" />       
+            <caption k="ref" font-style="bold" font-size="9" fill="#FFFFFF" stroke="#A82020" stroke-width="5" />
         </rule>
+        <!-- Motorway ref — red shield (dálnice) -->
         <rule e="way" k="highway" v="motorway" zoom-min="11">
-            <caption k="ref" font-style="bold" font-size="10" fill="#FFFFFF" stroke="#1076BA" stroke-width="4" />        
+            <caption k="ref" font-style="bold" font-size="10" fill="#FFFFFF" stroke="#A82020" stroke-width="5" />        
         <!--
             <pathText k="ref"  font-style="bold" font-size="10" fill="#FFFFFF" stroke="#1076BA" stroke-width="4" repeat-gap="40000" display="ifspace"/>             
         -->                     
