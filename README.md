@@ -62,9 +62,6 @@ mapRender/
 │   ├── symbols/                  # KCT trail markers + OSMC symbols
 │   └── …
 │
-├── maps/                         # Mapsforge .map files (downloaded, not in git)
-│   └── czech-republic.map
-│
 ├── tile-server/                  # Mapsforge tile server for local testing
 │
 ├── web/                          # Frontend for visual browsing
@@ -80,6 +77,50 @@ mapRender/
 ├── docker-compose.yml
 └── README.md
 ```
+
+## Running locally (tile server)
+
+The tile server renders map tiles from a Mapsforge `.map` file.
+The map file is stored in a Docker volume and populated from a GHCR image on first start.
+
+### First-time setup
+
+1. Push the map image to GHCR (one-time, or after updating the map file):
+   ```bash
+   ./scripts/push-map-image.sh <github-owner>
+   ```
+
+2. Start the stack:
+   ```bash
+   docker compose up
+   ```
+   On first run, `map-init` copies `czech-republic.map` from the GHCR image into the
+   `map-data` volume. Subsequent starts skip this step automatically.
+
+3. Open the map viewer at `http://localhost:8080`.
+
+### Updating the map file
+
+1. Replace your `.map` file and update `config/map-version.txt`.
+2. Re-run `push-map-image.sh` to publish the new image.
+3. Re-create the volume to fetch the new file:
+   ```bash
+   docker compose down -v
+   docker compose up
+   ```
+
+### Manual volume population (no GHCR access)
+
+```bash
+docker volume create maprender_map-data
+docker run --rm \
+  -v "$PWD/maps/czech-republic.map:/src/czech-republic.map:ro" \
+  -v maprender_map-data:/export \
+  busybox cp /src/czech-republic.map /export/czech-republic.map
+docker compose up --no-deps tile-server
+```
+
+---
 
 ## Icon reference
 
