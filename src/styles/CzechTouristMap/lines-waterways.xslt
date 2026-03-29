@@ -65,10 +65,10 @@
 <xsl:param name="drift-width2" />
 <rule e="way" k="waterway" v="{$waterway}" zoom-min="{$zoom-min}"  >
     <rule e="way" k="*" v="*" zoom-min="{$zoom-label}" zoom-max="{$zoom-label + 1}">
-        <pathText k="name" font-style="italic" font-size="{$font-size}" fill="#0050A0" stroke="#FFFFFF" stroke-width="2" repeat-start="30" repeat-gap="150" priority="{$pr-waterway-name}" />
+        <pathText k="name" font-style="italic" font-size="{$font-size}" fill="#3366CC" stroke="#FFFFFF" stroke-width="2" repeat-start="30" repeat-gap="150" priority="{$pr-waterway-name}" />
     </rule>
      <rule e="way" k="*" v="*" zoom-min="{$zoom-label + 2}">
-        <pathText k="name" font-style="italic" font-size="{$font-size + 2}" fill="#0050A0" stroke="#FFFFFF" stroke-width="2" repeat-start="30" repeat-gap="150" priority="{$pr-waterway-name}" />
+        <pathText k="name" font-style="italic" font-size="{$font-size + 2}" fill="#3366CC" stroke="#FFFFFF" stroke-width="2" repeat-start="30" repeat-gap="150" priority="{$pr-waterway-name}" />
     </rule>   
     <rule e="way" k="tunnel" v="yes|culvert">
         <line stroke="{$stroke-color}" stroke-dasharray="1,0.4" stroke-width="{$stroke-width}" stroke-linecap="butt" scale="all"/>

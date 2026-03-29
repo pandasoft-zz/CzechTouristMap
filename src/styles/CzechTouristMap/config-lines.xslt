@@ -125,32 +125,32 @@
 <xsl:variable name="lw-protected-strictly-4">0.2</xsl:variable>
 <xsl:variable name="lw-protected-strictly-4-wide">2</xsl:variable>
 
-<!-- Road border/outline colors — dark versions of fill for casing effect -->
-<xsl:variable name="bc-motorway">#880000</xsl:variable>
-<xsl:variable name="bc-motorway_link">#880000</xsl:variable>
-<xsl:variable name="bc-trunk">#880000</xsl:variable>
-<xsl:variable name="bc-trunk_link">#884400</xsl:variable>
-<xsl:variable name="bc-primary">#904400</xsl:variable>
-<xsl:variable name="bc-secondary">#907000</xsl:variable>
-<xsl:variable name="bc-tertiary">#909000</xsl:variable>
-<xsl:variable name="bc-unclassified">#606060</xsl:variable>
-<xsl:variable name="bc-residential">#707070</xsl:variable>
-<xsl:variable name="bc-living">#707070</xsl:variable>
-<xsl:variable name="bc-service">#707070</xsl:variable>
+<!-- Road border/outline colors — SM5/guideline: dark gray casing -->
+<xsl:variable name="bc-motorway">#444444</xsl:variable>
+<xsl:variable name="bc-motorway_link">#444444</xsl:variable>
+<xsl:variable name="bc-trunk">#444444</xsl:variable>
+<xsl:variable name="bc-trunk_link">#555555</xsl:variable>
+<xsl:variable name="bc-primary">#555555</xsl:variable>
+<xsl:variable name="bc-secondary">#666666</xsl:variable>
+<xsl:variable name="bc-tertiary">#777777</xsl:variable>
+<xsl:variable name="bc-unclassified">#888888</xsl:variable>
+<xsl:variable name="bc-residential">#888888</xsl:variable>
+<xsl:variable name="bc-living">#888888</xsl:variable>
+<xsl:variable name="bc-service">#888888</xsl:variable>
 <xsl:variable name="bc-cycleway">#0040A0</xsl:variable>
 <xsl:variable name="bc-macadam">#707070</xsl:variable>
 <xsl:variable name="bc-tunnel">#707070</xsl:variable>
 
 
-<!-- Road fill colors — Czech tourist map hierarchy (mapy.cz / KČT style) -->
-<!-- Dálnice (motorway): red | Silnice I (primary): orange | Silnice II (secondary): yellow | Silnice III (tertiary): pale yellow | local: white -->
-<xsl:variable name="lc-motorway">#D42020</xsl:variable>
-<xsl:variable name="lc-motorway_link">#D42020</xsl:variable>
-<xsl:variable name="lc-trunk">#D42020</xsl:variable>
-<xsl:variable name="lc-trunk_link">#E07030</xsl:variable>
-<xsl:variable name="lc-primary">#E07820</xsl:variable>
-<xsl:variable name="lc-secondary">#F0C000</xsl:variable>
-<xsl:variable name="lc-tertiary">#F5E040</xsl:variable>
+<!-- Road fill colors — SM5/guideline: yellow hierarchy -->
+<!-- Dálnice: #FFFF99 | Silnice I: #FFCC66 | Silnice II: #FFEE99 | Silnice III+: #FFFFFF -->
+<xsl:variable name="lc-motorway">#FFFF99</xsl:variable>
+<xsl:variable name="lc-motorway_link">#FFFF99</xsl:variable>
+<xsl:variable name="lc-trunk">#FFFF99</xsl:variable>
+<xsl:variable name="lc-trunk_link">#FFCC66</xsl:variable>
+<xsl:variable name="lc-primary">#FFCC66</xsl:variable>
+<xsl:variable name="lc-secondary">#FFEE99</xsl:variable>
+<xsl:variable name="lc-tertiary">#FFFFFF</xsl:variable>
 <xsl:variable name="lc-4wd-road">#C8A060</xsl:variable>
 <xsl:variable name="lc-unclassified">#FFFFFF</xsl:variable>
 <xsl:variable name="lc-residential">#FFFFFF</xsl:variable>
@@ -170,14 +170,14 @@
 <xsl:variable name="lc-steps">#A02030</xsl:variable>
 <xsl:variable name="lc-ferrata">#C00000</xsl:variable>
 
-<!-- Tunnel fill — lighter/desaturated versions of road colors -->
-<xsl:variable name="lc-motorway-tunnel">#E87070</xsl:variable>
-<xsl:variable name="lc-motorway_link-tunnel">#E87070</xsl:variable>
-<xsl:variable name="lc-trunk-tunnel">#E87070</xsl:variable>
-<xsl:variable name="lc-trunk_link-tunnel">#F0A878</xsl:variable>
-<xsl:variable name="lc-primary-tunnel">#F0B878</xsl:variable>
-<xsl:variable name="lc-secondary-tunnel">#F8E080</xsl:variable>
-<xsl:variable name="lc-tertiary-tunnel">#F8F090</xsl:variable>
+<!-- Tunnel fill — desaturated versions of road colors -->
+<xsl:variable name="lc-motorway-tunnel">#FFFFC0</xsl:variable>
+<xsl:variable name="lc-motorway_link-tunnel">#FFFFC0</xsl:variable>
+<xsl:variable name="lc-trunk-tunnel">#FFFFC0</xsl:variable>
+<xsl:variable name="lc-trunk_link-tunnel">#FFE0A0</xsl:variable>
+<xsl:variable name="lc-primary-tunnel">#FFE0A0</xsl:variable>
+<xsl:variable name="lc-secondary-tunnel">#FFF4C0</xsl:variable>
+<xsl:variable name="lc-tertiary-tunnel">#F0F0F0</xsl:variable>
 <xsl:variable name="lc-unclassified-tunnel">#E8E8E8</xsl:variable>
 <xsl:variable name="lc-residential-tunnel">#E8E8E8</xsl:variable>
 <xsl:variable name="lc-living-tunnel">#E8E8E8</xsl:variable>

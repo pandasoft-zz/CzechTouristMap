@@ -35,7 +35,7 @@
 </rule>
 
 <rule e="way" k="landuse" v="brownfield|construction">
-<area fill="#e7debc" stroke="#c9b56a" stroke-width="1" scale="none"/>
+<area fill="#e7debc" scale="none"/>
   <rule e="way" k="*" v="*" zoom-min="16">
     <caption k="name" font-style="italic" font-family="sans_serif" font-size="12" fill="#000000" stroke="#FFFFFF" stroke-width="1.7" />
   </rule>
@@ -43,8 +43,9 @@
 
 
 <!-- Parks/gardens — light green, Czech map style; SM5 garden fill = 245,255,219 = #F5FFDB -->
+<!-- Note: no stroke — parks can be large polygons spanning many tiles; stroke causes tile-boundary artifacts -->
 <rule e="way" k="leisure" v="common|village_green|park|garden">
-  <area fill="#C8F090" stroke="#3A9A3A" stroke-width="1" scale="none"/>
+  <area fill="#C8F090" scale="none"/>
   <rule e="way" k="*" v="*" zoom-max="14">
     <area src="{$patternPath}/park.svg" symbol-height="20"/>
   </rule>
@@ -126,8 +127,9 @@
     <area fill="#D5D5D5" />
   </rule>
 
+  <!-- Airport/aerodrome — SM5/guideline: #F2E6F2 light lilac -->
   <rule e="way" k="aeroway" v="airport|aerodrome|apron|helipad|terminal" closed="yes">
-    <area fill="#F0E8E0" />
+    <area fill="#F2E6F2" />
   </rule>
 
   <rule e="way" k="amenity" v="childcare|kindergarten|school" closed="yes">  

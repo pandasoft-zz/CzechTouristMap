@@ -32,6 +32,14 @@
         <line stroke="#C030A050" stroke-width="1.5"/>
         <line stroke="#D060C0" stroke-width="0.3" stroke-dasharray="0.4,2,2,2" scale="all" />
     </rule>
+    <!-- District/okres border (admin_level=6) — medium dash, zoom ≥ 9 -->
+    <rule e="way" k="admin_level" v="6" zoom-min="9">
+        <line stroke="#FF4CFF" stroke-width="1.0" stroke-dasharray="4,3" scale="all"/>
+    </rule>
+    <!-- Municipality/obec border (admin_level=8) — short dash, zoom ≥ 11 -->
+    <rule e="way" k="admin_level" v="8" zoom-min="11">
+        <line stroke="#FF4CFF" stroke-width="0.7" stroke-dasharray="2,2" scale="all"/>
+    </rule>
 </rule>
 
 </xsl:template>

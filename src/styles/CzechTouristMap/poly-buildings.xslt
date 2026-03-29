@@ -12,9 +12,9 @@
 <!-- Building colors — ČÚZK SM5: building fill 227,227,227 = #E3E3E3, outline #707070 -->
 <xsl:template name="poly-buildings">
 <rule cat="buildings" e="way" k="building" v="*" zoom-min="15" closed="yes">
-   <!-- Generic building — SM5: #E3E3E3 -->
+   <!-- Generic building — SM5: #E3E3E3, outline #000000 0.5px -->
    <rule e="way" k="building" v="yes">
-      <area fill="#E0E0E0" stroke="#808080" stroke-width="0.6" scale="none" />
+      <area fill="#E0E0E0" stroke="#000000" stroke-width="0.5" scale="none" />
     </rule>
     <rule e="way" k="building" v="supermarket">
       <area fill="#D8C0CC" stroke="#808080" stroke-width="0.6" scale="none" />

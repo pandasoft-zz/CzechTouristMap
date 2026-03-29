@@ -17,20 +17,20 @@
 </rule>
 
 
-<!-- Water bodies — soft medium blue, Czech tourist map style -->
+<!-- Water bodies — SM5 standard: #E0FFFF (224,255,255 light cyan) -->
 <rule e="way" k="natural" v="water">
-    <area fill="#B8D8F0"/>
+    <area fill="#E0FFFF"/>
     <rule e="way" k="tidal" v="yes">
-        <area fill="#C8ECF0"/>
+        <area fill="#E0FFFF"/>
     </rule>
 </rule>
 
 <rule e="way" k="landuse" v="reservoir|basin">
-    <area fill="#B8D8F0"/>
+    <area fill="#E0FFFF"/>
 </rule>
 
 <rule  e="way" k="waterway" v="riverbank">
-    <area fill="#B8D8F0"/>
+    <area fill="#E0FFFF"/>
 </rule>
 
 <!-- Wetlands -->

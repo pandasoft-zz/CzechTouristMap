@@ -30,3 +30,21 @@ locations:
     lng: 17.011084
     zoom: 14
     note: Male mesto + dalnice
+
+  - name: Bug-brno
+    lat: 49.203248
+    lng: 16.626615
+    zoom: 12
+    note: VNapis brno je vykresleny jen z pulky, je usknuty dlazdici
+
+  - name: bug-zelene-ctverce
+    lat: 49.396711
+    lng: 16.7471
+    zoom: 12
+    note: Na mape jsou mae zelene ctverce ve vetsich bylych ctvercich
+
+  - name: bug-vodni-plocha
+    lat: 49.209076
+    lng: 16.755124
+    zoom: 13
+    note: Nadpis vodni ploxy je porad moc veliky
