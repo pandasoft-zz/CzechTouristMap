@@ -4,7 +4,7 @@
 # --platform=$BUILDPLATFORM: always run on the build host, not the target arch
 FROM --platform=$BUILDPLATFORM ubuntu:24.04 AS downloader
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends wget gdal-bin \
+    && apt-get install -y --no-install-recommends ca-certificates wget gdal-bin \
     && rm -rf /var/lib/apt/lists/*
 
 RUN <<'EOF'
