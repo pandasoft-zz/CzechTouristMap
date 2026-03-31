@@ -7,10 +7,15 @@ services:
       MAP_FILE: /data/maps/czech-republic.map
       THEMES_DIR: /data/themes
       LOCATIONS_FILE: /data/config/locations.yaml
+      HGT_DIR: /data/hgt
     volumes:
       - ./maps:/data/maps:ro
       - ./themes:/data/themes:ro
       - ./config:/data/config
+      - type: image
+        source: ghcr.io/pandasoft-zz/czechtouristmap-hgtdata:latest
+        target: /data/hgt
+        read_only: true
     ports:
       - "8080:8080"       # optional: direct access for debugging
     restart: unless-stopped

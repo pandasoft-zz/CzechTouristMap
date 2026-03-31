@@ -6,6 +6,10 @@ import org.mapsforge.core.model.Tile
 import org.mapsforge.map.awt.graphics.AwtGraphicFactory
 import org.mapsforge.map.datastore.MapDataStore
 import org.mapsforge.map.layer.cache.InMemoryTileCache
+import org.mapsforge.map.layer.hills.DemFolderFS
+import org.mapsforge.map.layer.hills.DiffuseLightShadingAlgorithm
+import org.mapsforge.map.layer.hills.HillsRenderConfig
+import org.mapsforge.map.layer.hills.MemoryCachingHgtReaderTileSource
 import org.mapsforge.map.layer.labels.TileBasedLabelStore
 import org.mapsforge.map.layer.renderer.DatabaseRenderer
 import org.mapsforge.map.layer.renderer.RendererJob
@@ -20,11 +24,15 @@ import java.io.IOException
 import javax.imageio.ImageIO
 import kotlin.math.*
 
-class TileRenderer(mapFilePath: String, private val themeManager: ThemeManager) {
-
+class TileRenderer(
+    mapFilePath: String,
+    private val themeManager: ThemeManager,
+    hgtDirPath: String? = null,
+) {
     private val graphicFactory: GraphicFactory = AwtGraphicFactory.INSTANCE
     private val displayModel = DisplayModel()
     private val mapDataStore: MapDataStore
+    private val hillsRenderConfig: HillsRenderConfig?
 
     // Per-theme renderer and future cache
     private val rendererCache = mutableMapOf<String, DatabaseRenderer>()
@@ -35,6 +43,26 @@ class TileRenderer(mapFilePath: String, private val themeManager: ThemeManager) 
         if (!mapFile.exists()) throw IOException("Map file not found: $mapFilePath")
         mapDataStore = MapFile(mapFile)
         println("Map file loaded: $mapFilePath")
+
+        hillsRenderConfig = if (hgtDirPath != null) {
+            val hgtDir = File(hgtDirPath)
+            if (hgtDir.isDirectory) {
+                val tileSource = MemoryCachingHgtReaderTileSource(
+                    DemFolderFS(hgtDir),
+                    DiffuseLightShadingAlgorithm(),
+                    graphicFactory,
+                )
+                HillsRenderConfig(tileSource).also {
+                    it.indexOnThread()
+                    println("Hillshading enabled: $hgtDirPath")
+                }
+            } else {
+                System.err.println("HGT_DIR not found or not a directory: $hgtDirPath — hillshading disabled")
+                null
+            }
+        } else {
+            null
+        }
     }
 
     /**
@@ -57,10 +85,10 @@ class TileRenderer(mapFilePath: String, private val themeManager: ThemeManager) 
         val renderer = DatabaseRenderer(
             mapDataStore, graphicFactory,
             InMemoryTileCache(0),
-            TileBasedLabelStore(1000), // LabelStore pro text / popisky
+            TileBasedLabelStore(1000),
             true,  // renderLabels
             true,  // cacheLabels
-            null   // HillsRenderConfig – stínování kopců nepotřebujeme
+            hillsRenderConfig,
         )
 
         themeFutureCache[themeName] = future
