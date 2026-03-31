@@ -4,7 +4,7 @@
 # --platform=$BUILDPLATFORM: always run on the build host, not the target arch
 FROM --platform=$BUILDPLATFORM ubuntu:24.04 AS downloader
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends awscli gdal-bin \
+    && apt-get install -y --no-install-recommends wget gdal-bin \
     && rm -rf /var/lib/apt/lists/*
 
 RUN <<'EOF'
@@ -20,8 +20,8 @@ for lat in 48 49 50 51; do
         tile="Copernicus_DSM_COG_10_N${lat_s}_00_E${lon_s}_00_DEM"
         echo -n "  N${lat_s}E${lon_s}: "
 
-        if aws s3 cp "s3://copernicus-dem-30m/${tile}/${tile}.tif" /tmp/src.tif \
-               --no-sign-request --quiet 2>/dev/null; then
+        url="https://copernicus-dem-30m.s3.amazonaws.com/${tile}/${tile}.tif"
+        if wget -q -O /tmp/src.tif "${url}" 2>/dev/null; then
             # Copernicus tiles are 3600x3600; SRTM HGT requires 3601x3601
             # (shared edge-pixel convention). gdalwarp resamples to exact extent.
             gdalwarp -q -r bilinear \
