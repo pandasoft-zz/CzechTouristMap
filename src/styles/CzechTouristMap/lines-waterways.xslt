@@ -4,8 +4,8 @@
 <!-- Waterway line colors — medium blue per Czech tourist map convention -->
 <!-- SM5 waterway line: RGB 0,255,255 — adapted to less saturated map-readable blue -->
 <xsl:template name="lines-waterways">
-<xsl:variable name="stream-color">#5090C8</xsl:variable>
-<xsl:variable name="drain-color">#90C8E8</xsl:variable>
+<xsl:variable name="stream-color">#BAD1E5</xsl:variable>
+<xsl:variable name="drain-color">#C8DCEC</xsl:variable>
 
 <xsl:call-template name="create-waterway-rules">
     <xsl:with-param name="waterway" select="'river'" />

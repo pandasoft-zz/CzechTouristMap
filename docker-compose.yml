@@ -1,29 +1,24 @@
 services:
 
-  # Copies the map file from the GHCR image into the map-data volume.
-  # Runs once on first start; skips copy if file already exists.
-  # Re-run manually after updating the map image:
-  #   docker compose run --rm map-init
-  map-init:
-    image: ghcr.io/pandasoft-zz/czechtouristmap-mapdata:latest
-    volumes:
-      - map-data:/export
-    restart: "no"
-
   tile-server:
     build: ./tile-server
     container_name: maprender-tile-server
-    depends_on:
-      map-init:
-        condition: service_completed_successfully
     environment:
       MAP_FILE: /data/maps/czech-republic.map
       THEMES_DIR: /data/themes
       LOCATIONS_FILE: /data/config/locations.yaml
+      HGT_DIR: /data/hgt
     volumes:
-      - map-data:/data/maps:ro
+      - type: image
+        source: ghcr.io/pandasoft-zz/czechtouristmap-mapdata:latest
+        target: /data/maps
+        read_only: true
       - ./themes:/data/themes:ro
       - ./config:/data/config
+      - type: image
+        source: ghcr.io/pandasoft-zz/czechtouristmap-hgtdata:latest
+        target: /data/hgt
+        read_only: true
     ports:
       - "8080:8080"       # optional: direct access for debugging
     restart: unless-stopped
@@ -43,6 +38,3 @@ services:
       tile-server:
         condition: service_healthy
     restart: unless-stopped
-
-volumes:
-  map-data:

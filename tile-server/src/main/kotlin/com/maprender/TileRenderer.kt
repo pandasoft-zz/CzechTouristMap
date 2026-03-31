@@ -6,12 +6,18 @@ import org.mapsforge.core.model.Tile
 import org.mapsforge.map.awt.graphics.AwtGraphicFactory
 import org.mapsforge.map.datastore.MapDataStore
 import org.mapsforge.map.layer.cache.InMemoryTileCache
+import org.mapsforge.map.layer.hills.DemFolderFS
+import org.mapsforge.map.layer.hills.DiffuseLightShadingAlgorithm
+import org.mapsforge.map.layer.hills.HillsRenderConfig
+import org.mapsforge.map.layer.hills.MemoryCachingHgtReaderTileSource
 import org.mapsforge.map.layer.labels.TileBasedLabelStore
 import org.mapsforge.map.layer.renderer.DatabaseRenderer
 import org.mapsforge.map.layer.renderer.RendererJob
 import org.mapsforge.map.model.DisplayModel
 import org.mapsforge.map.reader.MapFile
 import org.mapsforge.map.rendertheme.ExternalRenderTheme
+import org.mapsforge.map.rendertheme.XmlRenderThemeMenuCallback
+import org.mapsforge.map.rendertheme.XmlRenderThemeStyleMenu
 import org.mapsforge.map.rendertheme.rule.RenderThemeFuture
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
@@ -29,10 +35,12 @@ import kotlin.math.tan
 class TileRenderer(
     mapFilePath: String,
     private val themeManager: ThemeManager,
+    hgtDirPath: String? = null,
 ) {
     private val graphicFactory: GraphicFactory = AwtGraphicFactory.INSTANCE
     private val displayModel = DisplayModel()
     private val mapDataStore: MapDataStore
+    private val hillsRenderConfig: HillsRenderConfig?
 
     // Per-theme renderer and future cache
     private val rendererCache = mutableMapOf<String, DatabaseRenderer>()
@@ -43,6 +51,26 @@ class TileRenderer(
         if (!mapFile.exists()) throw IOException("Map file not found: $mapFilePath")
         mapDataStore = MapFile(mapFile)
         println("Map file loaded: $mapFilePath")
+
+        hillsRenderConfig = if (hgtDirPath != null) {
+            val hgtDir = File(hgtDirPath)
+            if (hgtDir.isDirectory) {
+                val tileSource = MemoryCachingHgtReaderTileSource(
+                    DemFolderFS(hgtDir),
+                    DiffuseLightShadingAlgorithm(),
+                    graphicFactory,
+                )
+                HillsRenderConfig(tileSource).also {
+                    it.indexOnThread()
+                    println("Hillshading enabled: $hgtDirPath")
+                }
+            } else {
+                System.err.println("HGT_DIR not found or not a directory: $hgtDirPath — hillshading disabled")
+                null
+            }
+        } else {
+            null
+        }
     }
 
     /**
@@ -56,7 +84,22 @@ class TileRenderer(
         val themeFile = themeManager.getThemeFile(themeName)
         if (!themeFile.exists()) throw IOException("Theme file not found: ${themeFile.absolutePath}")
 
-        val renderTheme = ExternalRenderTheme(themeFile)
+        // Enable all categories that are marked enabled="true" in the stylemenu.
+        // Without this callback Mapsforge ignores enabled layers (hiking_routes, contours, etc.).
+        val menuCallback = object : XmlRenderThemeMenuCallback {
+            override fun getCategories(menu: XmlRenderThemeStyleMenu): Set<String> {
+                val active = mutableSetOf<String>()
+                val base = menu.getLayer(menu.defaultValue)
+                if (base != null) {
+                    active.addAll(base.categories)
+                    for (overlay in base.overlays) {
+                        if (overlay.isEnabled) active.addAll(overlay.categories)
+                    }
+                }
+                return active
+            }
+        }
+        val renderTheme = ExternalRenderTheme(themeFile, menuCallback)
         val future = RenderThemeFuture(graphicFactory, renderTheme, displayModel)
 
         // Mapsforge requires running the future in a thread to compile the theme
@@ -70,10 +113,10 @@ class TileRenderer(
                 mapDataStore,
                 graphicFactory,
                 InMemoryTileCache(0),
-                TileBasedLabelStore(1000), // LabelStore pro text / popisky
+                TileBasedLabelStore(1000),
                 true, // renderLabels
                 true, // cacheLabels
-                null, // HillsRenderConfig – stínování kopců nepotřebujeme
+                hillsRenderConfig,
             )
 
         themeFutureCache[themeName] = future

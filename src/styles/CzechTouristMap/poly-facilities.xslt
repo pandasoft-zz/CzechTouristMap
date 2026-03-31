@@ -16,7 +16,7 @@
 
 <!-- Commercial/industrial — SM5: manipulation area 240,240,240 = #F0F0F0 -->
 <rule e="way" k="landuse" v="commercial">
-  <area fill="#F0E8E0" scale="none"/>
+  <area fill="#F5EFEA" scale="none"/>
   <rule e="way" k="*" v="*" zoom-min="16">
     <caption k="name" font-style="italic" font-family="sans_serif" font-size="12" fill="#000000" stroke="#FFFFFF" stroke-width="1.7" />
   </rule>
@@ -24,7 +24,7 @@
 
 <!-- Industrial — SM5: manipulation/storage area 240,240,240 = #F0F0F0 -->
 <rule e="way" k="landuse" v="industrial">
-  <area fill="#D8D8D0" scale="none"/>
+  <area fill="#E5E5E0" scale="none"/>
   <rule e="way" k="*" v="*" zoom-min="16">
     <caption k="name" font-style="italic" font-family="sans_serif" font-size="12" fill="#000000" stroke="#FFFFFF" stroke-width="1.7" />
   </rule>
@@ -45,7 +45,7 @@
 <!-- Parks/gardens — light green, Czech map style; SM5 garden fill = 245,255,219 = #F5FFDB -->
 <!-- Note: no stroke — parks can be large polygons spanning many tiles; stroke causes tile-boundary artifacts -->
 <rule e="way" k="leisure" v="common|village_green|park|garden">
-  <area fill="#C8F090" scale="none"/>
+  <area fill="#E2F0CB" scale="none"/>
   <rule e="way" k="*" v="*" zoom-max="14">
     <area src="{$patternPath}/park.svg" symbol-height="20"/>
   </rule>
@@ -59,7 +59,7 @@
 
 
 <rule e="way" k="landuse" v="recreation_ground">
-    <area fill="#C8F090" scale="none"/>
+    <area fill="#E2F0CB" scale="none"/>
   <rule e="way" k="*" v="*" zoom-max="14">
     <area src="file:/patterns/park.svg" symbol-height="20"/>
   </rule>
@@ -73,7 +73,7 @@
 
 
 <rule e="way" k="leisure" v="sports_centre" closed="yes">
-  <area fill="#BDFFD5" scale="none"/>
+  <area fill="#e4ecc7" scale="none"/>
 </rule>
 
 <rule e="way" k="leisure" v="water_park" closed="yes">
@@ -87,19 +87,19 @@
 
 <!-- Camp site — clear green with visible border -->
 <rule e="way" k="tourism" v="camp_site" closed="yes">
-    <area fill="#80E890" stroke="#207830" stroke-width="0.5" scale="none"/>
+    <area fill="#EBF8D0" stroke="#207830" stroke-width="0.5" scale="none"/>
 </rule>
 
 
 <rule e="way" k="landuse" v="retail">
-  <area fill="#F0E8E0" />
+  <area fill="#F5EFEA" />
   <rule e="way" k="*" v="*" zoom-min="16">
     <caption k="name" font-style="italic" font-family="sans_serif" font-size="12" fill="#000000" stroke="#FFFFFF" stroke-width="1.7" />
   </rule>
 </rule>
 
 <rule e="way" k="landuse" v="railway">
-  <area fill="#c6b4b0" />
+  <area fill="#D8CAC8" />
 </rule>
 
 
@@ -114,12 +114,12 @@
 <rule e="way" k="building" v="~" >
   <rule e="way" k="power" v="plant">
     <rule e="way" k="plant:source" v="solar">
-      <area fill="#42979B" />
+      <area fill="#7ABFC2" />
     </rule>
   </rule>
   <rule e="way" k="power" v="generator">
     <rule e="way" k="generator:source" v="solar">
-      <area fill="#42979B" />
+      <area fill="#7ABFC2" />
     </rule>
   </rule>
 
@@ -127,17 +127,21 @@
     <area fill="#D5D5D5" />
   </rule>
 
-  <!-- Airport/aerodrome — SM5/guideline: #F2E6F2 light lilac -->
+  <!-- Airport/aerodrome — mapy.cz: same as farmland off-white -->
   <rule e="way" k="aeroway" v="airport|aerodrome|apron|helipad|terminal" closed="yes">
-    <area fill="#F2E6F2" />
+    <area fill="#f0efe4" />
   </rule>
 
-  <rule e="way" k="amenity" v="childcare|kindergarten|school" closed="yes">  
-    <area fill="#E0ECD3" stroke="#676a3f" stroke-width="1" scale="none"/>
+  <rule e="way" k="amenity" v="childcare|kindergarten|school" closed="yes">
+    <area fill="#ccc2b1" stroke="#A09080" stroke-width="1" scale="none"/>
+  </rule>
+
+  <rule e="way" k="amenity" v="townhall|government" closed="yes">
+    <area fill="#ccc2b1" stroke="#A09080" stroke-width="1" scale="none"/>
   </rule>
 
   <rule e="way" k="amenity" v="hospital|clinic" closed="yes">
-    <area fill="#fcb6b4" stroke="#F86C68" stroke-width="1" scale="none"/>
+    <area fill="#ccc2b1" stroke="#A09080" stroke-width="1" scale="none"/>
   </rule>
 
 
@@ -155,7 +159,7 @@
   <!-- DO 8-->
 <rule e="way" k="power" v="plant">
   <rule e="way" k="plant:source" v="solar">
-    <area fill="#42979B" />
+    <area fill="#7ABFC2" />
     <rule e="any" k="*" v="*"  zoom-max="15">
       <area stroke="#C5C5C5" stroke-width="2" scale="none" src="{$patternPath}/solar.svg" symbol-height="32"/>
     </rule>
@@ -167,7 +171,7 @@
 
 <rule e="way" k="power" v="generator">
   <rule e="way" k="generator:source" v="solar">
-    <area fill="#42979B" />
+    <area fill="#7ABFC2" />
     <rule e="any" k="*" v="*"  zoom-max="15">
       <area stroke="#C5C5C5" stroke-width="2" scale="none" src="{$patternPath}/solar.svg" symbol-height="32"/>
     </rule>

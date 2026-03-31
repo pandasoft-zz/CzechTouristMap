@@ -22,6 +22,18 @@ Command to regenerate (run from project root):
 python scripts/gen_symbols_md.py
 ```
 
+## Build & Runtime
+
+The tile server has no local Gradle wrapper. It is built exclusively via Docker:
+```
+docker compose build tile-server
+docker compose up
+```
+
+The map file (`czech-republic.map`) lives in a Docker volume, not on the host filesystem.
+The volume is populated from a GHCR image (`ghcr.io/pandasoft-zz/czechtouristmap-mapdata`) on first start via the `map-init` init container in `docker-compose.yml`.
+To update the map file, push a new image via the `push-map-image` CI pipeline.
+
 ## Code Style
 
 Follow the rules defined in `.editorconfig` for all files you create or modify:

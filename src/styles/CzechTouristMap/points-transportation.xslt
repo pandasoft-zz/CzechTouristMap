@@ -133,8 +133,8 @@
     <symbol id="airport" src="{$transportationIconPath}/airport.svg" symbol-width="23" priority="{$pr-airport}"/>
   </rule>
   <rule e="any" k="*" v="*" zoom-min="14">
-    <caption k="name" symbol-id="airport" 
-    font-style="bold" font-size="11" fill="#4040ff" stroke="#ffffff" stroke-width="2" priority="{$pr-label-public-transport}"/>
+    <caption k="name" symbol-id="airport"
+    font-style="bold" font-size="11" fill="#a2917e" stroke="#ffffff" stroke-width="2" priority="{$pr-label-public-transport}"/>
   </rule>
 </rule>
 

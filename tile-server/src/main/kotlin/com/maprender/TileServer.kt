@@ -12,18 +12,20 @@ fun main() {
     val mapFilePath = System.getenv("MAP_FILE") ?: "/data/maps/czech-republic.map"
     val themesDirPath = System.getenv("THEMES_DIR") ?: "/data/themes"
     val locationsFilePath = System.getenv("LOCATIONS_FILE") ?: "/data/config/locations.yaml"
+    val hgtDirPath = System.getenv("HGT_DIR")
 
     println("Starting map tile server...")
     println("Map:    $mapFilePath")
     println("Themes: $themesDirPath")
     println("Locations: $locationsFilePath")
+    println("HGT dir: ${hgtDirPath ?: "(not set — hillshading disabled)"}")
 
     val themeManager = ThemeManager(themesDirPath)
     val locationManager = LocationManager(locationsFilePath)
 
     val tileRenderer: TileRenderer? =
         try {
-            TileRenderer(mapFilePath, themeManager)
+            TileRenderer(mapFilePath, themeManager, hgtDirPath)
         } catch (e: Exception) {
             System.err.println("ERROR loading map: ${e.message}")
             System.err.println("Place your .map file at: $mapFilePath")
