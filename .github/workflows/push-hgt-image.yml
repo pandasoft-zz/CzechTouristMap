@@ -28,4 +28,4 @@ jobs:
             | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Build and push HGT image
-        run: ./scripts/push-hgt-image.sh "${{ github.repository_owner }}"
+        run: bash ./scripts/push-hgt-image.sh "${{ github.repository_owner }}"

@@ -25,4 +25,4 @@ jobs:
             | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Build and push map image
-        run: ./scripts/push-map-image.sh "${{ github.repository_owner }}"
+        run: bash ./scripts/push-map-image.sh "${{ github.repository_owner }}"
