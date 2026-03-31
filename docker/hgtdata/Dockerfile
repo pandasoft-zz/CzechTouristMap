@@ -20,7 +20,7 @@ for lat in 48 49 50 51; do
         tile="Copernicus_DSM_COG_10_N${lat_s}_00_E${lon_s}_00_DEM"
         echo -n "  N${lat_s}E${lon_s}: "
 
-        url="https://copernicus-dem-30m.s3.amazonaws.com/${tile}/${tile}.tif"
+        url="https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com/${tile}/${tile}.tif"
         if wget -q -O /tmp/src.tif "${url}" 2>/dev/null; then
             # Copernicus tiles are 3600x3600; SRTM HGT requires 3601x3601
             # (shared edge-pixel convention). gdalwarp resamples to exact extent.
