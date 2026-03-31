@@ -44,9 +44,19 @@ for lat in "${LATS[@]}"; do
 
         echo -n "  N${lat_s}E${lon_s}: downloading... "
         if aws s3 cp "$s3_path" "$tif_tmp" --no-sign-request --quiet 2>/dev/null; then
-            echo -n "converting... "
-            gdal_translate -q -of SRTMHGT "$tif_tmp" "$hgt_out"
+            echo -n "resampling... "
+            # Copernicus tiles are 3600x3600; SRTM HGT requires 3601x3601
+            # (edge pixels are shared between adjacent tiles).
+            # gdalwarp resamples to the exact 1°x1° extent at 3601x3601.
+            warped_tmp="$WORKDIR/warped_${lat_s}_${lon_s}.tif"
+            gdalwarp -q -r bilinear \
+                -te "${lon}.0" "${lat}.0" "$((lon + 1)).0" "$((lat + 1)).0" \
+                -ts 3601 3601 \
+                "$tif_tmp" "$warped_tmp"
             rm -f "$tif_tmp"
+            echo -n "converting... "
+            gdal_translate -q -of SRTMHGT "$warped_tmp" "$hgt_out"
+            rm -f "$warped_tmp"
             echo "ok"
         else
             echo "not found, skipping"
