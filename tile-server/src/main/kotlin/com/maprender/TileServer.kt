@@ -36,6 +36,7 @@ fun main() {
     server.createContext("/tiles/") { handleTile(it, tileRenderer, themeManager) }
     server.createContext("/render") { handleRender(it, tileRenderer) }
     server.createContext("/locations") { handleLocations(it, locationManager) }
+    server.createContext("/themes/refresh") { handleRefreshTheme(it, themeManager, tileRenderer) }
     server.createContext("/themes/select/") { handleSelectTheme(it, themeManager) }
     server.createContext("/themes/current") { handleCurrentTheme(it, themeManager) }
     server.createContext("/themes") { handleThemes(it, themeManager) }
@@ -272,6 +273,31 @@ private fun handleHealth(
     val count = themeManager.listThemes().size
     val json = """{"status":"ok","mapLoaded":$loaded,"currentTheme":"$theme","themes":$count}"""
     exchange.sendJson(200, json)
+}
+
+// POST /themes/refresh  →  clears cached renderer so theme XML is reloaded from disk
+private fun handleRefreshTheme(
+    exchange: HttpExchange,
+    themeManager: ThemeManager,
+    renderer: TileRenderer?,
+) {
+    exchange.addCors()
+    if (exchange.requestMethod == "OPTIONS") {
+        exchange.sendResponseHeaders(200, -1)
+        exchange.close()
+        return
+    }
+    if (exchange.requestMethod != "POST") {
+        exchange.sendError(405, "Method not allowed")
+        return
+    }
+    val theme = themeManager.currentTheme
+    if (theme == null) {
+        exchange.sendJson(404, """{"success":false,"error":"No active theme"}""")
+        return
+    }
+    renderer?.clearThemeCache(theme)
+    exchange.sendJson(200, """{"success":true,"theme":"${theme.escJson()}"}""")
 }
 
 // ── Extensions ────────────────────────────────────────────────────────────────

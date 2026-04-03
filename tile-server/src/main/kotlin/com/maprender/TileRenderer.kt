@@ -72,6 +72,17 @@ class TileRenderer(
     }
 
     /**
+     * Evicts the cached renderer and theme future for the given theme,
+     * so the next tile request reloads the theme XML from disk.
+     */
+    @Synchronized
+    fun clearThemeCache(themeName: String) {
+        rendererCache.remove(themeName)
+        themeFutureCache.remove(themeName)
+        println("Theme cache cleared for: $themeName")
+    }
+
+    /**
      * Returns a DatabaseRenderer for the given theme, creating it on first access.
      */
     @Synchronized
