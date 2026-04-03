@@ -24,7 +24,7 @@ The project was created as an open-source alternative to proprietary map styles 
 ## Build
 
 ```bash
-./build-theme.sh
+make theme
 ```
 
 Output: `themes/CzechTouristMap.xml`
@@ -32,16 +32,6 @@ Output: `themes/CzechTouristMap.xml`
 ### Requirements
 
 - Docker
-
-### Manual build
-
-```bash
-# Build Docker image
-docker build -f src/Dockerfile.style -t czechtouristmap-style src/
-
-# Generate XML
-docker run --rm -v $(pwd)/themes:/data/work czechtouristmap-style
-```
 
 ## Project structure
 
@@ -51,8 +41,7 @@ mapRender/
 │   ├── styles/
 │   │   └── CzechTouristMap/      # XSLT templates
 │   ├── config/                   # Makefile configuration
-│   ├── Makefile
-│   └── Dockerfile.style          # Build image
+│   └── Makefile
 │
 ├── themes/                       # Generated XML + icon assets
 │   ├── CzechTouristMap.xml       # Generated (build output, do not edit manually)

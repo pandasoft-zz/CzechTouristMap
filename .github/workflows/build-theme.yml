@@ -31,7 +31,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - run: pip install ruff --quiet
-      - run: ruff check scripts/ tests/
+      - run: ruff check scripts/ tests/ theme-builder/server.py
 
   lint-xml:
     name: xmllint
