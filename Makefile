@@ -1,36 +1,40 @@
 STYLE ?= CzechTouristMap
 
+DEV_RUN = docker compose run --rm --no-deps --build dev
+
 .PHONY: all theme test lint lint-shell lint-yaml lint-python lint-xml lint-kotlin up down
 
 ## Run theme build + lint + tests
 all: theme lint test
 
+## Run dev full stack
+dev: up
+
 ## Build theme XML from XSLT source (requires Docker)
 theme:
-	docker compose run --rm --no-deps theme-builder sh /app/build.sh
+	docker compose run --rm --no-deps --build theme-builder sh /app/build.sh
 
-## Run all linters
+## Run all linters (requires Docker)
 lint: lint-shell lint-yaml lint-python lint-xml lint-kotlin
 
 lint-shell:
-	shellcheck scripts/push-map-image.sh theme-builder/build.sh
+	$(DEV_RUN) shellcheck scripts/push-map-image.sh theme-builder/build.sh
 
 lint-yaml:
-	yamllint -c .yamllint.yml config/locations.yaml .github/workflows/*.yml
+	$(DEV_RUN) yamllint -c .yamllint.yml config/locations.yaml .github/workflows/*.yml
 
 lint-python:
-	ruff check scripts/ tests/ theme-builder/server.py
+	$(DEV_RUN) ruff check scripts/ tests/ theme-builder/server.py
 
 lint-xml:
-	xmllint --noout src/styles/$(STYLE)/*.xslt
+	$(DEV_RUN) xmllint --noout src/styles/$(STYLE)/*.xslt
 
 lint-kotlin:
-	ktlint "tile-server/src/**/*.kt"
+	$(DEV_RUN) ktlint "tile-server/src/**/*.kt"
 
-## Run theme XML validation tests
+## Run theme XML validation tests (requires Docker)
 test:
-	pip install -q -r tests/requirements.txt
-	pytest tests/
+	$(DEV_RUN) pytest tests/
 
 ## Start the full stack
 up:

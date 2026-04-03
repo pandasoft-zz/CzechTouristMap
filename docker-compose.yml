@@ -1,5 +1,14 @@
 services:
 
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/work
+    profiles:
+      - dev
+
   theme-builder:
     build: ./theme-builder
     container_name: maprender-theme-builder
@@ -9,6 +18,12 @@ services:
       - ./src/styles:/app/styles:ro
       - ./themes:/data/themes:rw
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
 
   tile-server:
     build: ./tile-server
@@ -20,7 +35,8 @@ services:
       HGT_DIR: /data/hgt
       THEME_BUILDER_URL: http://theme-builder:5000
     depends_on:
-      - theme-builder
+      theme-builder:
+        condition: service_healthy
     volumes:
       - type: image
         source: ghcr.io/pandasoft-zz/czechtouristmap-mapdata:latest

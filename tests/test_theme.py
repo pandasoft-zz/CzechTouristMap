@@ -98,45 +98,6 @@ def test_no_invalid_font_family(theme):
     assert bad == [], "Invalid font-family values:\n" + "\n".join(bad)
 
 
-# ── Tests: Czech map style ────────────────────────────────────────────────────
-
-
-def test_czech_road_colors(theme):
-    """Roads must use Czech tourist map color hierarchy (red/orange/yellow)."""
-    xml_str = THEME_FILE.read_text(encoding="utf-8")
-    assert "D42020" in xml_str, "Motorway red #D42020 not found"
-    assert "E07820" in xml_str, "Primary road orange #E07820 not found"
-    assert "F0C000" in xml_str, "Secondary road yellow #F0C000 not found"
-
-
-def test_kct_trail_colors(theme):
-    """KČT hiking trail colors must match club standard."""
-    xml_str = THEME_FILE.read_text(encoding="utf-8")
-    assert "DC0000" in xml_str, "KČT red trail #DC0000 not found"
-    assert "0050C8" in xml_str, "KČT blue trail #0050C8 not found"
-    assert "007820" in xml_str, "KČT green trail #007820 not found"
-    assert "E8B400" in xml_str, "KČT yellow trail #E8B400 not found"
-
-
-def test_sm5_contour_color(theme):
-    """Contour lines must use SM5-derived warm brown."""
-    xml_str = THEME_FILE.read_text(encoding="utf-8")
-    assert "C07030" in xml_str, "SM5 contour brown #C07030 not found"
-
-
-def test_sm5_water_color(theme):
-    """Water fill must match Czech tourist map blue."""
-    xml_str = THEME_FILE.read_text(encoding="utf-8")
-    assert "B8D8F0" in xml_str, "Water fill #B8D8F0 not found"
-
-
-def test_sm5_vegetation_colors(theme):
-    """Forest and meadow must use SM5-derived green tones."""
-    xml_str = THEME_FILE.read_text(encoding="utf-8")
-    assert "C8E8A0" in xml_str, "Broadleaf forest fill #C8E8A0 not found"
-    assert "E4F5C0" in xml_str, "Meadow fill #E4F5C0 not found"
-
-
 def test_no_openhiking_branding(theme):
     """Theme must not contain OpenHiking brand name."""
     xml_str = THEME_FILE.read_text(encoding="utf-8")

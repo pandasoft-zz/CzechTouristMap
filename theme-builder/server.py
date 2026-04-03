@@ -14,6 +14,12 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):
         print(fmt % args, flush=True)
 
+    def do_GET(self):
+        if self.path != "/health":
+            self._send(404, {"error": "not found"})
+            return
+        self._send(200, {"status": "ok"})
+
     def do_POST(self):
         if self.path != "/build":
             self._send(404, {"error": "not found"})
