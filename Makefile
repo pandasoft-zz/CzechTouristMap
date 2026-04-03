@@ -4,7 +4,7 @@ STYLE ?= CzechTouristMap
 
 ## Build theme XML from XSLT source (requires Docker)
 theme:
-	docker compose run --rm theme-builder
+	docker compose run --rm --no-deps theme-builder sh /app/build.sh
 
 ## Start the full stack
 up:

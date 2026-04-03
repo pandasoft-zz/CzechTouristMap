@@ -7,6 +7,9 @@ RUN apt-get update && apt-get install -y \
     python3 \
     && rm -rf /var/lib/apt/lists/*
 
+COPY build.sh /app/build.sh
+RUN chmod +x /app/build.sh
+
 ENV STYLE=CzechTouristMap
 
 EXPOSE 5000
