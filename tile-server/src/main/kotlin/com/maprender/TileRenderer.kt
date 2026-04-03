@@ -52,6 +52,9 @@ class TileRenderer(
         mapDataStore = MapFile(mapFile)
         println("Map file loaded: $mapFilePath")
 
+        // Hillshading disabled — too slow and visually undesirable
+        hillsRenderConfig = null
+        /*
         hillsRenderConfig = if (hgtDirPath != null) {
             val hgtDir = File(hgtDirPath)
             if (hgtDir.isDirectory) {
@@ -71,6 +74,7 @@ class TileRenderer(
         } else {
             null
         }
+        */
     }
 
     /**
