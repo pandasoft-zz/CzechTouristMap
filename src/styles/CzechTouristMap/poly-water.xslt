@@ -8,7 +8,7 @@
 
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns="http://mapsforge.org/renderTheme" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 <!-- Water colors — based on ČÚZK SM5: fill 224,255,255 (#E0FFFF), adapted to Czech tourist map style -->
-<xsl:variable name="wetland-color">#C0E8E0</xsl:variable>
+<xsl:variable name="wetland-color">#D0EDE8</xsl:variable>
 <xsl:template name="poly-water">
 
 <!-- Glacier — very pale blue-white -->
@@ -17,20 +17,20 @@
 </rule>
 
 
-<!-- Water bodies — soft medium blue, Czech tourist map style -->
+<!-- Water bodies — mapy.cz: #BDD4E8 -->
 <rule e="way" k="natural" v="water">
-    <area fill="#B8D8F0"/>
+    <area fill="#BDD4E8"/>
     <rule e="way" k="tidal" v="yes">
-        <area fill="#C8ECF0"/>
+        <area fill="#b0ccdf"/>
     </rule>
 </rule>
 
 <rule e="way" k="landuse" v="reservoir|basin">
-    <area fill="#B8D8F0"/>
+    <area fill="#BDD4E8"/>
 </rule>
 
 <rule  e="way" k="waterway" v="riverbank">
-    <area fill="#B8D8F0"/>
+    <area fill="#BDD4E8"/>
 </rule>
 
 <!-- Wetlands -->
@@ -48,7 +48,7 @@
       </rule>
   </rule>
   <rule e="way" k="wetland" v="swamp">
-      <area fill="#B0D890"/>
+      <area fill="#C8E5AE"/>
       <rule e="way" k="*" v="*" zoom-max="15">
         <area src="{$patternPath}/swamp.svg" symbol-height="16"/>
       </rule>

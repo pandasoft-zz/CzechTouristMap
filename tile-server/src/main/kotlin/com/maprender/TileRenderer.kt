@@ -16,6 +16,8 @@ import org.mapsforge.map.layer.renderer.RendererJob
 import org.mapsforge.map.model.DisplayModel
 import org.mapsforge.map.reader.MapFile
 import org.mapsforge.map.rendertheme.ExternalRenderTheme
+import org.mapsforge.map.rendertheme.XmlRenderThemeMenuCallback
+import org.mapsforge.map.rendertheme.XmlRenderThemeStyleMenu
 import org.mapsforge.map.rendertheme.rule.RenderThemeFuture
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
@@ -44,6 +46,9 @@ class TileRenderer(
         mapDataStore = MapFile(mapFile)
         println("Map file loaded: $mapFilePath")
 
+        // Hillshading disabled — too slow and visually undesirable
+        hillsRenderConfig = null
+        /*
         hillsRenderConfig = if (hgtDirPath != null) {
             val hgtDir = File(hgtDirPath)
             if (hgtDir.isDirectory) {
@@ -63,6 +68,7 @@ class TileRenderer(
         } else {
             null
         }
+        */
     }
 
     /**
@@ -76,11 +82,29 @@ class TileRenderer(
         val themeFile = themeManager.getThemeFile(themeName)
         if (!themeFile.exists()) throw IOException("Theme file not found: ${themeFile.absolutePath}")
 
-        val renderTheme = ExternalRenderTheme(themeFile)
+        // Enable all categories that are marked enabled="true" in the stylemenu.
+        // Without this callback Mapsforge ignores enabled layers (hiking_routes, contours, etc.).
+        val menuCallback = object : XmlRenderThemeMenuCallback {
+            override fun getCategories(menu: XmlRenderThemeStyleMenu): Set<String> {
+                val active = mutableSetOf<String>()
+                val base = menu.getLayer(menu.defaultValue)
+                if (base != null) {
+                    active.addAll(base.categories)
+                    for (overlay in base.overlays) {
+                        if (overlay.isEnabled) active.addAll(overlay.categories)
+                    }
+                }
+                return active
+            }
+        }
+        val renderTheme = ExternalRenderTheme(themeFile, menuCallback)
         val future = RenderThemeFuture(graphicFactory, renderTheme, displayModel)
 
         // Mapsforge requires running the future in a thread to compile the theme
-        Thread(future).also { it.start(); it.join() }
+        Thread(future).also {
+            it.start()
+            it.join()
+        }
 
         val renderer = DatabaseRenderer(
             mapDataStore, graphicFactory,
@@ -101,7 +125,13 @@ class TileRenderer(
      * Renders a map area centered on (lat, lng) at the given zoom.
      * Returns a PNG of exactly (width x height) pixels.
      */
-    fun renderArea(lat: Double, lng: Double, zoom: Int, width: Int, height: Int): ByteArray {
+    fun renderArea(
+        lat: Double,
+        lng: Double,
+        zoom: Int,
+        width: Int,
+        height: Int,
+    ): ByteArray {
         // Fractional tile coordinates of the center point
         val n = 2.0.pow(zoom)
         val centerTileX = (lng + 180.0) / 360.0 * n
@@ -113,9 +143,9 @@ class TileRenderer(
         val centerPixelY = (centerTileY - floor(centerTileY)) * 256.0
 
         // Tile range needed to cover the output image
-        val tileX0 = floor(centerTileX).toInt() - ceil((width  / 2.0 - centerPixelX) / 256).toInt()
+        val tileX0 = floor(centerTileX).toInt() - ceil((width / 2.0 - centerPixelX) / 256).toInt()
         val tileY0 = floor(centerTileY).toInt() - ceil((height / 2.0 - centerPixelY) / 256).toInt()
-        val tileX1 = floor(centerTileX).toInt() + ceil((width  / 2.0 + (256 - centerPixelX)) / 256).toInt()
+        val tileX1 = floor(centerTileX).toInt() + ceil((width / 2.0 + (256 - centerPixelX)) / 256).toInt()
         val tileY1 = floor(centerTileY).toInt() + ceil((height / 2.0 + (256 - centerPixelY)) / 256).toInt()
 
         val canvasW = (tileX1 - tileX0 + 1) * 256
@@ -135,7 +165,7 @@ class TileRenderer(
         // Crop to exactly (width x height) centered on lat/lng
         val centerCanvasX = ((centerTileX - tileX0) * 256).toInt()
         val centerCanvasY = ((centerTileY - tileY0) * 256).toInt()
-        val cropX = (centerCanvasX - width  / 2).coerceIn(0, canvasW - width)
+        val cropX = (centerCanvasX - width / 2).coerceIn(0, canvasW - width)
         val cropY = (centerCanvasY - height / 2).coerceIn(0, canvasH - height)
         val cropped = canvas.getSubimage(cropX, cropY, width, height)
 
@@ -146,9 +176,14 @@ class TileRenderer(
      * Renders tile (x, y, zoom) with the currently selected theme.
      * Returns PNG bytes, or null when the tile has no map data.
      */
-    fun renderTile(x: Int, y: Int, zoom: Byte): ByteArray? {
-        val themeName = themeManager.currentTheme
-            ?: throw IllegalStateException("No theme selected")
+    fun renderTile(
+        x: Int,
+        y: Int,
+        zoom: Byte,
+    ): ByteArray? {
+        val themeName =
+            themeManager.currentTheme
+                ?: throw IllegalStateException("No theme selected")
 
         val renderer = getRenderer(themeName)
         val future = themeFutureCache[themeName]!!
@@ -156,9 +191,10 @@ class TileRenderer(
         val tile = Tile(x, y, zoom, 256)
         val job = RendererJob(tile, mapDataStore, future, displayModel, 1.0f, false, false)
 
-        val tileBitmap: TileBitmap? = synchronized(renderer) {
-            renderer.executeJob(job)
-        }
+        val tileBitmap: TileBitmap? =
+            synchronized(renderer) {
+                renderer.executeJob(job)
+            }
 
         tileBitmap ?: return null
 

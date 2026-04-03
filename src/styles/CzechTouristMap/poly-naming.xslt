@@ -6,8 +6,8 @@
 <rule e="way" k="natural"
     v="grassland|heath|marsh|wetland|scree|scrub|wood"
     zoom-min="15">
-    <caption fill="#202020" font-family="serif" font-size="12" font-style="italic" k="name"
-        priority="{$pr-poly-label-natural}" stroke="#FFFFFF" stroke-width="0.1" />
+    <caption fill="#407020" font-family="serif" font-size="12" font-style="bold_italic" k="name"
+        priority="{$pr-poly-label-natural}" stroke="#FFFFFF" stroke-width="2.0" />
 </rule>
 <!-- 
 <rule e="way" k="natural" v="mountain_range">
@@ -45,25 +45,35 @@
 
 <rule e="way" k="natural" v="water" >
     <rule e="any" k="*" v="*" zoom-min="11" zoom-max="11">
-        <caption k="name" font-family="sans_serif" font-size="10" 
-            priority="{$pr-poly-label-natural}" fill="#0d0dad" stroke="#ffffff" stroke-width="0.5"/>
+        <caption k="name" font-family="sans_serif" font-size="10" font-style="italic"
+            priority="{$pr-poly-label-natural}" fill="#3366CC" stroke="#ffffff" stroke-width="2.5"/>
     </rule>
     <rule e="any" k="*" v="*" zoom-min="12" zoom-max="12">
-        <caption k="name" font-family="sans_serif" font-style="bold" font-size="12" 
-            priority="{$pr-poly-label-natural}" fill="#4040ff" stroke="#ffffff" stroke-width="2"/>
+        <caption k="name" font-family="sans_serif" font-style="italic" font-size="11"
+            priority="{$pr-poly-label-natural}" fill="#3366CC" stroke="#ffffff" stroke-width="2.5"/>
     </rule>
-    <rule e="any" k="*" v="*" zoom-min="13" >
-        <caption k="name" font-style="bold_italic" font-size="14" 
-            priority="{$pr-poly-label-natural}" fill="#4040ff" stroke="#ffffff" stroke-width="3"/>
-    </rule>            
+    <rule e="any" k="*" v="*" zoom-min="13" zoom-max="14">
+        <caption k="name" font-style="italic" font-size="12"
+            priority="{$pr-poly-label-natural}" fill="#3366CC" stroke="#ffffff" stroke-width="2.5"/>
+    </rule>
+    <rule e="any" k="*" v="*" zoom-min="15">
+        <caption k="name" font-style="italic" font-size="13"
+            priority="{$pr-poly-label-natural}" fill="#3366CC" stroke="#ffffff" stroke-width="2.5"/>
+    </rule>
 </rule>
 
 
 <rule e="way" k="landuse"
-    v="forest|meadow|grass|orchard|vineyard|allotments|farmland|landfill|quarry|dog_park"
+    v="forest|meadow|grass|orchard|vineyard|allotments|farmland"
+    zoom-min="15">
+    <caption fill="#407020" font-family="serif" font-size="12" font-style="bold_italic" k="name"
+        priority="{$pr-poly-label-landuse}" stroke="#FFFFFF" stroke-width="2.0" />
+</rule>
+<rule e="way" k="landuse"
+    v="landfill|quarry|dog_park"
     zoom-min="15">
     <caption fill="#202020" font-family="serif" font-size="12" font-style="italic" k="name"
-        priority="{$pr-poly-label-landuse}" stroke="#FFFFFF" stroke-width="0.1" />
+        priority="{$pr-poly-label-landuse}" stroke="#FFFFFF" stroke-width="1.0" />
 </rule>
 
 <rule e="way" k="natural" v="glacier" zoom-min="9">

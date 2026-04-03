@@ -11,21 +11,24 @@ data class Location(
     val note: String? = null,
 )
 
-class LocationManager(private val filePath: String) {
-
+class LocationManager(
+    private val filePath: String,
+) {
     private val file = File(filePath)
 
     fun list(): List<Location> {
         if (!file.exists()) return emptyList()
         val yaml = Yaml()
+
         @Suppress("UNCHECKED_CAST")
         val root = yaml.load<Map<String, Any?>>(file.inputStream()) ?: return emptyList()
+
         @Suppress("UNCHECKED_CAST")
         val raw = root["locations"] as? List<Map<String, Any?>> ?: return emptyList()
         return raw.mapNotNull { map ->
             val name = map["name"] as? String ?: return@mapNotNull null
-            val lat  = (map["lat"]  as? Number)?.toDouble() ?: return@mapNotNull null
-            val lng  = (map["lng"]  as? Number)?.toDouble() ?: return@mapNotNull null
+            val lat = (map["lat"] as? Number)?.toDouble() ?: return@mapNotNull null
+            val lng = (map["lng"] as? Number)?.toDouble() ?: return@mapNotNull null
             val zoom = (map["zoom"] as? Number)?.toInt() ?: return@mapNotNull null
             val note = map["note"] as? String
             Location(name, lat, lng, zoom, note)
@@ -69,10 +72,11 @@ class LocationManager(private val filePath: String) {
     }
 
     fun toJson(locations: List<Location>): String {
-        val items = locations.joinToString(",") { loc ->
-            val note = if (loc.note != null) ",\"note\":\"${loc.note.escJson()}\"" else ""
-            """{"name":"${loc.name.escJson()}","lat":${loc.lat},"lng":${loc.lng},"zoom":${loc.zoom}$note}"""
-        }
+        val items =
+            locations.joinToString(",") { loc ->
+                val note = if (loc.note != null) ",\"note\":\"${loc.note.escJson()}\"" else ""
+                """{"name":"${loc.name.escJson()}","lat":${loc.lat},"lng":${loc.lng},"zoom":${loc.zoom}$note}"""
+            }
         return "[$items]"
     }
 

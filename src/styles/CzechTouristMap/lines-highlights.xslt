@@ -248,25 +248,21 @@
 <xsl:param name="lw-l2" />
 <xsl:param name="lw-l3" />
 <xsl:param name="lw-l4" />
-	<rule e="way" k="*" v="*" zoom-max="{$zm-highway - 1}">		
-		<line stroke="{$color}" stroke-width="{$lw-trail-highlight-low}" stroke-linecap="butt" />
+	<rule e="way" k="*" v="*" zoom-max="{$zm-highway - 1}">
+		<line stroke="{$color}" dy="0.7" stroke-width="{$lw-trail-highlight-low}" stroke-linecap="butt" />
 	</rule>
-	<rule e="way" k="*" v="*" zoom-min="{$zm-highway}" zoom-max="{$zm-level2 - 1}">		
+	<rule e="way" k="*" v="*" zoom-min="{$zm-highway}" zoom-max="{$zm-level2 - 1}">
 		<line stroke="{$color}" dy="{($lw-l1 + $lw-trail-highlight) div 2}" stroke-width="{$lw-trail-highlight}" stroke-linecap="butt" />
-		<line stroke="{$color}" dy="-{($lw-l1 + $lw-trail-highlight) div 2}" stroke-width="{$lw-trail-highlight}" stroke-linecap="butt" />
 	</rule>
-	<rule e="way" k="*" v="*" zoom-min="{$zm-level2}" zoom-max="{$zm-level3 - 1}" >		
+	<rule e="way" k="*" v="*" zoom-min="{$zm-level2}" zoom-max="{$zm-level3 - 1}" >
 		<line stroke="{$color}" dy="{($lw-l2 + $lw-trail-highlight-l2) div 2}" stroke-width="{$lw-trail-highlight-l2}" stroke-linecap="butt" />
-		<line stroke="{$color}" dy="-{($lw-l2 + $lw-trail-highlight-l2) div 2}" stroke-width="{$lw-trail-highlight-l2}" stroke-linecap="butt" />
 	</rule>
-	<rule e="way" k="*" v="*" zoom-min="{$zm-level3}" zoom-max="{$zm-level4 - 1}" >		
+	<rule e="way" k="*" v="*" zoom-min="{$zm-level3}" zoom-max="{$zm-level4 - 1}" >
 		<line stroke="{$color}" dy="{($lw-l3 + $lw-trail-highlight-l3) div 2}" stroke-width="{$lw-trail-highlight-l3}" stroke-linecap="butt" />
-		<line stroke="{$color}" dy="-{($lw-l3 + $lw-trail-highlight-l3) div 2}" stroke-width="{$lw-trail-highlight-l3}" stroke-linecap="butt" />
 	</rule>
-	<rule e="way" k="*" v="*" zoom-min="{$zm-level4}">		
+	<rule e="way" k="*" v="*" zoom-min="{$zm-level4}">
 		<line stroke="{$color}" dy="{($lw-l4 + $lw-trail-highlight-l4) div 2}" stroke-width="{$lw-trail-highlight-l4}" stroke-linecap="butt" />
-		<line stroke="{$color}" dy="-{($lw-l4 + $lw-trail-highlight-l4) div 2}" stroke-width="{$lw-trail-highlight-l4}" stroke-linecap="butt" />
-	</rule>		
+	</rule>
 </xsl:template>
 
 <xsl:template name="trail-highlight-bilateral-dashed-4l">
@@ -276,28 +272,24 @@
 <xsl:param name="lw-l2" />
 <xsl:param name="lw-l3" />
 <xsl:param name="lw-l4" />
-	<rule e="way" k="*" v="*" zoom-max="{$zm-highway - 1}">		
-		<line stroke="{$color}" stroke-width="{$lw-trail-highlight-low}"  stroke-dasharray="{$da-highlight-l0}" stroke-linecap="butt" />
+	<rule e="way" k="*" v="*" zoom-max="{$zm-highway - 1}">
+		<line stroke="{$color}" dy="0.7" stroke-width="{$lw-trail-highlight-low}"  stroke-dasharray="{$da-highlight-l0}" stroke-linecap="butt" />
 	</rule>
-	<rule e="way" k="*" v="*" zoom-min="{$zm-highway}" zoom-max="{$zm-level2 - 1}">		
+	<rule e="way" k="*" v="*" zoom-min="{$zm-highway}" zoom-max="{$zm-level2 - 1}">
 		<line stroke="{$color}" dy="{($lw-l1 + $lw-trail-highlight) div 2}" stroke-width="{$lw-trail-highlight}"  stroke-dasharray="{$da-highlight-l1}"  stroke-linecap="butt" />
-		<line stroke="{$color}" dy="-{($lw-l1 + $lw-trail-highlight) div 2}" stroke-width="{$lw-trail-highlight}"  stroke-dasharray="{$da-highlight-l1}" stroke-linecap="butt" />
        	<pathText k="{$route_condition}" dy="-4" font-style="bold" font-size="11" fill="#800000" stroke="#ffffff" stroke-width="0.5" repeat-start="10" repeat-gap="75" priority="{$pr-cond-access}" />
 	</rule>
-	<rule e="way" k="*" v="*" zoom-min="{$zm-level2}" zoom-max="{$zm-level3 - 1}" >		
+	<rule e="way" k="*" v="*" zoom-min="{$zm-level2}" zoom-max="{$zm-level3 - 1}" >
 		<line stroke="{$color}" dy="{($lw-l2 + $lw-trail-highlight-l2) div 2}" stroke-width="{$lw-trail-highlight-l2}"  stroke-dasharray="{$da-highlight-l2}" stroke-linecap="butt" />
-		<line stroke="{$color}" dy="-{($lw-l2 + $lw-trail-highlight-l2) div 2}" stroke-width="{$lw-trail-highlight-l2}"  stroke-dasharray="{$da-highlight-l2}" stroke-linecap="butt" />
        	<pathText k="{$route_condition}" dy="-4" font-style="bold" font-size="12" fill="#800000" stroke="#ffffff" stroke-width="0.8" repeat-start="10" repeat-gap="120" priority="{$pr-cond-access}" />
 	</rule>
-	<rule e="way" k="*" v="*" zoom-min="{$zm-level3}" zoom-max="{$zm-level4 - 1}" >		
+	<rule e="way" k="*" v="*" zoom-min="{$zm-level3}" zoom-max="{$zm-level4 - 1}" >
 		<line stroke="{$color}" dy="{($lw-l3 + $lw-trail-highlight-l3) div 2}" stroke-width="{$lw-trail-highlight-l3}"  stroke-dasharray="{$da-highlight-l3}"  stroke-linecap="butt" />
-		<line stroke="{$color}" dy="-{($lw-l3 + $lw-trail-highlight-l3) div 2}" stroke-width="{$lw-trail-highlight-l3}"  stroke-dasharray="{$da-highlight-l3}"  stroke-linecap="butt" />
        <pathText k="{$route_condition}" dy="-3" font-style="bold" font-size="14" fill="#800000" stroke="#ffffff" stroke-width="0.8"  repeat-start="10" repeat-gap="200"  priority="{$pr-cond-access}"/>
 	</rule>
-	<rule e="way" k="*" v="*" zoom-min="{$zm-level4}">		
+	<rule e="way" k="*" v="*" zoom-min="{$zm-level4}">
 		<line stroke="{$color}" dy="{($lw-l4 + $lw-trail-highlight-l4) div 2}" stroke-width="{$lw-trail-highlight-l4}"  stroke-dasharray="{$da-highlight-l4}"  stroke-linecap="butt" />
-		<line stroke="{$color}" dy="-{($lw-l4 + $lw-trail-highlight-l4) div 2}" stroke-width="{$lw-trail-highlight-l4}"  stroke-dasharray="{$da-highlight-l4}"  stroke-linecap="butt" />
-	</rule>		 
+	</rule>
 </xsl:template>
 
 
@@ -308,23 +300,20 @@
 <xsl:param name="lw-l1" />
 <xsl:param name="lw-l3" />
 <xsl:param name="lw-l4" />
-	<rule e="way" k="*" v="*" zoom-max="{$zm-highway - 1}">		
-		<line stroke="{$color}" stroke-width="{$lw-trail-highlight-low}" stroke-linecap="butt" />
+	<rule e="way" k="*" v="*" zoom-max="{$zm-highway - 1}">
+		<line stroke="{$color}" dy="0.7" stroke-width="{$lw-trail-highlight-low}" stroke-linecap="butt" />
 	</rule>
-	<rule e="way" k="*" v="*" zoom-min="{$zm-highway}" zoom-max="{$zm-level3 - 1}">		
+	<rule e="way" k="*" v="*" zoom-min="{$zm-highway}" zoom-max="{$zm-level3 - 1}">
 		<line stroke="{$color}" dy="{($lw-l1 + $lw-trail-highlight) div 2}" stroke-width="{$lw-trail-highlight}" stroke-linecap="butt" />
-		<line stroke="{$color}" dy="-{($lw-l1 + $lw-trail-highlight) div 2}" stroke-width="{$lw-trail-highlight}" stroke-linecap="butt" />
        	<pathText k="{$route_condition}" dy="-4" font-style="bold" font-size="12" fill="#800000" stroke="#ffffff" stroke-width="0.8" repeat-start="10" repeat-gap="120" priority="{$pr-cond-access}" />
 	</rule>
-	<rule e="way" k="*" v="*" zoom-min="{$zm-level3}" zoom-max="{$zm-level4 - 1}" >		
+	<rule e="way" k="*" v="*" zoom-min="{$zm-level3}" zoom-max="{$zm-level4 - 1}" >
 		<line stroke="{$color}" dy="{($lw-l3 + $lw-trail-highlight-l3) div 2}" stroke-width="{$lw-trail-highlight-l3}" stroke-linecap="butt" />
-		<line stroke="{$color}" dy="-{($lw-l3 + $lw-trail-highlight-l3) div 2}" stroke-width="{$lw-trail-highlight-l3}" stroke-linecap="butt" />
        <pathText k="{$route_condition}" dy="-3" font-style="bold" font-size="14" fill="#800000" stroke="#ffffff" stroke-width="0.8"  repeat-start="10" repeat-gap="200"  priority="{$pr-cond-access}"/>
 	</rule>
-	<rule e="way" k="*" v="*" zoom-min="{$zm-level4}">		
+	<rule e="way" k="*" v="*" zoom-min="{$zm-level4}">
 		<line stroke="{$color}" dy="{($lw-l4 + $lw-trail-highlight-l4) div 2}" stroke-width="{$lw-trail-highlight-l4}" stroke-linecap="butt" />
-		<line stroke="{$color}" dy="-{($lw-l4 + $lw-trail-highlight-l4) div 2}" stroke-width="{$lw-trail-highlight-l4}" stroke-linecap="butt" />
-	</rule>		
+	</rule>
 </xsl:template>
 
 <xsl:template name="trail-highlight-bilateral-dashed-3l">
@@ -337,20 +326,17 @@
 	<rule e="way" k="*" v="*" zoom-max="{$zm-highway - 1}">		
 		<line stroke="{$color}" stroke-width="{$lw-trail-highlight-low}"  stroke-dasharray="{$da-highlight-l0}" stroke-linecap="butt" />
 	</rule>
-	<rule e="way" k="*" v="*" zoom-min="{$zm-highway}" zoom-max="{$zm-level3 - 1}">		
+	<rule e="way" k="*" v="*" zoom-min="{$zm-highway}" zoom-max="{$zm-level3 - 1}">
 		<line stroke="{$color}" dy="{($lw-l1 + $lw-trail-highlight) div 2}" stroke-width="{$lw-trail-highlight}"  stroke-dasharray="{$da-highlight-l1}"  stroke-linecap="butt" />
-		<line stroke="{$color}" dy="-{($lw-l1 + $lw-trail-highlight) div 2}" stroke-width="{$lw-trail-highlight}"  stroke-dasharray="{$da-highlight-l1}" stroke-linecap="butt" />
         <pathText k="{$route_condition}" dy="-4" font-style="bold" font-size="12" fill="#0000fc" stroke="#ffffff" stroke-width="2"  repeat-start="20" repeat-gap="200"  priority="{$pr-cond-access}"/>
 	</rule>
-	<rule e="way" k="*" v="*" zoom-min="{$zm-level3}" zoom-max="{$zm-level4 - 1}" >		
+	<rule e="way" k="*" v="*" zoom-min="{$zm-level3}" zoom-max="{$zm-level4 - 1}" >
 		<line stroke="{$color}" dy="{($lw-l3 + $lw-trail-highlight-l3) div 2}" stroke-width="{$lw-trail-highlight-l3}"  stroke-dasharray="{$da-highlight-l3}"  stroke-linecap="butt" />
-		<line stroke="{$color}" dy="-{($lw-l3 + $lw-trail-highlight-l3) div 2}" stroke-width="{$lw-trail-highlight-l3}"  stroke-dasharray="{$da-highlight-l3}"  stroke-linecap="butt" />
         <pathText k="{$route_condition}" dy="-3" font-style="bold" font-size="14" fill="#0000fc" stroke="#ffffff" stroke-width="2"  repeat-start="20" repeat-gap="200"  priority="{$pr-cond-access}"/>
 	</rule>
-	<rule e="way" k="*" v="*" zoom-min="{$zm-level4}">		
+	<rule e="way" k="*" v="*" zoom-min="{$zm-level4}">
 		<line stroke="{$color}" dy="{($lw-l4 + $lw-trail-highlight-l4) div 2}" stroke-width="{$lw-trail-highlight-l4}"  stroke-dasharray="{$da-highlight-l4}"  stroke-linecap="butt" />
-		<line stroke="{$color}" dy="-{($lw-l4 + $lw-trail-highlight-l4) div 2}" stroke-width="{$lw-trail-highlight-l4}"  stroke-dasharray="{$da-highlight-l4}"  stroke-linecap="butt" />
-	</rule>		 
+	</rule>
 </xsl:template>
 
 <xsl:template name="trail-highlight-mono">

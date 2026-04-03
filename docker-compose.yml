@@ -9,7 +9,10 @@ services:
       LOCATIONS_FILE: /data/config/locations.yaml
       HGT_DIR: /data/hgt
     volumes:
-      - ./maps:/data/maps:ro
+      - type: image
+        source: ghcr.io/pandasoft-zz/czechtouristmap-mapdata:latest
+        target: /data/maps
+        read_only: true
       - ./themes:/data/themes:ro
       - ./config:/data/config
       - type: image

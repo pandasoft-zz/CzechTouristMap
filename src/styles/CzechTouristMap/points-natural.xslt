@@ -13,8 +13,8 @@
 <rule e="node" k="natural" v="peak" >
     <rule e="node" k="importance" v="national" zoom-min="10" zoom-max="10">   
         <symbol id="peak" src="{$naturalIconPath}/peak.svg" symbol-width="8" priority="{$pr-peak-named}"/>
-        <caption  k="name" font-size="11" fill="#693600" font-style="bold_italic"  position="above"
-        stroke="#FFFFFF" stroke-width="1.5" symbol-id="peak" priority="{$pr-label-peak}" />
+        <caption  k="name" font-size="11" fill="#693600" font-style="bold" position="above"
+        stroke="#FFFFFF" stroke-width="2" symbol-id="peak" priority="{$pr-label-peak}" />
         <caption fill="#693600" font-size="10" font-style="bold" k="ele" position="below"
             stroke="#FFFFFF" stroke-width="1.5" symbol-id="peak" priority="{$pr-label-peak}"/>
     </rule>
@@ -28,7 +28,7 @@
             stroke="#FFFFFF" stroke-width="1.5" symbol-id="peak" priority="{$pr-label-peak}" />
         </rule>
         <caption fill="#693600" font-size="9" font-style="bold" k="ele" position="below"
-            stroke="#FFFFFF" stroke-width="1.5" symbol-id="peak" priority="{$pr-ele-peak}"/>
+            stroke="#FFFFFF" stroke-width="2" symbol-id="peak" priority="{$pr-ele-peak}"/>
     </rule>
     <rule e="node" k="summit:cross" v="*" zoom-min="13" >   
         <rule e="node" k="*" v="*" zoom-min="14" zoom-max="15">        
@@ -50,14 +50,14 @@
         <rule e="node" k="name" v="~" >    
             <symbol id="peak" src="{$naturalIconPath}/peak.svg" symbol-width="8" priority="{$pr-peak}"/>
             <caption fill="#693600" font-size="10" font-style="bold" k="ele" position="below"
-                stroke="#FFFFFF" stroke-width="1.5" symbol-id="peak" priority="{$pr-label-peak}"/>
+                stroke="#FFFFFF" stroke-width="2" symbol-id="peak" priority="{$pr-label-peak}"/>
         </rule>
     </rule>
     <rule e="node" k="summit:cross|name" v="*" zoom-min="13" >
-        <caption  k="name" font-size="12" fill="#693600" font-style="bold_italic"  position="above"
-        stroke="#FFFFFF" stroke-width="1.5" symbol-id="peak" priority="{$pr-label-peak}" />
+        <caption  k="name" font-size="12" fill="#693600" font-style="bold" position="above"
+        stroke="#FFFFFF" stroke-width="2" symbol-id="peak" priority="{$pr-label-peak}" />
         <caption fill="#693600" font-size="11" font-style="bold" k="ele" position="below"
-            stroke="#FFFFFF" stroke-width="1.5" symbol-id="peak" priority="{$pr-ele-peak}"/>
+            stroke="#FFFFFF" stroke-width="2" symbol-id="peak" priority="{$pr-ele-peak}"/>
     </rule>
 </rule>
 
@@ -142,7 +142,7 @@
 
 <!-- 
 <rule e="any" k="mountain_pass" v="yes" zoom-min="14">
-    <symbol id="pass" src="{$naturalIconPath}//mountain_pass.svg" />
+    <symbol id="pass" src="{$naturalIconPath}/mountain_pass.svg" />
     <rule e="any" k="*" v="*" zoom-min="15">
         <caption fill="#666666" font-size="12" font-style="bold" k="ele" position="above"
              stroke="#FFFFFF" stroke-width="2.0" symbol-id="pass" />
@@ -303,7 +303,7 @@
 <!-- 
 <rule e="node" k="natural" v="tree" zoom-min="16">
     <rule e="node" k="name" v="*">
-        <symbol id="tree" src="{$naturalIconPath}//tree.png" priority="{$pr-tree}"/>
+        <symbol id="tree" src="{$naturalIconPath}/tree.svg" priority="{$pr-tree}"/>
         <caption k="name" symbol-id="tree" position="below" 
         font-style="bold" font-size="10" fill="#666666" stroke="#ffffff" stroke-width="2" priority="{$pr-tree}"/>        
     </rule>

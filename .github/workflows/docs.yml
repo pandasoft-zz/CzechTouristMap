@@ -1,0 +1,180 @@
+name: Docs
+
+on:
+  pull_request:
+    paths:
+      - "src/styles/**"
+      - "tile-server/**"
+      - "config/locations.yaml"
+      - "docs/design-manual-project.md"
+  push:
+    tags:
+      - '[0-9][0-9][0-9][0-9].[0-9][0-9].[0-9][0-9]'
+
+permissions:
+  contents: write       # push to gh-pages
+  pull-requests: write  # post PR comment
+  packages: read        # pull map image from GHCR
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      # ── 1. Build theme XML ─────────────────────────────────────────────────
+      - name: Build theme XML
+        run: ./build-theme.sh
+
+      # ── 2. Tile-server image (BuildKit + GHA cache) ────────────────────────
+      #    Gradle build is cached — only rebuilt when tile-server/** changes.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build tile-server image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./tile-server
+          tags: tile-server:ci
+          load: true
+          cache-from: type=gha,scope=tile-server
+          cache-to: type=gha,mode=max,scope=tile-server
+
+      # ── 3. Map file (GHCR image, cached by map-version.txt hash) ──────────
+      - name: Restore map file from cache
+        id: cache-map
+        uses: actions/cache@v4
+        with:
+          path: maps/czech-republic.map
+          key: map-czech-${{ hashFiles('config/map-version.txt') }}
+          restore-keys: map-czech-
+
+      - name: Extract map file from GHCR image
+        if: steps.cache-map.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p maps
+          MAP_IMAGE="ghcr.io/${{ github.repository_owner }}/czechtouristmap-mapdata:latest"
+          echo "${{ secrets.GITHUB_TOKEN }}" \
+            | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          docker pull "$MAP_IMAGE"
+          id=$(docker create "$MAP_IMAGE")
+          docker cp "$id:/data/maps/czech-republic.map" maps/czech-republic.map
+          docker rm "$id"
+
+      # ── 4. Start tile server ───────────────────────────────────────────────
+      - name: Start tile server
+        run: |
+          docker run -d --name tile-server \
+            -p 8080:8080 \
+            -v "$PWD/maps:/data/maps:ro" \
+            -v "$PWD/themes:/data/themes:ro" \
+            -v "$PWD/config:/data/config:ro" \
+            tile-server:ci
+
+      - name: Wait for tile server to be healthy
+        run: |
+          echo "Waiting for tile server..."
+          timeout 120 bash -c \
+            'until wget -q -O/dev/null http://localhost:8080/health 2>/dev/null; \
+             do sleep 5; printf "."; done'
+          echo " ready"
+
+      # ── 5. Generate site ───────────────────────────────────────────────────
+      - name: Install Python deps
+        run: pip install -r requirements.txt --quiet
+
+      - name: Render PR preview
+        if: github.ref_type != 'tag'
+        run: python scripts/ci-render.py
+        env:
+          OUTPUT_DIR: site
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_BRANCH: ${{ github.head_ref }}
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+
+      - name: Generate release docs
+        if: github.ref_type == 'tag'
+        run: python scripts/gen-docs.py
+        env:
+          OUTPUT_DIR: site
+          VERSION: ${{ github.ref_name }}
+
+      # ── 6. Upload artifacts ────────────────────────────────────────────────
+      - name: Upload screenshots
+        if: github.ref_type != 'tag'
+        uses: actions/upload-artifact@v4
+        with:
+          name: map-preview-pr-${{ github.event.pull_request.number }}
+          path: site/
+          retention-days: 30
+
+      # ── 7. Deploy to GitHub Pages ──────────────────────────────────────────
+      #    Enable Pages in repo Settings → Pages → Source: gh-pages branch.
+      #    PR previews: /pr-{number}/
+      #    Release docs: /
+      - name: Deploy PR preview to Pages
+        id: pages-pr
+        if: github.ref_type != 'tag'
+        continue-on-error: true
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: site
+          destination_dir: pr-${{ github.event.pull_request.number }}
+          keep_files: true
+
+      - name: Deploy release docs to Pages
+        if: github.ref_type == 'tag'
+        continue-on-error: true
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: site
+          destination_dir: .
+          keep_files: true
+
+      # ── 8. Comment on PR ──────────────────────────────────────────────────
+      - name: Comment on PR
+        if: github.ref_type != 'tag'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const pr = context.payload.pull_request.number;
+            const sha = context.payload.pull_request.head.sha.substring(0, 7);
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const pagesUrl = `https://${context.repo.owner}.github.io/${context.repo.repo}/pr-${pr}/`;
+            const pagesOk = '${{ steps.pages-pr.outcome }}' === 'success';
+
+            const manifest = JSON.parse(fs.readFileSync('site/manifest.json', 'utf8'));
+
+            const lines = [`## Map Preview — \`${sha}\``, ''];
+
+            if (pagesOk) {
+              lines.push(`**[Open full preview](${pagesUrl})**`, '');
+              lines.push('| Location | Zoom |', '|---|---|');
+              for (const loc of manifest) {
+                lines.push(`| ${loc.name} | z${loc.zoom} |`);
+                lines.push(`| ![${loc.name}](${pagesUrl}${loc.filename}.png) | |`);
+              }
+            } else {
+              lines.push(
+                '> GitHub Pages not configured — screenshots available as artifacts.',
+                '',
+                `**[Download screenshots](${runUrl})**`,
+                '',
+                '| Location | Zoom |', '|---|---|',
+                ...manifest.map(loc => `| ${loc.name} | z${loc.zoom} |`),
+              );
+            }
+
+            lines.push('', `<sub>[Workflow run](${runUrl}) · Artifacts kept 30 days</sub>`);
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr,
+              body: lines.join('\n'),
+            });

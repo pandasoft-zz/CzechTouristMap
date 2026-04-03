@@ -11,23 +11,23 @@
 
 <!-- Building colors — ČÚZK SM5: building fill 227,227,227 = #E3E3E3, outline #707070 -->
 <xsl:template name="poly-buildings">
-<rule cat="buildings" e="way" k="building" v="*" zoom-min="15" closed="yes">
-   <!-- Generic building — SM5: #E3E3E3 -->
+<rule cat="buildings" e="way" k="building" v="*" zoom-min="14" closed="yes">
+   <!-- Generic building — mapy.cz: #EDE5CC warm beige -->
    <rule e="way" k="building" v="yes">
-      <area fill="#E0E0E0" stroke="#808080" stroke-width="0.6" scale="none" />
+      <area fill="#EDE5CC" stroke="#808080" stroke-width="0.6" scale="none" />
     </rule>
     <rule e="way" k="building" v="supermarket">
-      <area fill="#D8C0CC" stroke="#808080" stroke-width="0.6" scale="none" />
+      <area fill="#E8D4DC" stroke="#808080" stroke-width="0.6" scale="none" />
     </rule>
     <!-- Religious buildings — warm golden tan, visible landmark -->
     <rule e="way" k="building" v="chapel|church|cathedral|basicila|monastry|mosque|synagogue">
-      <area fill="#D4A870" stroke="#806040" stroke-width="1.6" scale="none" />
+      <area fill="#E4C498" stroke="#806040" stroke-width="1.6" scale="none" />
     </rule>
     <rule e="way" k="building" v="museum">
-      <area fill="#C8A0A0" stroke="#808080" stroke-width="0.6" scale="none" />
+      <area fill="#DCC0C0" stroke="#808080" stroke-width="0.6" scale="none" />
     </rule>
     <rule e="way" k="building" v="public|education|hospital|transportation">
-      <area fill="#E0E0E0" stroke="#808080" stroke-width="0.6" scale="none" />
+      <area fill="#ccc2b1" stroke="#808080" stroke-width="0.6" scale="none" />
     </rule>
     <rule e="way" k="building" v="sports_centre">
       <area fill="#C8D8E0" stroke="#4080A0" stroke-width="1" scale="none" />

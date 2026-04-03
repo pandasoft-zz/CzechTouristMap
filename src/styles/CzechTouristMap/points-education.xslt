@@ -11,7 +11,7 @@
 
 <xsl:template name="points-education">
 
-<rule  e="any" k="amenity" v="childcare|kindergarten" zoom-min="15">
+<rule  e="any" k="amenity" v="childcare|kindergarten" zoom-min="16">
   <rule  e="any" k="*" v="*" zoom-max="16">
     <symbol id="kindergarten" src="{$educationIconPath}/kindergarten.svg" symbol-width="18" priority="{$pr-school}"/>
   </rule>
@@ -24,7 +24,7 @@
   </rule>       
 </rule>
 
-<rule  e="any" k="amenity" v="school" zoom-min="15">
+<rule  e="any" k="amenity" v="school" zoom-min="16">
   <rule  e="any" k="*" v="*" zoom-max="16">
     <symbol id="school" src="{$educationIconPath}/school.svg" symbol-width="18" priority="{$pr-school}"/>
   </rule>
@@ -37,7 +37,7 @@
   </rule>       
 </rule>
 
-<rule  e="any" k="amenity" v="college|university" zoom-min="14">
+<rule  e="any" k="amenity" v="college|university" zoom-min="16">
   <rule  e="any" k="*" v="*" zoom-max="15">
     <symbol id="university" src="{$educationIconPath}/university.svg" symbol-width="16" priority="{$pr-school}"/>
   </rule>

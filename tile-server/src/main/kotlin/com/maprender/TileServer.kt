@@ -33,13 +33,13 @@ fun main() {
 
     val server = HttpServer.create(InetSocketAddress(8080), 50)
 
-    server.createContext("/tiles/")         { handleTile(it, tileRenderer, themeManager) }
-    server.createContext("/render")         { handleRender(it, tileRenderer) }
-    server.createContext("/locations")      { handleLocations(it, locationManager) }
+    server.createContext("/tiles/") { handleTile(it, tileRenderer, themeManager) }
+    server.createContext("/render") { handleRender(it, tileRenderer) }
+    server.createContext("/locations") { handleLocations(it, locationManager) }
     server.createContext("/themes/select/") { handleSelectTheme(it, themeManager) }
     server.createContext("/themes/current") { handleCurrentTheme(it, themeManager) }
-    server.createContext("/themes")         { handleThemes(it, themeManager) }
-    server.createContext("/health")         { handleHealth(it, tileRenderer, themeManager) }
+    server.createContext("/themes") { handleThemes(it, themeManager) }
+    server.createContext("/health") { handleHealth(it, tileRenderer, themeManager) }
 
     server.executor = Executors.newFixedThreadPool(8)
     server.start()
@@ -51,9 +51,17 @@ fun main() {
 // ── Handlers ──────────────────────────────────────────────────────────────────
 
 // GET /tiles/{z}/{x}/{y}.png
-private fun handleTile(exchange: HttpExchange, renderer: TileRenderer?, themeManager: ThemeManager) {
+private fun handleTile(
+    exchange: HttpExchange,
+    renderer: TileRenderer?,
+    themeManager: ThemeManager,
+) {
     exchange.addCors()
-    if (exchange.requestMethod == "OPTIONS") { exchange.sendResponseHeaders(200, -1); exchange.close(); return }
+    if (exchange.requestMethod == "OPTIONS") {
+        exchange.sendResponseHeaders(200, -1)
+        exchange.close()
+        return
+    }
 
     if (renderer == null) {
         exchange.sendError(503, "Map file not loaded – check server logs")
@@ -62,10 +70,11 @@ private fun handleTile(exchange: HttpExchange, renderer: TileRenderer?, themeMan
 
     try {
         // URL: /tiles/{z}/{x}/{y}.png
-        val parts = exchange.requestURI.path
-            .removePrefix("/tiles/")
-            .removeSuffix(".png")
-            .split("/")
+        val parts =
+            exchange.requestURI.path
+                .removePrefix("/tiles/")
+                .removeSuffix(".png")
+                .split("/")
 
         require(parts.size == 3) { "Invalid tile URL" }
         val z = parts[0].toInt()
@@ -83,9 +92,11 @@ private fun handleTile(exchange: HttpExchange, renderer: TileRenderer?, themeMan
         exchange.responseHeaders.set("Cache-Control", "no-cache")
         exchange.sendResponseHeaders(200, png.size.toLong())
         exchange.responseBody.write(png)
-
     } catch (e: NumberFormatException) {
         exchange.sendError(400, "Invalid tile coordinates")
+    } catch (e: java.io.IOException) {
+        // Client disconnected before response was sent — not an error.
+        System.err.println("Tile aborted (client disconnected): ${e.message}")
     } catch (e: Exception) {
         System.err.println("Tile render error: ${e.message}")
         e.printStackTrace()
@@ -96,25 +107,32 @@ private fun handleTile(exchange: HttpExchange, renderer: TileRenderer?, themeMan
 }
 
 // GET /render?lat=49.95&lng=15.27&zoom=14&width=800&height=600  →  PNG image
-private fun handleRender(exchange: HttpExchange, renderer: TileRenderer?) {
+private fun handleRender(
+    exchange: HttpExchange,
+    renderer: TileRenderer?,
+) {
     exchange.addCors()
-    if (renderer == null) { exchange.sendError(503, "Map file not loaded"); return }
+    if (renderer == null) {
+        exchange.sendError(503, "Map file not loaded")
+        return
+    }
 
     try {
-        val params = exchange.requestURI.query
-            ?.split("&")
-            ?.associate { it.substringBefore("=") to it.substringAfter("=") }
-            ?: emptyMap()
+        val params =
+            exchange.requestURI.query
+                ?.split("&")
+                ?.associate { it.substringBefore("=") to it.substringAfter("=") }
+                ?: emptyMap()
 
-        val lat    = params["lat"]?.toDouble()    ?: 49.8
-        val lng    = params["lng"]?.toDouble()    ?: 15.5
-        val zoom   = params["zoom"]?.toInt()      ?: 12
-        val width  = params["width"]?.toInt()     ?: 800
-        val height = params["height"]?.toInt()    ?: 600
+        val lat = params["lat"]?.toDouble() ?: 49.8
+        val lng = params["lng"]?.toDouble() ?: 15.5
+        val zoom = params["zoom"]?.toInt() ?: 12
+        val width = params["width"]?.toInt() ?: 800
+        val height = params["height"]?.toInt() ?: 600
 
-        require(zoom in 2..18)          { "zoom must be 2–18" }
-        require(width  in 64..4096)     { "width must be 64–4096" }
-        require(height in 64..4096)     { "height must be 64–4096" }
+        require(zoom in 2..18) { "zoom must be 2–18" }
+        require(width in 64..4096) { "width must be 64–4096" }
+        require(height in 64..4096) { "height must be 64–4096" }
 
         val png = renderer.renderArea(lat, lng, zoom, width, height)
 
@@ -135,9 +153,16 @@ private fun handleRender(exchange: HttpExchange, renderer: TileRenderer?) {
 
 // GET /locations          →  JSON array of all locations
 // POST /locations         →  body: name=…&lat=…&lng=…&zoom=…&note=…  →  appends entry
-private fun handleLocations(exchange: HttpExchange, locationManager: LocationManager) {
+private fun handleLocations(
+    exchange: HttpExchange,
+    locationManager: LocationManager,
+) {
     exchange.addCors()
-    if (exchange.requestMethod == "OPTIONS") { exchange.sendResponseHeaders(200, -1); exchange.close(); return }
+    if (exchange.requestMethod == "OPTIONS") {
+        exchange.sendResponseHeaders(200, -1)
+        exchange.close()
+        return
+    }
 
     when (exchange.requestMethod) {
         "GET" -> {
@@ -147,17 +172,22 @@ private fun handleLocations(exchange: HttpExchange, locationManager: LocationMan
         "POST" -> {
             try {
                 val body = exchange.requestBody.readBytes().toString(Charsets.UTF_8)
-                val params = body.split("&").associate {
-                    it.substringBefore("=") to java.net.URLDecoder.decode(it.substringAfter("="), "UTF-8")
-                }
-                val name = params["name"]?.takeIf { it.isNotBlank() }
-                    ?: throw IllegalArgumentException("name is required")
-                val lat  = params["lat"]?.toDoubleOrNull()
-                    ?: throw IllegalArgumentException("lat is required")
-                val lng  = params["lng"]?.toDoubleOrNull()
-                    ?: throw IllegalArgumentException("lng is required")
-                val zoom = params["zoom"]?.trim()?.toIntOrNull()
-                    ?: throw IllegalArgumentException("zoom is required and must be an integer")
+                val params =
+                    body.split("&").associate {
+                        it.substringBefore("=") to java.net.URLDecoder.decode(it.substringAfter("="), "UTF-8")
+                    }
+                val name =
+                    params["name"]?.takeIf { it.isNotBlank() }
+                        ?: throw IllegalArgumentException("name is required")
+                val lat =
+                    params["lat"]?.toDoubleOrNull()
+                        ?: throw IllegalArgumentException("lat is required")
+                val lng =
+                    params["lng"]?.toDoubleOrNull()
+                        ?: throw IllegalArgumentException("lng is required")
+                val zoom =
+                    params["zoom"]?.trim()?.toIntOrNull()
+                        ?: throw IllegalArgumentException("zoom is required and must be an integer")
                 val note = params["note"]?.takeIf { it.isNotBlank() }
                 locationManager.append(Location(name, lat, lng, zoom, note))
                 exchange.sendJson(201, """{"success":true}""")
@@ -169,10 +199,17 @@ private fun handleLocations(exchange: HttpExchange, locationManager: LocationMan
             }
         }
         "DELETE" -> {
-            val name = exchange.requestURI.query
-                ?.split("&")?.associate { it.substringBefore("=") to java.net.URLDecoder.decode(it.substringAfter("="), "UTF-8") }
-                ?.get("name")
-                ?: run { exchange.sendError(400, "name query param required"); return }
+            val name =
+                exchange.requestURI.query
+                    ?.split("&")
+                    ?.associate {
+                        it.substringBefore("=") to
+                            java.net.URLDecoder.decode(it.substringAfter("="), "UTF-8")
+                    }?.get("name")
+                    ?: run {
+                        exchange.sendError(400, "name query param required")
+                        return
+                    }
             if (locationManager.delete(name)) {
                 exchange.sendJson(200, """{"success":true}""")
             } else {
@@ -184,22 +221,35 @@ private fun handleLocations(exchange: HttpExchange, locationManager: LocationMan
 }
 
 // GET /themes  →  ["default.xml","dark.xml",...]
-private fun handleThemes(exchange: HttpExchange, themeManager: ThemeManager) {
+private fun handleThemes(
+    exchange: HttpExchange,
+    themeManager: ThemeManager,
+) {
     exchange.addCors()
     val list = themeManager.listThemes().joinToString(",") { "\"${it.escJson()}\"" }
     exchange.sendJson(200, "[$list]")
 }
 
 // GET /themes/current  →  "default.xml"
-private fun handleCurrentTheme(exchange: HttpExchange, themeManager: ThemeManager) {
+private fun handleCurrentTheme(
+    exchange: HttpExchange,
+    themeManager: ThemeManager,
+) {
     exchange.addCors()
     exchange.sendJson(200, "\"${(themeManager.currentTheme ?: "").escJson()}\"")
 }
 
 // POST /themes/select/{name}
-private fun handleSelectTheme(exchange: HttpExchange, themeManager: ThemeManager) {
+private fun handleSelectTheme(
+    exchange: HttpExchange,
+    themeManager: ThemeManager,
+) {
     exchange.addCors()
-    if (exchange.requestMethod == "OPTIONS") { exchange.sendResponseHeaders(200, -1); exchange.close(); return }
+    if (exchange.requestMethod == "OPTIONS") {
+        exchange.sendResponseHeaders(200, -1)
+        exchange.close()
+        return
+    }
 
     val name = exchange.requestURI.path.removePrefix("/themes/select/")
     if (themeManager.listThemes().contains(name)) {
@@ -211,9 +261,16 @@ private fun handleSelectTheme(exchange: HttpExchange, themeManager: ThemeManager
 }
 
 // GET /health
-private fun handleHealth(exchange: HttpExchange, renderer: TileRenderer?, themeManager: ThemeManager) {
+private fun handleHealth(
+    exchange: HttpExchange,
+    renderer: TileRenderer?,
+    themeManager: ThemeManager,
+) {
     exchange.addCors()
-    val json = """{"status":"ok","mapLoaded":${renderer != null},"currentTheme":"${(themeManager.currentTheme ?: "").escJson()}","themes":${themeManager.listThemes().size}}"""
+    val loaded = renderer != null
+    val theme = (themeManager.currentTheme ?: "").escJson()
+    val count = themeManager.listThemes().size
+    val json = """{"status":"ok","mapLoaded":$loaded,"currentTheme":"$theme","themes":$count}"""
     exchange.sendJson(200, json)
 }
 
@@ -225,7 +282,10 @@ private fun HttpExchange.addCors() {
     responseHeaders.set("Access-Control-Allow-Headers", "Content-Type")
 }
 
-private fun HttpExchange.sendJson(status: Int, json: String) {
+private fun HttpExchange.sendJson(
+    status: Int,
+    json: String,
+) {
     val bytes = json.toByteArray(StandardCharsets.UTF_8)
     responseHeaders.set("Content-Type", "application/json; charset=utf-8")
     sendResponseHeaders(status, bytes.size.toLong())
@@ -233,7 +293,10 @@ private fun HttpExchange.sendJson(status: Int, json: String) {
     close()
 }
 
-private fun HttpExchange.sendError(status: Int, message: String) {
+private fun HttpExchange.sendError(
+    status: Int,
+    message: String,
+) {
     sendJson(status, """{"error":"${message.escJson()}"}""")
 }
 

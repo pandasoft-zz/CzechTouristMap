@@ -1,0 +1,7 @@
+extends: default
+
+rules:
+  document-start: disable   # --- header not required
+  line-length:
+    max: 200                 # long box-drawing comments in workflow files
+  truthy: disable            # GitHub Actions uses 'on:' without quotes

@@ -98,12 +98,12 @@
 </rule>        
 
 <rule  e="any" k="amenity" v="drinking_water" >
-    <rule  e="any" k="*" v="*" zoom-min="15" zoom-max="16">
+    <rule  e="any" k="*" v="*" zoom-min="14" zoom-max="16">
         <symbol id="drinking_water" src="{$publicServiceIconPath}/drinking_water.svg" symbol-width="18" priority="{$pr-drinking-water}"/>
-    </rule>        
+    </rule>
     <rule  e="any" k="*" v="*" zoom-min="17">
         <symbol id="drinking_water" src="{$publicServiceIconPath}/drinking_water.svg" symbol-width="20" priority="{$pr-drinking-water}"/>
-    </rule>        
+    </rule>
 </rule>        
 
 

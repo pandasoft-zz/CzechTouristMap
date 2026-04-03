@@ -10,7 +10,7 @@
 -->
 <xsl:template name="points-food">
 
-<rule  e="any" k="amenity" v="restaurant" zoom-min="15">
+<rule  e="any" k="amenity" v="restaurant" zoom-min="17">
     <rule  e="any" k="*" v="*" zoom-max="16">
         <symbol id="restaurant" src="{$foodIconPath}/restaurant.svg" symbol-width="16" priority="{$pr-restaurant}"/>
     </rule> 
@@ -39,7 +39,7 @@
     </rule>       
 </rule>
 
-<rule  e="any" k="amenity" v="cafe" zoom-min="15">
+<rule  e="any" k="amenity" v="cafe" zoom-min="14">
 <symbol id="cafe" src="{$foodIconPath}/cafe.svg" symbol-width="19" priority="{$pr-cafe}"/>
     <rule e="any" k="*" v="*" zoom-min="16">
         <caption k="name" symbol-id="cafe" 
@@ -47,7 +47,7 @@
     </rule>       
 </rule>
 
-<rule  e="any" k="amenity" v="pub|biergarten|bar" zoom-min="15">
+<rule  e="any" k="amenity" v="pub|biergarten|bar" zoom-min="14">
         <symbol id="pub" src="{$foodIconPath}/pub.svg" symbol-width="18" priority="{$pr-pub}"/>
         <rule e="any" k="*" v="*" zoom-min="16">
             <caption k="name" symbol-id="pub" 

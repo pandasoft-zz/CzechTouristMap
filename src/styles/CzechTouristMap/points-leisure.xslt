@@ -39,7 +39,7 @@
   </rule>
 </rule>
 
-<rule  e="any" k="leisure" v="playground" zoom-min="16">
+<rule  e="any" k="leisure" v="playground" zoom-min="14">
         <symbol id="playground" src="{$leisureIconPath}/playground.svg" symbol-width="23" priority="{$pr-playground}"/>
 </rule>
 
@@ -132,16 +132,16 @@
 </rule>
 
 <rule  e="any" k="leisure" v="*" >
-  <rule  e="any" k="sport" v="soccer" zoom-min="15">
-    <rule  e="any" k="*" v="*" zoom-min="15" zoom-max="16">
+  <rule  e="any" k="sport" v="soccer" zoom-min="14">
+    <rule  e="any" k="*" v="*" zoom-min="14" zoom-max="16">
       <symbol id="soccer" src="{$leisureIconPath}/soccer.svg" symbol-width="19" priority="{$pr-soccer}"/>
     </rule>
     <rule  e="any" k="*" v="*" zoom-min="17"> 
       <symbol id="soccer" src="{$leisureIconPath}/soccer.svg" symbol-width="22" priority="{$pr-soccer}"/>
     </rule>     
   </rule>
-  <rule  e="any" k="sport" v="tennis" zoom-min="15">
-    <rule  e="any" k="*" v="*" zoom-min="15" zoom-max="16">
+  <rule  e="any" k="sport" v="tennis" zoom-min="14">
+    <rule  e="any" k="*" v="*" zoom-min="14" zoom-max="16">
       <symbol id="tennis" src="{$leisureIconPath}/tennis.svg" symbol-width="13" priority="{$pr-tennis}"/>
     </rule>
     <rule  e="any" k="*" v="*" zoom-min="17"> 
@@ -150,8 +150,8 @@
   </rule>
 </rule>  
 
-<rule  e="any" k="leisure" v="golf_course" zoom-min="15">
-  <rule  e="any" k="*" v="*" zoom-min="15" zoom-max="16">
+<rule  e="any" k="leisure" v="golf_course" zoom-min="14">
+  <rule  e="any" k="*" v="*" zoom-min="14" zoom-max="16">
     <symbol id="golf_course" src="{$leisureIconPath}/golf.svg" symbol-width="16" priority="{$pr-sport}"/>
   </rule>
   <rule  e="any" k="*" v="*" zoom-min="17"> 
@@ -163,7 +163,7 @@
   </rule>
 </rule>
 
-<rule  e="any" k="tourism" v="attraction" zoom-min="15">
+<rule  e="any" k="tourism" v="attraction" zoom-min="14">
   <symbol id="attraction" src="{$leisureIconPath}/attraction.svg" symbol-width="16" priority="{$pr-attraction}"/>
   <rule e="any" k="*" v="*" zoom-min="16">
     <caption k="name" symbol-id="attraction" 
