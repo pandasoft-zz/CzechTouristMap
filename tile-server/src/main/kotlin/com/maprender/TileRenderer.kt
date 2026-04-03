@@ -24,13 +24,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import javax.imageio.ImageIO
-import kotlin.math.PI
-import kotlin.math.ceil
-import kotlin.math.cos
-import kotlin.math.floor
-import kotlin.math.ln
-import kotlin.math.pow
-import kotlin.math.tan
+import kotlin.math.*
 
 class TileRenderer(
     mapFilePath: String,
@@ -112,16 +106,14 @@ class TileRenderer(
             it.join()
         }
 
-        val renderer =
-            DatabaseRenderer(
-                mapDataStore,
-                graphicFactory,
-                InMemoryTileCache(0),
-                TileBasedLabelStore(1000),
-                true, // renderLabels
-                true, // cacheLabels
-                hillsRenderConfig,
-            )
+        val renderer = DatabaseRenderer(
+            mapDataStore, graphicFactory,
+            InMemoryTileCache(0),
+            TileBasedLabelStore(1000),
+            true,  // renderLabels
+            true,  // cacheLabels
+            hillsRenderConfig,
+        )
 
         themeFutureCache[themeName] = future
         rendererCache[themeName] = renderer

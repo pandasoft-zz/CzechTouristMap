@@ -23,14 +23,13 @@ fun main() {
     val themeManager = ThemeManager(themesDirPath)
     val locationManager = LocationManager(locationsFilePath)
 
-    val tileRenderer: TileRenderer? =
-        try {
-            TileRenderer(mapFilePath, themeManager, hgtDirPath)
-        } catch (e: Exception) {
-            System.err.println("ERROR loading map: ${e.message}")
-            System.err.println("Place your .map file at: $mapFilePath")
-            null
-        }
+    val tileRenderer: TileRenderer? = try {
+        TileRenderer(mapFilePath, themeManager, hgtDirPath)
+    } catch (e: Exception) {
+        System.err.println("ERROR loading map: ${e.message}")
+        System.err.println("Place your .map file at: $mapFilePath")
+        null
+    }
 
     val server = HttpServer.create(InetSocketAddress(8080), 50)
 

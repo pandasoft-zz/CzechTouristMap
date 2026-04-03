@@ -1,11 +1,11 @@
-name: Push map image
+name: Push HGT image
 
 on:
   push:
     branches: [main, master]
     paths:
-      - config/map-version.txt
-      - docker/mapdata/Dockerfile
+      - config/hgt-version.txt
+      - docker/hgtdata/Dockerfile
   workflow_dispatch:
 
 permissions:
@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 jobs:
-  push-map:
+  push-hgt:
     runs-on: ubuntu-latest
 
     steps:
@@ -35,13 +35,12 @@ jobs:
 
       - name: Build and push
         run: |
-          VERSION=$(cat config/map-version.txt)
+          VERSION=$(cat config/hgt-version.txt)
           ORG=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          IMAGE="ghcr.io/${ORG}/czechtouristmap-mapdata"
+          IMAGE="ghcr.io/${ORG}/czechtouristmap-hgtdata"
           docker buildx build \
             --platform linux/amd64,linux/arm64 \
             --push \
-            --build-arg MAP_VERSION="${VERSION}" \
             -t "${IMAGE}:latest" \
             -t "${IMAGE}:${VERSION}" \
-            docker/mapdata/
+            docker/hgtdata/
