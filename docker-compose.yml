@@ -7,7 +7,6 @@ services:
       STYLE: CzechTouristMap
     volumes:
       - ./src/styles:/app/styles:ro
-      - ./theme-builder/server.py:/app/server.py:ro
       - ./themes:/data/themes:rw
     restart: unless-stopped
 
