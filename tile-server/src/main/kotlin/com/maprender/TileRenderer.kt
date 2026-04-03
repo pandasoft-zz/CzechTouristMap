@@ -6,10 +6,7 @@ import org.mapsforge.core.model.Tile
 import org.mapsforge.map.awt.graphics.AwtGraphicFactory
 import org.mapsforge.map.datastore.MapDataStore
 import org.mapsforge.map.layer.cache.InMemoryTileCache
-import org.mapsforge.map.layer.hills.DemFolderFS
-import org.mapsforge.map.layer.hills.DiffuseLightShadingAlgorithm
 import org.mapsforge.map.layer.hills.HillsRenderConfig
-import org.mapsforge.map.layer.hills.MemoryCachingHgtReaderTileSource
 import org.mapsforge.map.layer.labels.TileBasedLabelStore
 import org.mapsforge.map.layer.renderer.DatabaseRenderer
 import org.mapsforge.map.layer.renderer.RendererJob
@@ -24,7 +21,13 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import javax.imageio.ImageIO
-import kotlin.math.*
+import kotlin.math.PI
+import kotlin.math.ceil
+import kotlin.math.cos
+import kotlin.math.floor
+import kotlin.math.ln
+import kotlin.math.pow
+import kotlin.math.tan
 
 class TileRenderer(
     mapFilePath: String,
@@ -68,7 +71,18 @@ class TileRenderer(
         } else {
             null
         }
-        */
+         */
+    }
+
+    /**
+     * Evicts the cached renderer and theme future for the given theme,
+     * so the next tile request reloads the theme XML from disk.
+     */
+    @Synchronized
+    fun clearThemeCache(themeName: String) {
+        rendererCache.remove(themeName)
+        themeFutureCache.remove(themeName)
+        println("Theme cache cleared for: $themeName")
     }
 
     /**
@@ -84,19 +98,20 @@ class TileRenderer(
 
         // Enable all categories that are marked enabled="true" in the stylemenu.
         // Without this callback Mapsforge ignores enabled layers (hiking_routes, contours, etc.).
-        val menuCallback = object : XmlRenderThemeMenuCallback {
-            override fun getCategories(menu: XmlRenderThemeStyleMenu): Set<String> {
-                val active = mutableSetOf<String>()
-                val base = menu.getLayer(menu.defaultValue)
-                if (base != null) {
-                    active.addAll(base.categories)
-                    for (overlay in base.overlays) {
-                        if (overlay.isEnabled) active.addAll(overlay.categories)
+        val menuCallback =
+            object : XmlRenderThemeMenuCallback {
+                override fun getCategories(menu: XmlRenderThemeStyleMenu): Set<String> {
+                    val active = mutableSetOf<String>()
+                    val base = menu.getLayer(menu.defaultValue)
+                    if (base != null) {
+                        active.addAll(base.categories)
+                        for (overlay in base.overlays) {
+                            if (overlay.isEnabled) active.addAll(overlay.categories)
+                        }
                     }
+                    return active
                 }
-                return active
             }
-        }
         val renderTheme = ExternalRenderTheme(themeFile, menuCallback)
         val future = RenderThemeFuture(graphicFactory, renderTheme, displayModel)
 
@@ -106,14 +121,16 @@ class TileRenderer(
             it.join()
         }
 
-        val renderer = DatabaseRenderer(
-            mapDataStore, graphicFactory,
-            InMemoryTileCache(0),
-            TileBasedLabelStore(1000),
-            true,  // renderLabels
-            true,  // cacheLabels
-            hillsRenderConfig,
-        )
+        val renderer =
+            DatabaseRenderer(
+                mapDataStore,
+                graphicFactory,
+                InMemoryTileCache(0),
+                TileBasedLabelStore(1000),
+                true, // renderLabels
+                true, // cacheLabels
+                hillsRenderConfig,
+            )
 
         themeFutureCache[themeName] = future
         rendererCache[themeName] = renderer

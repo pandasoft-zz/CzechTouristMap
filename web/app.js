@@ -13,9 +13,10 @@ let tileLayer = null;
 
 // ── Theme management ──────────────────────────────────────────────────────────
 
-const themeSelect = document.getElementById('theme-select');
 const statusDot   = document.getElementById('status-dot');
 const statusText  = document.getElementById('status-text');
+
+let currentThemeName = '';
 
 function setStatus(state, text) {
   statusDot.className = 'dot dot-' + state;
@@ -24,7 +25,7 @@ function setStatus(state, text) {
 
 /**
  * Recreates the Leaflet tile layer so all tiles are re-fetched
- * (needed after theme switch because tile URLs use a cache-buster).
+ * (needed after theme reload because tile URLs use a cache-buster).
  */
 function reloadTileLayer() {
   if (tileLayer) {
@@ -39,7 +40,7 @@ function reloadTileLayer() {
     errorTileUrl: 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEAAAAALAAAAAABAAEAAAI=', // 1px transparent
   });
 
-  tileLayer.on('tileload', () => setStatus('ok', `Téma: ${themeSelect.value}`));
+  tileLayer.on('tileload', () => setStatus('ok', `Téma: ${currentThemeName}`));
   tileLayer.on('tileerror', (e) => {
     // 204 = tile outside map bounds – not a real error
     if (e.tile.src.includes('data:')) return;
@@ -50,22 +51,25 @@ function reloadTileLayer() {
 }
 
 /**
- * Tells the server to switch theme, then reloads tiles.
+ * Asks the server to rebuild the theme XML from XSLT and reload tiles.
+ * Server-side: runs xsltproc via theme-builder, then evicts renderer cache.
  */
-async function selectTheme(themeName) {
-  if (!themeName) return;
-  setStatus('loading', `Přepínám na ${themeName}…`);
+async function refreshTheme() {
+  setStatus('loading', 'Sestavuji téma…');
   try {
-    const res = await fetch(`${API}/themes/select/${encodeURIComponent(themeName)}`, { method: 'POST' });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const res = await fetch(`${API}/themes/rebuild`, { method: 'POST' });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `HTTP ${res.status}`);
+    }
     reloadTileLayer();
-    setStatus('ok', `Téma: ${themeName}`);
+    setStatus('ok', `Téma: ${currentThemeName}`);
   } catch (err) {
-    setStatus('error', 'Chyba přepnutí tématu: ' + err.message);
+    setStatus('error', 'Chyba sestavení tématu: ' + err.message);
   }
 }
 
-themeSelect.addEventListener('change', () => selectTheme(themeSelect.value));
+document.getElementById('theme-refresh-btn').addEventListener('click', refreshTheme);
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
 
@@ -86,41 +90,13 @@ async function init() {
     setStatus('nomap', 'Map soubor nenalezen – viz maps/README.md');
   }
 
-  // 2. Fetch available themes
-  let themes = [];
-  try {
-    const res = await fetch(`${API}/themes`);
-    themes = await res.json();
-  } catch {
-    setStatus('error', 'Nelze načíst seznam témat');
-  }
+  // 2. Store current theme name for status display
+  currentThemeName = health.currentTheme || '';
 
-  // 3. Populate theme dropdown
-  themeSelect.innerHTML = '';
-  if (themes.length === 0) {
-    const opt = document.createElement('option');
-    opt.value = '';
-    opt.textContent = '-- žádná témata --';
-    themeSelect.appendChild(opt);
-  } else {
-    themes.forEach(name => {
-      const opt = document.createElement('option');
-      opt.value = name;
-      // Strip .xml extension for display
-      opt.textContent = name.replace(/\.xml$/i, '');
-      themeSelect.appendChild(opt);
-    });
-
-    // Pre-select the server's current theme
-    if (health.currentTheme) {
-      themeSelect.value = health.currentTheme;
-    }
-  }
-
-  // 4. Start rendering tiles
+  // 3. Start rendering tiles
   if (health.mapLoaded) {
     reloadTileLayer();
-    setStatus('ok', `Téma: ${themeSelect.value}`);
+    setStatus('ok', `Téma: ${currentThemeName}`);
   } else {
     setStatus('nomap', 'Stáhněte .map soubor – viz README');
   }

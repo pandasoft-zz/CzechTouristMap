@@ -37,34 +37,6 @@ html, body {
   white-space: nowrap;
 }
 
-#theme-section {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-#theme-section label {
-  color: #aaa;
-  white-space: nowrap;
-}
-
-#theme-select {
-  background: #3a3a3a;
-  color: #f0f0f0;
-  border: 1px solid #555;
-  border-radius: 4px;
-  padding: 5px 10px;
-  font-size: 13px;
-  cursor: pointer;
-  min-width: 180px;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-#theme-select:hover,
-#theme-select:focus {
-  border-color: #7ecef4;
-}
 
 #status-bar {
   display: flex;
