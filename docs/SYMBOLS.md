@@ -143,7 +143,7 @@ _Hrady, zříceniny, mlýny, pomníky, mohyly_
 | <img src="../themes/historic/mine.svg" width="32" height="32" alt="mine"> | Důl (historický) | `historic/mine.svg` |
 | <img src="../themes/historic/palace.svg" width="32" height="32" alt="palace"> | Palác | `historic/palace.svg` |
 | <img src="../themes/historic/plaque.svg" width="32" height="32" alt="plaque"> | Pamětní deska | `historic/plaque.svg` |
-| <img src="../themes/historic/quarry.svg" width="32" height="32" alt="quarry"> | Lom (vzor) | `historic/quarry.svg` |
+| <img src="../themes/historic/quarry.svg" width="32" height="32" alt="quarry"> | Lom (historický) | `historic/quarry.svg` |
 | <img src="../themes/historic/ruins.svg" width="32" height="32" alt="ruins"> | Zřícenina | `historic/ruins.svg` |
 | <img src="../themes/historic/ruins_castle.svg" width="32" height="32" alt="ruins_castle"> | Zřícenina hradu | `historic/ruins_castle.svg` |
 | <img src="../themes/historic/ruins_church.svg" width="32" height="32" alt="ruins_church"> | Zřícenina kostela | `historic/ruins_church.svg` |
@@ -321,7 +321,7 @@ _Hřiště, bazény, kluziště, golf, zoo_
 | <img src="../themes/leisure/swimming.svg" width="32" height="32" alt="swimming"> | Plavání / bazén | `leisure/swimming.svg` |
 | <img src="../themes/leisure/tennis.svg" width="32" height="32" alt="tennis"> | Tenis | `leisure/tennis.svg` |
 | <img src="../themes/leisure/water_ski.svg" width="32" height="32" alt="water_ski"> | Vodní lyžování | `leisure/water_ski.svg` |
-| <img src="../themes/leisure/zoo.svg" width="32" height="32" alt="zoo"> | ZOO (vzor) | `leisure/zoo.svg` |
+| <img src="../themes/leisure/zoo.svg" width="32" height="32" alt="zoo"> | ZOO | `leisure/zoo.svg` |
 
 ## Doprava
 
