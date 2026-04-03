@@ -1,5 +1,16 @@
 services:
 
+  theme-builder:
+    build: ./theme-builder
+    container_name: maprender-theme-builder
+    environment:
+      STYLE: CzechTouristMap
+    volumes:
+      - ./src/styles:/app/styles:ro
+      - ./theme-builder/server.py:/app/server.py:ro
+      - ./themes:/data/themes:rw
+    restart: unless-stopped
+
   tile-server:
     build: ./tile-server
     container_name: maprender-tile-server
@@ -8,6 +19,9 @@ services:
       THEMES_DIR: /data/themes
       LOCATIONS_FILE: /data/config/locations.yaml
       HGT_DIR: /data/hgt
+      THEME_BUILDER_URL: http://theme-builder:5000
+    depends_on:
+      - theme-builder
     volumes:
       - type: image
         source: ghcr.io/pandasoft-zz/czechtouristmap-mapdata:latest

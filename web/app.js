@@ -51,18 +51,21 @@ function reloadTileLayer() {
 }
 
 /**
- * Asks the server to drop its in-memory theme cache so the XML is
- * reloaded from disk on the next tile request, then reloads map tiles.
+ * Asks the server to rebuild the theme XML from XSLT and reload tiles.
+ * Server-side: runs xsltproc via theme-builder, then evicts renderer cache.
  */
 async function refreshTheme() {
-  setStatus('loading', 'Obnova tématu…');
+  setStatus('loading', 'Sestavuji téma…');
   try {
-    const res = await fetch(`${API}/themes/refresh`, { method: 'POST' });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const res = await fetch(`${API}/themes/rebuild`, { method: 'POST' });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `HTTP ${res.status}`);
+    }
     reloadTileLayer();
     setStatus('ok', `Téma: ${currentThemeName}`);
   } catch (err) {
-    setStatus('error', 'Chyba obnovy tématu: ' + err.message);
+    setStatus('error', 'Chyba sestavení tématu: ' + err.message);
   }
 }
 

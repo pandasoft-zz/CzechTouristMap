@@ -36,6 +36,7 @@ fun main() {
     server.createContext("/tiles/") { handleTile(it, tileRenderer, themeManager) }
     server.createContext("/render") { handleRender(it, tileRenderer) }
     server.createContext("/locations") { handleLocations(it, locationManager) }
+    server.createContext("/themes/rebuild") { handleRebuildTheme(it, themeManager, tileRenderer) }
     server.createContext("/themes/refresh") { handleRefreshTheme(it, themeManager, tileRenderer) }
     server.createContext("/themes/select/") { handleSelectTheme(it, themeManager) }
     server.createContext("/themes/current") { handleCurrentTheme(it, themeManager) }
@@ -273,6 +274,55 @@ private fun handleHealth(
     val count = themeManager.listThemes().size
     val json = """{"status":"ok","mapLoaded":$loaded,"currentTheme":"$theme","themes":$count}"""
     exchange.sendJson(200, json)
+}
+
+// POST /themes/rebuild  →  calls theme-builder to regenerate XML, then clears renderer cache
+private fun handleRebuildTheme(
+    exchange: HttpExchange,
+    themeManager: ThemeManager,
+    renderer: TileRenderer?,
+) {
+    exchange.addCors()
+    if (exchange.requestMethod == "OPTIONS") {
+        exchange.sendResponseHeaders(200, -1)
+        exchange.close()
+        return
+    }
+    if (exchange.requestMethod != "POST") {
+        exchange.sendError(405, "Method not allowed")
+        return
+    }
+    val theme = themeManager.currentTheme
+    if (theme == null) {
+        exchange.sendJson(404, """{"success":false,"error":"No active theme"}""")
+        return
+    }
+
+    // Step 1: ask theme-builder service to regenerate the XML from XSLT
+    val builderUrl = System.getenv("THEME_BUILDER_URL") ?: "http://theme-builder:5000"
+    try {
+        val client = java.net.http.HttpClient.newHttpClient()
+        val request =
+            java.net.http.HttpRequest.newBuilder()
+                .uri(java.net.URI.create("$builderUrl/build"))
+                .POST(java.net.http.HttpRequest.BodyPublishers.noBody())
+                .timeout(java.time.Duration.ofSeconds(120))
+                .build()
+        val response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString())
+        if (response.statusCode() != 200) {
+            val err = response.body().take(300).escJson()
+            exchange.sendJson(502, """{"success":false,"error":"Theme build failed: $err"}""")
+            return
+        }
+    } catch (e: Exception) {
+        val err = (e.message ?: "unknown").escJson()
+        exchange.sendJson(502, """{"success":false,"error":"Theme builder unavailable: $err"}""")
+        return
+    }
+
+    // Step 2: evict renderer cache so new XML is loaded on the next tile request
+    renderer?.clearThemeCache(theme)
+    exchange.sendJson(200, """{"success":true,"theme":"${theme.escJson()}"}""")
 }
 
 // POST /themes/refresh  →  clears cached renderer so theme XML is reloaded from disk
