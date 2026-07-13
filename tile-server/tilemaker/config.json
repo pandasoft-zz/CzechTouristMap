@@ -1,0 +1,22 @@
+{
+  "layers": {
+    "water": {
+      "file": "water.lua",
+      "description": "Water layer"
+    },
+    "landuse": {
+      "file": "landuse.lua",
+      "description": "Landuse layer"
+    },
+    "transportation": {
+      "file": "transportation.lua",
+      "description": "Roads and transportation"
+    }
+  },
+  "settings": {
+    "compress": "gzip",
+    "pool_size": 8,
+    "name": "CzechTouristMap",
+    "attribution": "© OpenStreetMap contributors | CzechTouristMap theme"
+  }
+}

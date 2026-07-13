@@ -1,8 +1,14 @@
 # Generated map theme output
 themes/*.xml
 
+# Generated PMTiles (production builds)
+web/assets/*.pmtiles
+web/assets/*.pbf
+
 # Downloaded map data
 maps/*.map
+maps/*.pbf
+maps/*.osm.pbf
 
 # Python
 __pycache__/

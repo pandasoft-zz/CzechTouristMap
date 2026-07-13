@@ -48,3 +48,15 @@ locations:
     lng: 16.755124
     zoom: 13
     note: Nadpis vodni ploxy je porad moc veliky
+
+  - name: Blansko
+    lat: 49.3706
+    lng: 16.6326
+    zoom: 13
+    note: Small town, testing area for rapid PMTiles build
+
+  - name: Brno — Stará osada
+    lat: 49.1606
+    lng: 16.6518
+    zoom: 14
+    note: Historic suburb of Brno, mixed terrain

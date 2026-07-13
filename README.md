@@ -16,7 +16,17 @@ The project was created as an open-source alternative to proprietary map styles 
 
 ## Technology
 
+**Development (live preview)**
 - **Mapsforge** — vector map format and render engine
+- **Tile-server** (Gradle/Kotlin) — renders tiles at runtime from XSLT theme
+- **Leaflet** — web map viewer
+
+**Production (offline distribution)**
+- **PMTiles** — single-file map archive format (compact, HTTP range-request friendly)
+- **Tilemaker** — prerender OSM data to PMTiles using Mapbox GL styles
+- **MapLibre GL** — client-side rendering from PMTiles
+
+**Common**
 - **XSLT** — templates for generating the XML render theme
 - **OpenHiking** — modular XSLT base (GPL-3.0)
 - **Docker** — reproducible build system
@@ -67,9 +77,23 @@ mapRender/
 └── README.md
 ```
 
-## Running locally (tile server)
+## Development workflow (live tile-server)
 
-The tile server renders map tiles from a Mapsforge `.map` file.
+For rapid style iteration with instant preview:
+
+```bash
+# 1. Build XSLT theme
+make theme
+
+# 2. Start live server (tile-server + web UI)
+make up
+
+# 3. Open http://localhost in browser
+# → Modify XSLT in src/styles/CzechTouristMap/
+# → Changes appear live in browser
+```
+
+The tile server renders map tiles from a Mapsforge `.map` file on-the-fly.
 The map file is stored in a Docker volume and populated from a GHCR image on first start.
 
 ### First-time setup
@@ -86,7 +110,7 @@ The map file is stored in a Docker volume and populated from a GHCR image on fir
    On first run, `map-init` copies `czech-republic.map` from the GHCR image into the
    `map-data` volume. Subsequent starts skip this step automatically.
 
-3. Open the map viewer at `http://localhost:8080`.
+3. Open the map viewer at `http://localhost`.
 
 ### Updating the map file
 
@@ -98,16 +122,61 @@ The map file is stored in a Docker volume and populated from a GHCR image on fir
    docker compose up
    ```
 
-### Manual volume population (no GHCR access)
+---
+
+## Production workflow (PMTiles)
+
+For offline-capable, distributable map files:
+
+### Quick test build (single area, ~30 seconds)
 
 ```bash
-docker volume create maprender_map-data
-docker run --rm \
-  -v "$PWD/maps/czech-republic.map:/src/czech-republic.map:ro" \
-  -v maprender_map-data:/export \
-  busybox cp /src/czech-republic.map /export/czech-republic.map
-docker compose up --no-deps tile-server
+# Build PMTiles for Blansko area only
+make build-pmtiles-test
+
+# Output: web/assets/CzechTouristMap.pmtiles (~5 MB)
+# View in browser: http://localhost/index.html (automatically detects PMTiles)
 ```
+
+### Full build (entire Czech Republic, ~2 hours)
+
+```bash
+# Build PMTiles for entire Czech Republic
+make build-pmtiles
+
+# Output: web/assets/CzechTouristMap.pmtiles (~45 MB)
+```
+
+### Build specific area
+
+```bash
+# By predefined location (from config/locations.yaml)
+./scripts/build-pmtiles.sh "Brno — Stará osada"
+./scripts/build-pmtiles.sh Blansko
+
+# By custom bbox (west,south,east,north)
+./scripts/build-pmtiles.sh --bbox 13.0,48.5,14.0,49.5 --zoom-max 14 --output Sumava.pmtiles
+
+# Full ČR with custom zoom
+./scripts/build-pmtiles.sh --zoom-max 16
+```
+
+The PMTiles file is **self-contained** — download once and use offline everywhere:
+- Web (MapLibre GL + PMTiles protocol)
+- Android (Malachite, OsmAnd, etc.)
+- WearOS
+- Offline backup
+
+---
+
+## Workflow summary
+
+| Goal | Command |
+|------|---------|
+| Develop theme (live) | `make up` → edit XSLT → browser auto-refreshes |
+| Test build (minutes) | `make build-pmtiles-test` → preview PMTiles |
+| Production build | `make build-pmtiles` → entire ČR |
+| Custom area | `./scripts/build-pmtiles.sh --bbox ...` |
 
 ---
 
