@@ -16,12 +16,6 @@ __pycache__/
 *.pyc
 *.pyo
 
-# Gradle / Kotlin build artifacts
-tile-server/build/
-tile-server/.gradle/
-*.jar
-*.class
-
 # Editor & IDE
 .history/
 .idea/

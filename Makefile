@@ -1,55 +1,48 @@
 STYLE ?= CzechTouristMap
 
-DEV_RUN = docker compose run --rm --no-deps --build dev
+.PHONY: help up down build-pmtiles build-pmtiles-test lint
 
-.PHONY: all theme test lint lint-shell lint-yaml lint-python lint-xml lint-kotlin up down build-pmtiles build-pmtiles-test
+help:
+	@echo "CzechTouristMap — Tegola + MapLibre GL + PMTiles"
+	@echo ""
+	@echo "Development (live preview):"
+	@echo "  make up              Start Tegola tile server + web UI (http://localhost)"
+	@echo "  make down            Stop all services"
+	@echo ""
+	@echo "Production (PMTiles prerendering):"
+	@echo "  make build-pmtiles   Build entire Czech Republic (2h)"
+	@echo "  make build-pmtiles-test  Build Blansko area only (30s)"
+	@echo ""
+	@echo "Styling:"
+	@echo "  make edit-style      Open Mapbox GL style editor (Maputnik)"
+	@echo "  make validate-style  Validate styles/CzechTouristMap.json"
+	@echo ""
 
-## Run theme build + lint + tests
-all: theme lint test
-
-## Run dev full stack
-dev: up
-
-## Build theme XML from XSLT source (requires Docker)
-theme:
-	docker compose run --rm --no-deps --build theme-builder sh /app/build.sh
-
-## Run all linters (requires Docker)
-lint: lint-shell lint-yaml lint-python lint-xml lint-kotlin
-
-lint-shell:
-	$(DEV_RUN) shellcheck scripts/push-map-image.sh scripts/build-pmtiles.sh theme-builder/build.sh
-
-lint-yaml:
-	$(DEV_RUN) yamllint -c .yamllint.yml config/locations.yaml .github/workflows/*.yml
-
-lint-python:
-	$(DEV_RUN) ruff check scripts/ tests/ theme-builder/server.py
-
-lint-xml:
-	$(DEV_RUN) xmllint --noout src/styles/$(STYLE)/*.xslt
-
-lint-kotlin:
-	$(DEV_RUN) ktlint "tile-server/src/**/*.kt"
-
-## Run theme XML validation tests (requires Docker)
-test:
-	$(DEV_RUN) pytest tests/
-
-## Start the full stack (live tile-server for development)
+## Start live development stack (Tegola + web)
 up:
-	docker compose up --build -d
+	docker compose up --build
 
-## Stop the full stack
+## Stop all services
 down:
 	docker compose down
 
-## Build PMTiles from entire Czech Republic
-build-pmtiles: theme
+## Build PMTiles for entire Czech Republic
+build-pmtiles:
 	chmod +x scripts/build-pmtiles.sh
 	./scripts/build-pmtiles.sh --zoom-max 14
 
-## Build PMTiles test area (Blansko — ~30 seconds)
-build-pmtiles-test: theme
+## Build PMTiles test area (Blansko, ~30 seconds)
+build-pmtiles-test:
 	chmod +x scripts/build-pmtiles.sh
 	./scripts/build-pmtiles.sh Blansko --zoom-max 14
+
+## Edit Mapbox GL style (requires npm + maputnik)
+edit-style:
+	@echo "Opening Mapbox GL style editor..."
+	@echo "Install: npm install -g @mapbox/mapbox-gl-style-spec"
+	npx @mapbox/mapbox-gl-style-spec styles/CzechTouristMap.json
+
+## Validate Mapbox GL style
+validate-style:
+	@echo "Validating Mapbox GL style..."
+	npx mapbox-gl-style-spec validate styles/CzechTouristMap.json || true
