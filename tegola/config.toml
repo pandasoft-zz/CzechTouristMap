@@ -1,0 +1,102 @@
+# Tegola configuration
+# Lightweight tile server for OpenStreetMap data
+
+[webserver]
+hostname = "0.0.0.0"
+port = 8080
+
+[[providers]]
+name = "osm"
+type = "mvt"
+tilepath = "/data/maps/czech-republic.osm.pbf"
+
+  [[providers.layers]]
+  name = "water"
+  sql = "SELECT id, geometry FROM water_polygon WHERE geometry && !BBOX!"
+
+  [[providers.layers]]
+  name = "landuse"
+  sql = "SELECT id, class, geometry FROM landuse_polygon WHERE geometry && !BBOX!"
+
+  [[providers.layers]]
+  name = "building"
+  sql = "SELECT id, geometry FROM building_polygon WHERE geometry && !BBOX!"
+  geometry_field = "geometry"
+  id_field = "id"
+
+  [[providers.layers]]
+  name = "waterway"
+  sql = "SELECT id, class, geometry FROM waterway_line WHERE geometry && !BBOX!"
+  geometry_field = "geometry"
+  id_field = "id"
+
+  [[providers.layers]]
+  name = "transportation"
+  sql = "SELECT id, class, geometry FROM transportation_line WHERE geometry && !BBOX!"
+  geometry_field = "geometry"
+  id_field = "id"
+
+  [[providers.layers]]
+  name = "boundary"
+  sql = "SELECT id, admin_level, maritime, geometry FROM boundary_line WHERE geometry && !BBOX!"
+  geometry_field = "geometry"
+  id_field = "id"
+
+  [[providers.layers]]
+  name = "place"
+  sql = "SELECT id, class, name, geometry FROM place_point WHERE geometry && !BBOX!"
+  geometry_field = "geometry"
+  id_field = "id"
+
+  [[providers.layers]]
+  name = "transportation_name"
+  sql = "SELECT id, class, name, geometry FROM transportation_name_line WHERE geometry && !BBOX!"
+  geometry_field = "geometry"
+  id_field = "id"
+
+[[maps]]
+name = "CzechTouristMap"
+attribution = "© OpenStreetMap contributors"
+
+  [[maps.layers]]
+  provider_layer = "osm.water"
+  min_zoom = 0
+  max_zoom = 14
+
+  [[maps.layers]]
+  provider_layer = "osm.landuse"
+  min_zoom = 0
+  max_zoom = 14
+
+  [[maps.layers]]
+  provider_layer = "osm.building"
+  min_zoom = 14
+  max_zoom = 14
+
+  [[maps.layers]]
+  provider_layer = "osm.waterway"
+  min_zoom = 3
+  max_zoom = 14
+
+  [[maps.layers]]
+  provider_layer = "osm.transportation"
+  min_zoom = 0
+  max_zoom = 14
+
+  [[maps.layers]]
+  provider_layer = "osm.boundary"
+  min_zoom = 0
+  max_zoom = 14
+
+  [[maps.layers]]
+  provider_layer = "osm.place"
+  min_zoom = 0
+  max_zoom = 14
+
+  [[maps.layers]]
+  provider_layer = "osm.transportation_name"
+  min_zoom = 11
+  max_zoom = 14
+
+[cache]
+ttl = 3600

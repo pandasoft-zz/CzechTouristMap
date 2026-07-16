@@ -1,217 +1,162 @@
-// All API calls go through nginx proxy → tile-server
-const API = '/api';
+const CONFIG = {
+  tegola_url: 'http://localhost:8080',
+  pmtiles_file: '/assets/CzechTouristMap.pmtiles',
+  initial_center: [15.5, 49.8],
+  initial_zoom: 7,
+};
 
-// ── Map init ──────────────────────────────────────────────────────────────────
+let map = null;
+let currentMode = 'tegola';
 
-const map = L.map('map', {
-  center: [49.8, 15.5],   // Střed České republiky
-  zoom: 7,
-  zoomControl: true,
-});
-
-let tileLayer = null;
-
-// ── Theme management ──────────────────────────────────────────────────────────
-
-const statusDot   = document.getElementById('status-dot');
-const statusText  = document.getElementById('status-text');
-
-let currentThemeName = '';
-
-function setStatus(state, text) {
-  statusDot.className = 'dot dot-' + state;
-  statusText.textContent = text;
+async function detectMode() {
+  try {
+    const response = await fetch(CONFIG.pmtiles_file, { method: 'HEAD' });
+    if (response.ok) return 'pmtiles';
+  } catch (e) {}
+  return 'tegola';
 }
 
-/**
- * Recreates the Leaflet tile layer so all tiles are re-fetched
- * (needed after theme reload because tile URLs use a cache-buster).
- */
-function reloadTileLayer() {
-  if (tileLayer) {
-    map.removeLayer(tileLayer);
-  }
-  const cacheBuster = Date.now();
-  tileLayer = L.tileLayer(`${API}/tiles/{z}/{x}/{y}.png?t=${cacheBuster}`, {
-    tileSize: 256,
-    minZoom: 2,
-    maxZoom: 18,
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | Rendered with <a href="https://mapsforge.org">Mapsforge</a>',
-    errorTileUrl: 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEAAAAALAAAAAABAAEAAAI=', // 1px transparent
+async function initPMTilesMode() {
+  currentMode = 'pmtiles';
+  let protocol = new PMTiles(CONFIG.pmtiles_file);
+  maplibregl.addProtocol('pmtiles', protocol.tile);
+
+  const style = {
+    version: 8,
+    sources: {
+      pmtiles: {
+        type: 'vector',
+        url: 'pmtiles://' + CONFIG.pmtiles_file,
+        minzoom: 0,
+        maxzoom: 14
+      }
+    },
+    layers: buildLayers('pmtiles')
+  };
+
+  map = new maplibregl.Map({
+    container: 'map',
+    style: style,
+    center: CONFIG.initial_center,
+    zoom: CONFIG.initial_zoom
   });
 
-  tileLayer.on('tileload', () => setStatus('ok', `Téma: ${currentThemeName}`));
-  tileLayer.on('tileerror', (e) => {
-    // 204 = tile outside map bounds – not a real error
-    if (e.tile.src.includes('data:')) return;
-    setStatus('error', 'Chyba načítání dlaždic');
+  setupUI();
+}
+
+async function initTegolaMode() {
+  currentMode = 'tegola';
+  const style = {
+    version: 8,
+    sources: {
+      tegola: {
+        type: 'vector',
+        tiles: [CONFIG.tegola_url + '/data/CzechTouristMap/{z}/{x}/{y}.pbf'],
+        minzoom: 0,
+        maxzoom: 14
+      }
+    },
+    layers: buildLayers('tegola')
+  };
+
+  map = new maplibregl.Map({
+    container: 'map',
+    style: style,
+    center: CONFIG.initial_center,
+    zoom: CONFIG.initial_zoom
   });
 
-  tileLayer.addTo(map);
+  setupUI();
 }
 
-/**
- * Asks the server to rebuild the theme XML from XSLT and reload tiles.
- * Server-side: runs xsltproc via theme-builder, then evicts renderer cache.
- */
-async function refreshTheme() {
-  setStatus('loading', 'Sestavuji téma…');
-  try {
-    const res = await fetch(`${API}/themes/rebuild`, { method: 'POST' });
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(body.error || `HTTP ${res.status}`);
-    }
-    reloadTileLayer();
-    setStatus('ok', `Téma: ${currentThemeName}`);
-  } catch (err) {
-    setStatus('error', 'Chyba sestavení tématu: ' + err.message);
-  }
+function buildLayers(sourceId) {
+  return [
+    { id: 'background', type: 'background', paint: { 'background-color': '#fdfdf0' } },
+    { id: 'water', type: 'fill', source: sourceId, 'source-layer': 'water', paint: { 'fill-color': '#a0c8f0' } },
+    { id: 'landuse-forest', type: 'fill', source: sourceId, 'source-layer': 'landuse', filter: ['==', ['get', 'class'], 'forest'], paint: { 'fill-color': '#c8e6c9' } },
+    { id: 'landuse-grass', type: 'fill', source: sourceId, 'source-layer': 'landuse', filter: ['==', ['get', 'class'], 'grass'], paint: { 'fill-color': '#e8f5e9' } },
+    { id: 'highway-motorway', type: 'line', source: sourceId, 'source-layer': 'transportation', filter: ['==', ['get', 'class'], 'motorway'], paint: { 'line-color': '#f9c74f', 'line-width': ['interpolate', ['linear'], ['zoom'], 5, 0.5, 14, 3] } },
+    { id: 'highway-primary', type: 'line', source: sourceId, 'source-layer': 'transportation', filter: ['==', ['get', 'class'], 'primary'], paint: { 'line-color': '#ffb81a', 'line-width': ['interpolate', ['linear'], ['zoom'], 5, 0.3, 14, 2] } },
+    { id: 'highway-secondary', type: 'line', source: sourceId, 'source-layer': 'transportation', filter: ['==', ['get', 'class'], 'secondary'], paint: { 'line-color': '#ffffff', 'line-width': ['interpolate', ['linear'], ['zoom'], 7, 0.2, 14, 1.5] } },
+    { id: 'highway-path', type: 'line', source: sourceId, 'source-layer': 'transportation', filter: ['==', ['get', 'class'], 'path'], paint: { 'line-color': '#8b9e7d', 'line-width': ['interpolate', ['linear'], ['zoom'], 10, 0.2, 14, 0.8], 'line-dasharray': [2, 2] }, minzoom: 12 },
+    { id: 'waterway', type: 'line', source: sourceId, 'source-layer': 'waterway', paint: { 'line-color': '#a0c8f0', 'line-width': ['interpolate', ['linear'], ['zoom'], 5, 0.2, 14, 1] } },
+    { id: 'admin-border', type: 'line', source: sourceId, 'source-layer': 'boundary', paint: { 'line-color': '#8b7d7d', 'line-width': ['interpolate', ['linear'], ['zoom'], 3, 0.5, 14, 1], 'line-dasharray': [2, 1] } },
+    { id: 'place-label', type: 'symbol', source: sourceId, 'source-layer': 'place', layout: { 'text-field': ['get', 'name'], 'text-font': ['Open Sans Regular'], 'text-size': ['interpolate', ['linear'], ['zoom'], 7, 10, 14, 14], 'text-anchor': 'center' }, paint: { 'text-color': '#333333', 'text-halo-color': '#ffffff', 'text-halo-width': 1 }, minzoom: 7 }
+  ];
 }
 
-document.getElementById('theme-refresh-btn').addEventListener('click', refreshTheme);
+function setupUI() {
+  const statusDot = document.getElementById('status-dot');
+  const statusText = document.getElementById('status-text');
+  const modeText = document.getElementById('mode-text');
 
-// ── Bootstrap ─────────────────────────────────────────────────────────────────
+  modeText.textContent = currentMode === 'pmtiles' ? '📦 PMTiles' : '🌐 Tegola';
 
-async function init() {
-  setStatus('loading', 'Připojování k serveru…');
+  map.on('load', () => {
+    statusDot.className = 'dot dot-ok';
+    statusText.textContent = 'Loaded';
+  });
 
-  // 1. Check server health
-  let health;
-  try {
-    const res = await fetch(`${API}/health`);
-    health = await res.json();
-  } catch {
-    setStatus('error', 'Server nedostupný – je spuštěn Docker?');
-    return;
-  }
+  const zoomInfo = document.getElementById('zoom-info');
+  const coordsInfo = document.getElementById('coords-info');
 
-  if (!health.mapLoaded) {
-    setStatus('nomap', 'Map soubor nenalezen – viz maps/README.md');
-  }
+  map.on('move', () => {
+    const c = map.getCenter();
+    zoomInfo.textContent = `zoom: ${map.getZoom().toFixed(1)}`;
+    coordsInfo.textContent = `${c.lat.toFixed(4)}, ${c.lng.toFixed(4)}`;
+  });
 
-  // 2. Store current theme name for status display
-  currentThemeName = health.currentTheme || '';
-
-  // 3. Start rendering tiles
-  if (health.mapLoaded) {
-    reloadTileLayer();
-    setStatus('ok', `Téma: ${currentThemeName}`);
-  } else {
-    setStatus('nomap', 'Stáhněte .map soubor – viz README');
-  }
+  loadLocations();
 }
-
-// ── Info box (zoom + coords) ──────────────────────────────────────────────────
-
-const zoomInfo  = document.getElementById('zoom-info');
-const coordInfo = document.getElementById('coords-info');
-
-map.on('zoomend', () => {
-  zoomInfo.textContent = `zoom: ${map.getZoom()}`;
-});
-map.on('mousemove', (e) => {
-  const { lat, lng } = e.latlng;
-  coordInfo.textContent = `lat: ${lat.toFixed(5)}  lng: ${lng.toFixed(5)}`;
-});
-
-// ── Locations ──────────────────────────────────────────────────────────────────
-
-const locSelect       = document.getElementById('loc-select');
-const locEditBtn      = document.getElementById('loc-edit-btn');
-const locEditControls = document.getElementById('loc-edit-controls');
-const locRemoveBtn    = document.getElementById('loc-remove-btn');
-const locAddBtn       = document.getElementById('loc-add-btn');
-const locOverlay      = document.getElementById('loc-overlay');
-const locFormCoords   = document.getElementById('loc-form-coords');
-const locFormMsg      = document.getElementById('loc-form-msg');
-
-let locations = [];
 
 async function loadLocations() {
   try {
-    const res = await fetch(`${API}/locations`);
-    locations = await res.json();
-    const prev = locSelect.value;
-    locSelect.innerHTML = locations.map((l, i) => `<option value="${i}">${l.name}</option>`).join('');
-    const prevIdx = prev !== '' ? parseInt(prev, 10) : -1;
-    if (prevIdx >= 0 && locations[prevIdx]) {
-      locSelect.value = prevIdx;
-    } else if (locations.length > 0) {
-      locSelect.value = '0';
-      map.setView([locations[0].lat, locations[0].lng], locations[0].zoom);
+    const res = await fetch('/config/locations.yaml');
+    const yaml = await res.text();
+    const select = document.getElementById('loc-select');
+    const lines = yaml.split('\n');
+    const locations = [];
+    let current = null;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (line.trim().startsWith('- name:')) {
+        if (current) locations.push(current);
+        current = { name: line.match(/- name: (.*)/)[1], lat: 0, lng: 0, zoom: 12 };
+      }
+      if (current) {
+        if (line.includes('lat:')) current.lat = parseFloat(line.match(/lat: ([\d.-]+)/)[1]);
+        if (line.includes('lng:')) current.lng = parseFloat(line.match(/lng: ([\d.-]+)/)[1]);
+        if (line.includes('zoom:')) current.zoom = parseInt(line.match(/zoom: (\d+)/)[1]);
+      }
     }
+    if (current) locations.push(current);
+
+    locations.forEach((loc, i) => {
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = loc.name;
+      select.appendChild(opt);
+    });
+
+    select.addEventListener('change', (e) => {
+      if (e.target.value === '') return;
+      const loc = locations[parseInt(e.target.value)];
+      map.flyTo({ center: [loc.lng, loc.lat], zoom: loc.zoom, duration: 1000 });
+    });
   } catch (e) {
-    console.warn('Could not load locations', e);
+    console.error('Locations failed:', e);
   }
 }
 
-locSelect.addEventListener('change', () => {
-  const idx = parseInt(locSelect.value, 10);
-  if (isNaN(idx)) return;
-  const loc = locations[idx];
-  if (loc) map.setView([loc.lat, loc.lng], loc.zoom);
-});
+async function init() {
+  const mode = await detectMode();
+  if (mode === 'pmtiles') await initPMTilesMode();
+  else await initTegolaMode();
+}
 
-locEditBtn.addEventListener('click', () => {
-  const open = locEditControls.classList.toggle('open');
-  locEditBtn.classList.toggle('tb-btn-active', open);
-});
-
-locRemoveBtn.addEventListener('click', async () => {
-  const idx = parseInt(locSelect.value, 10);
-  if (isNaN(idx)) { alert('Select a location first.'); return; }
-  const loc = locations[idx];
-  if (!confirm(`Remove "${loc.name}"?`)) return;
-  const res = await fetch(`${API}/locations?name=${encodeURIComponent(loc.name)}`, { method: 'DELETE' });
-  if (res.ok) await loadLocations();
-  else alert('Delete failed: ' + res.statusText);
-});
-
-locAddBtn.addEventListener('click', () => {
-  const center = map.getCenter();
-  locFormCoords.textContent =
-    `lat ${center.lat.toFixed(5)}, lng ${center.lng.toFixed(5)}, zoom ${map.getZoom()}`;
-  locFormMsg.textContent = '';
-  document.getElementById('lf-name').value = '';
-  document.getElementById('lf-note').value = '';
-  locOverlay.style.display = 'flex';
-  document.getElementById('lf-name').focus();
-});
-
-document.getElementById('lf-cancel').addEventListener('click', () => {
-  locOverlay.style.display = 'none';
-});
-
-document.getElementById('lf-save').addEventListener('click', async () => {
-  const name = document.getElementById('lf-name').value.trim();
-  if (!name) { locFormMsg.textContent = 'Name is required.'; locFormMsg.style.color = '#f88'; return; }
-
-  const center = map.getCenter();
-  const body = new URLSearchParams({
-    name,
-    lat:  center.lat.toFixed(6),
-    lng:  center.lng.toFixed(6),
-    zoom: map.getZoom(),
-    note: document.getElementById('lf-note').value.trim(),
-  }).toString();
-
-  const res  = await fetch(`${API}/locations`, {
-    method: 'POST', body,
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-  });
-  const data = await res.json();
-  if (res.ok && data.success) {
-    locOverlay.style.display = 'none';
-    await loadLocations();
-    const newIdx = locations.findIndex(l => l.name === name);
-    if (newIdx >= 0) locSelect.value = newIdx;
-  } else {
-    locFormMsg.textContent = data.error || 'Save failed.';
-    locFormMsg.style.color = '#f88';
-  }
-});
-
-// ── Start ─────────────────────────────────────────────────────────────────────
-init();
-loadLocations();
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}

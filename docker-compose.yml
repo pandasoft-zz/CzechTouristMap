@@ -9,61 +9,36 @@ services:
     profiles:
       - dev
 
-  theme-builder:
-    build: ./theme-builder
-    container_name: maprender-theme-builder
+  tegola:
+    build: ./tegola
+    container_name: czechtouristmap-tegola
     environment:
-      STYLE: CzechTouristMap
-    volumes:
-      - ./src/styles:/app/styles:ro
-      - ./themes:/data/themes:rw
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-      start_period: 10s
-
-  tile-server:
-    build: ./tile-server
-    container_name: maprender-tile-server
-    environment:
-      MAP_FILE: /data/maps/czech-republic.map
-      THEMES_DIR: /data/themes
-      LOCATIONS_FILE: /data/config/locations.yaml
-      HGT_DIR: /data/hgt
-      THEME_BUILDER_URL: http://theme-builder:5000
-    depends_on:
-      theme-builder:
-        condition: service_healthy
+      CONFIG: /app/config.toml
     volumes:
       - type: image
-        source: ghcr.io/pandasoft-zz/czechtouristmap-mapdata:latest
+        source: ghcr.io/pandasoft-zz/czechtouristmap-osm:latest
         target: /data/maps
         read_only: true
-      - ./themes:/data/themes:ro
-      - ./config:/data/config
-      - type: image
-        source: ghcr.io/pandasoft-zz/czechtouristmap-hgtdata:latest
-        target: /data/hgt
-        read_only: true
+      - ./tegola/config.toml:/app/config.toml:ro
     ports:
-      - "8080:8080"       # optional: direct access for debugging
+      - "8080:8080"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O-", "http://localhost:8080/health"]
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost:8080/"]
       interval: 10s
       timeout: 5s
-      retries: 10
-      start_period: 60s   # Gradle build + JVM startup takes a moment
+      retries: 5
+      start_period: 30s
 
   web:
     build: ./web
-    container_name: maprender-web
+    container_name: czechtouristmap-web
     ports:
       - "80:80"
     depends_on:
-      tile-server:
+      tegola:
         condition: service_healthy
     restart: unless-stopped
+    volumes:
+      - ./styles:/web/styles:ro
+      - ./config:/web/config:ro

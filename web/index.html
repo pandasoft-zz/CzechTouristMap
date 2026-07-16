@@ -3,51 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MapRender – Mapsforge Viewer</title>
+  <title>CzechTouristMap — Mapbox GL / PMTiles Viewer</title>
 
-  <!-- Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
   <!-- Top toolbar -->
   <div id="toolbar">
-    <span id="title">MapRender</span>
+    <span id="title">CzechTouristMap</span>
 
-    <button id="theme-refresh-btn" class="tb-btn" title="Reload theme from disk and refresh map">Refresh téma</button>
+    <div id="mode-indicator">
+      <span id="mode-text">Loading...</span>
+    </div>
 
     <div id="loc-section">
-      <select id="loc-select" title="Location of interest">
+      <select id="loc-select" title="Jump to location">
         <option value="">– locations –</option>
       </select>
-      <button id="loc-edit-btn" class="tb-btn" title="Edit locations">Edit</button>
-      <div id="loc-edit-controls">
-        <button id="loc-remove-btn" class="tb-btn tb-btn-danger">Remove</button>
-        <button id="loc-add-btn" class="tb-btn tb-btn-ok">Add view</button>
-      </div>
     </div>
 
     <div id="status-bar">
       <span id="status-dot" class="dot dot-loading"></span>
-      <span id="status-text">Připojování...</span>
-    </div>
-  </div>
-
-  <!-- Add-location overlay -->
-  <div id="loc-overlay" style="display:none">
-    <div id="loc-form-box">
-      <div id="loc-form-title">Save current view</div>
-      <label>Name *<input id="lf-name" type="text" placeholder="e.g. Olomouc centrum" autocomplete="off"></label>
-      <label>Note<input id="lf-note" type="text" placeholder="optional"></label>
-      <div id="loc-form-coords"></div>
-      <div id="loc-form-actions">
-        <button id="lf-cancel" class="tb-btn">Cancel</button>
-        <button id="lf-save" class="tb-btn tb-btn-ok">Save</button>
-      </div>
-      <div id="loc-form-msg"></div>
+      <span id="status-text">Connecting...</span>
     </div>
   </div>
 
@@ -60,6 +39,8 @@
     <div id="coords-info">lat/lng: –</div>
   </div>
 
+  <script src="https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.js"></script>
+  <script src="https://unpkg.com/pmtiles@latest/dist/pmtiles.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
