@@ -3,12 +3,11 @@
 | File | Content |
 |---|---|
 | `tile-schema.md` | Layers and attributes in the PMTiles files |
+| `style-variants.md` | The two maps (Turistická, Topografická), their sources and limits |
 | `adr/` | Architecture decision records |
-| `design-manual-project.md` | Colours, line widths and zoom levels of this map |
-| `design-manual-mapycz.md` | Reference: Mapy.cz tourist map style |
-| `design-manual-cuzk.md` | Reference: ČÚZK base map style |
+| `design-manual-project.md` | Colours, line widths and zoom levels of the tourist map |
+| `design-manual-cuzk.md` | ČÚZK map standards; basis of the topographic map |
 | `design-manual-typography.md` | Label fonts and sizes |
-| `design-comparison.md` | Comparison of the styles above |
 | `standards/` | Official map symbol standards (PDF) |
 
 The design manuals were written for the previous Mapsforge version of the project.

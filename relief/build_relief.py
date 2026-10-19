@@ -1,9 +1,13 @@
 """Build relief.pmtiles: elevation tiles (Terrarium encoding) for MapLibre hillshading.
 
-Source: Copernicus DEM GLO-30 (public AWS bucket, about 30 m resolution).
+Source (--source):
+- sonny: Sonny's LiDAR DTM of Europe, 1" HGT files in data/sonny/ (https://sonny.4lima.de,
+  CC BY 4.0). A terrain model without trees and buildings. Default when data/sonny/ has files.
+- copernicus: Copernicus DEM GLO-30 (public AWS bucket, about 30 m), downloaded by this script.
+  A surface model: forest edges and buildings show in the shading.
 
 Steps:
-1. Download DEM tiles (1 x 1 degree GeoTIFF) for the area.
+1. Find or download DEM tiles (1 x 1 degree) for the area.
 2. Reproject the mosaic to Web Mercator at the max zoom grid.
 3. Keep only tiles near the area polygon (the OSM extract border).
 4. Build lower zooms by 2 x 2 averaging.
@@ -32,6 +36,8 @@ from rasterio.features import rasterize
 from rasterio.transform import from_origin
 from rasterio.warp import Resampling, reproject
 from scipy import ndimage
+
+from dem_sources import find_sonny, tile_key
 
 DEM_URL = (
     "https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com/"
@@ -173,7 +179,30 @@ def fill_nan(array):
 def build(args):
     root = Path(args.data_dir)
     lon0, lat0, lon1, lat1 = args.dem_bbox
-    dem_files = download_dem(root / "dem", (lon0, lon1), (lat0, lat1))
+    source = args.source
+    if source == "auto":
+        source = "sonny" if find_sonny(root / "sonny") else "copernicus"
+    if source == "sonny":
+        tiles = find_sonny(root / "sonny")
+        dem_files = [
+            path
+            for (lat, lon), path in sorted(tiles.items())
+            if lat0 <= lat <= lat1 and lon0 <= lon <= lon1
+        ]
+        if not dem_files:
+            sys.exit("No HGT files in data/sonny/ (see build_contours.py)")
+        log(f"{len(dem_files)} DEM tiles from Sonny's LiDAR DTM")
+        # Tiles in the margin without Sonny data: Copernicus underneath. The mosaic is
+        # filled in list order, so the Sonny tiles come last and win where both exist.
+        fallback = [
+            path
+            for path in download_dem(root / "dem", (lon0, lon1), (lat0, lat1))
+            if tile_key(path.name) not in tiles
+        ]
+        log(f"{len(fallback)} Copernicus tiles fill the rest of the margin")
+        dem_files = fallback + dem_files
+    else:
+        dem_files = download_dem(root / "dem", (lon0, lon1), (lat0, lat1))
     poly_path = root / "area.poly"
     if not download(args.poly_url, poly_path):
         sys.exit(f"Cannot download {args.poly_url}")
@@ -300,6 +329,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--data-dir", default="data")
     parser.add_argument("--output", default="dist/relief.pmtiles")
+    parser.add_argument(
+        "--source", choices=["auto", "sonny", "copernicus"], default="auto"
+    )
     parser.add_argument("--poly-url", default=POLY_URL)
     parser.add_argument(
         "--dem-bbox",

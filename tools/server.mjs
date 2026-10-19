@@ -1,9 +1,11 @@
 // Small HTTP server for local development.
 //
 //   /                 viewer (viewer/index.html)
-//   /style.json       style built fresh from style/*.mjs on every request
+//   /style.json       style built fresh from style/*.mjs on every request (?variant=topo)
+//   /variants.json    list of style variants
 //   /tiles/NAME       PMTiles files from dist/ (with HTTP Range support)
 //   /fonts/...        glyph PBF files
+//   /sprite/...       style sprite (images for road number shields)
 //   /vendor/...       browser libraries from node_modules
 
 import http from 'node:http';
@@ -33,15 +35,23 @@ const STATIC = [
   ['/vendor/pmtiles/', path.join(ROOT, 'node_modules/pmtiles/dist')],
   ['/tiles/', DIST],
   ['/fonts/', path.join(ROOT, 'fonts')],
+  ['/sprite/', path.join(ROOT, 'sprite')],
   ['/', path.join(ROOT, 'viewer')],
 ];
 
 // Build the style in a child process, so changes in style/*.mjs are always picked up.
-async function buildStyleJson(origin) {
-  const { stdout } = await execFileAsync(process.execPath, [
-    path.join(ROOT, 'tools/czmap.mjs'), 'style', '--stdout', '--tiles', `${origin}/tiles`,
-  ], { maxBuffer: 16 * 1024 * 1024 });
+async function buildStyleJson(origin, variant) {
+  const args = [path.join(ROOT, 'tools/czmap.mjs'), 'style', '--stdout', '--tiles', `${origin}/tiles`];
+  if (variant) {
+    args.push('--variant', variant);
+  }
+  const { stdout } = await execFileAsync(process.execPath, args, { maxBuffer: 16 * 1024 * 1024 });
   return stdout;
+}
+
+async function variantsJson() {
+  const { THEMES } = await import('../style/themes/index.mjs');
+  return JSON.stringify(Object.values(THEMES).map(({ id, name, description }) => ({ id, name, description })));
 }
 
 function resolveStatic(urlPath) {
@@ -110,9 +120,19 @@ export function startServer({ port = 8080, host = '127.0.0.1', quiet = false } =
     try {
       if (url.pathname === '/style.json') {
         const origin = `http://${req.headers.host}`;
-        const body = await buildStyleJson(origin);
+        const variant = url.searchParams.get('variant');
+        if (variant && !/^[a-z0-9-]+$/.test(variant)) {
+          res.writeHead(400, { 'Content-Type': 'text/plain' }).end('Bad variant');
+          return;
+        }
+        const body = await buildStyleJson(origin, variant);
         res.writeHead(200, { 'Content-Type': MIME['.json'], 'Cache-Control': 'no-cache' });
         res.end(body);
+        return;
+      }
+      if (url.pathname === '/variants.json') {
+        res.writeHead(200, { 'Content-Type': MIME['.json'], 'Cache-Control': 'no-cache' });
+        res.end(await variantsJson());
         return;
       }
       const file = resolveStatic(decodeURIComponent(url.pathname));

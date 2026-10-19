@@ -1,0 +1,28 @@
+{
+  "shield": {
+    "x": 0,
+    "y": 0,
+    "width": 44,
+    "height": 40,
+    "pixelRatio": 2,
+    "sdf": true,
+    "stretchX": [
+      [
+        14,
+        30
+      ]
+    ],
+    "stretchY": [
+      [
+        14,
+        26
+      ]
+    ],
+    "content": [
+      8,
+      8,
+      36,
+      32
+    ]
+  }
+}

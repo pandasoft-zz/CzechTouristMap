@@ -1,12 +1,13 @@
 # Tile schema
 
-The map uses three PMTiles files. The style (`style/`) reads them as three sources.
+The map uses four PMTiles files. The style (`style/`) reads them as four sources.
 
 | File | Source | Type | Zoom | Built by |
 |---|---|---|---|---|
 | `base.pmtiles` | `base` | vector (MVT) | 0–14 | `tiles/` (Planetiler, profile `base`) |
 | `routes.pmtiles` | `routes` | vector (MVT) | 0–14 | `tiles/` (Planetiler, profile `routes`) |
 | `relief.pmtiles` | `relief` | raster-dem (Terrarium, WebP) | 6–12 | `relief/build_relief.py` |
+| `contours.pmtiles` | `contours` | vector (MVT) | 11–14 | `relief/build_contours.py` + `tiles/` (profile `contours`) |
 
 MapLibre over-zooms all sources above their max zoom, so the map stays sharp up to zoom 18.
 
@@ -43,9 +44,20 @@ One way can carry several hiking colours. Each colour is one feature. `count` is
 `slot` is the index (0 = first in order red, blue, green, yellow). The style shifts each stripe by
 `(slot - (count - 1) / 2) * stripe width`, so the stripes lie side by side.
 
+## contours.pmtiles
+
+Contour lines from Sonny's LiDAR DTM (1"), via `data/contours.gpkg` (see ADR 0003).
+
+| Layer | Geometry | Attributes | Min zoom |
+|---|---|---|---|
+| `contours` | line | `ele` (metres, multiple of 10) | 11 (every 100 m), 12 (every 50 m), 13 (all) |
+
+Heights are smoothed before tracing (`--sigma`, default 1.5 px) to remove the 1 m steps of the HGT values.
+Short closed loops (noise) are dropped.
+
 ## relief.pmtiles
 
-- Source: Copernicus DEM GLO-30 (30 m)
+- Source: Sonny's LiDAR DTM 1" (`data/sonny/`); fallback Copernicus DEM GLO-30 (30 m)
 - Encoding: [Terrarium](https://github.com/tilezen/joerd/blob/master/docs/formats.md#terrarium):
   `height = R * 256 + G + B / 256 - 32768`
 - Heights are rounded to 0.25 m (`--step`). This makes the tiles much smaller with no visible change in hillshading.

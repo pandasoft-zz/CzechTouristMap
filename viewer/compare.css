@@ -1,0 +1,79 @@
+html,
+body {
+  margin: 0;
+  height: 100%;
+  font: 13px/1.4 system-ui, sans-serif;
+  background: #e8e6df;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  align-items: baseline;
+  padding: 6px 12px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+}
+
+.status {
+  margin-left: auto;
+  color: #555;
+  font-variant-numeric: tabular-nums;
+}
+
+.grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: 1fr;
+  gap: 2px;
+  min-height: 0;
+}
+
+.cell {
+  position: relative;
+  min-height: 0;
+}
+
+.cell .map {
+  position: absolute;
+  inset: 0;
+}
+
+.cell .name {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  padding: 3px 8px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  color: #111;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.cell .name small {
+  display: block;
+  font-weight: 400;
+  color: #555;
+}
+
+.render .bar,
+.render .maplibregl-ctrl {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

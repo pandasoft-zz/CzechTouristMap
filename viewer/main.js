@@ -3,12 +3,14 @@
 // URL parameters:
 //   ?render=1            hide UI; set window.__mapIdle when all tiles are drawn (used by "czmap render")
 //   ?layers=base,relief  visible layer groups (default: all)
+//   ?variant=topo        map: tourist or topo (default: last choice, else the server default)
 //   #zoom/lat/lon        map position
 
 import * as maplibregl from '/vendor/maplibre-gl/maplibre-gl.mjs';
 
-const GROUPS = ['base', 'relief', 'hiking', 'cycling'];
+const GROUPS = ['base', 'relief', 'contours', 'hiking', 'cycling'];
 const STORAGE_KEY = 'czmap.layers';
+const VARIANT_KEY = 'czmap.variant';
 
 const params = new URLSearchParams(location.search);
 const renderMode = params.has('render');
@@ -40,6 +42,20 @@ function initialGroups() {
   return new Set(GROUPS);
 }
 
+function initialVariant() {
+  if (params.has('variant')) {
+    return params.get('variant');
+  }
+  try {
+    return localStorage.getItem(VARIANT_KEY);
+  } catch {
+    return null;
+  }
+}
+
+let variant = initialVariant();
+const styleUrl = () => `/style.json?${variant ? `variant=${encodeURIComponent(variant)}&` : ''}t=${Date.now()}`;
+
 const visible = initialGroups();
 for (const group of GROUPS) {
   panel.elements[group].checked = visible.has(group);
@@ -47,7 +63,7 @@ for (const group of GROUPS) {
 
 const map = new maplibregl.Map({
   container: 'map',
-  style: '/style.json',
+  style: styleUrl(),
   center: [15.5, 49.8],
   zoom: 7,
   hash: true,
@@ -117,8 +133,45 @@ panel.addEventListener('change', (event) => {
 });
 
 function reloadStyle() {
-  map.setStyle(`/style.json?t=${Date.now()}`, { diff: false });
+  map.setStyle(styleUrl(), { diff: false });
 }
+
+// Without a variant the server sends its default map.
+// Fill the variant list from the server. The first entry is the default.
+fetch('/variants.json')
+  .then((res) => res.json())
+  .then((variants) => {
+    const select = panel.elements.variant;
+    // A saved variant may not exist any more (renamed or removed).
+    if (variant && !variants.some((v) => v.id === variant)) {
+      variant = null;
+      reloadStyle();
+    }
+    variant ??= variants[0].id;
+    for (const v of variants) {
+      select.add(new Option(v.name, v.id, false, v.id === variant));
+      select.lastElementChild.title = v.description;
+    }
+  })
+  .catch((err) => console.error(err));
+
+panel.elements.variant.addEventListener('change', (event) => {
+  variant = event.target.value;
+  try {
+    localStorage.setItem(VARIANT_KEY, variant);
+  } catch {
+    // Storage may be blocked; ignore.
+  }
+  const query = new URLSearchParams(location.search);
+  query.set('variant', variant);
+  history.replaceState(null, '', `?${query}${location.hash}`);
+  reloadStyle();
+});
+
+// Keep the map position when opening the comparison view.
+document.getElementById('compare').addEventListener('click', (event) => {
+  event.currentTarget.href = `compare.html${location.hash}`;
+});
 document.getElementById('reload').addEventListener('click', reloadStyle);
 document.addEventListener('keydown', (event) => {
   if (event.key === 'r' && !event.ctrlKey && !event.metaKey && event.target === document.body) {
