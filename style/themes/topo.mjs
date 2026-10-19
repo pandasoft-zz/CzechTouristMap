@@ -39,6 +39,8 @@ export default {
     // no source
     sand: '#FFF7ED',
     sport: '#F0F4D1',
+    // ZTM10 "ulice nesjízdná" colour, also for squares.
+    pedestrian: '#E6E7E8',
   },
 
   water: {
@@ -82,7 +84,8 @@ export default {
       tertiary: '#86888A',
       minor: '#86888A',
       service: '#86888A',
-      pedestrian: '#86888A',
+      // Same as the fill: pedestrian streets and squares form one surface (no source).
+      pedestrian: '#E6E7E8',
     },
     casingExtra: 1.4,
     // ZTM10 bridge edges are dark grey #58595B.

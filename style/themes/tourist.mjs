@@ -37,6 +37,8 @@ export default {
     sand: '#F5F0A0',
     // no source
     sport: '#DCEDD0',
+    // Squares and pedestrian zones: light warm grey, the same as pedestrian streets (no source).
+    pedestrian: '#E8E3DC',
   },
 
   // Kept from the first style: more saturated than the manual (#B8D8F0, #5080C0, #2060A0).
@@ -74,7 +76,9 @@ export default {
       tertiary: '#F5E040',
       minor: '#FFFFFF',
       service: '#FFFFFF',
-      pedestrian: '#707070',
+      // Pedestrian streets: the colour of pedestrian areas, so streets and squares form one surface
+      // (manual: dark grey #707070).
+      pedestrian: '#E8E3DC',
     },
     casing: {
       motorway: '#2F6E2A',
@@ -84,7 +88,8 @@ export default {
       tertiary: '#909000',
       minor: '#606060',
       service: '#707070',
-      pedestrian: '#707070',
+      // The casing has the fill colour: no outline between pedestrian streets and squares.
+      pedestrian: '#E8E3DC',
     },
     // no source
     casingExtra: 1.2,
@@ -92,7 +97,7 @@ export default {
     bridge: { color: '#404040', opacity: 0.85, width: 3.4 },
     // Ratios of the manual's base widths (motorway 2.8, primary 3.0, secondary 2.8,
     // tertiary 2.5, residential 2.0, unclassified 2.5, service 2.2).
-    widthFactor: { motorway: 0.75, trunk: 0.8, primary: 0.95, minor: 1.2, service: 1.9, pedestrian: 0.5 },
+    widthFactor: { motorway: 0.75, trunk: 0.8, primary: 0.95, minor: 1.2, service: 1.9 },
     centreLine: null,
     // Dash patterns: no source.
     track: { color: '#8C5A1E', dashGraded: [1, 0], dash: [5, 2] },

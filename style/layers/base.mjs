@@ -216,6 +216,8 @@ export function baseLayers(t) {
       type: 'fill',
       source: SOURCE,
       'source-layer': 'landcover',
+      // Pedestrian areas are drawn above the relief (pedestrian-area), with the pedestrian streets.
+      filter: ['!=', ['get', 'kind'], 'pedestrian'],
       paint: {
         'fill-color': ['case',
           ['==', ['get', 'leaf'], 'needle'], t.landcover.forestNeedle,
@@ -339,6 +341,15 @@ export function baseOverlayLayers(t) {
         'line-width': width(...t.boundary.country.width),
         'line-dasharray': t.boundary.country.dash,
       },
+      metadata: group,
+    },
+    {
+      id: 'pedestrian-area',
+      type: 'fill',
+      source: SOURCE,
+      'source-layer': 'landcover',
+      filter: ['==', ['get', 'kind'], 'pedestrian'],
+      paint: { 'fill-color': t.landcover.pedestrian },
       metadata: group,
     },
     {

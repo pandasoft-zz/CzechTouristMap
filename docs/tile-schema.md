@@ -17,12 +17,12 @@ No POIs. Only land cover, water, transport, buildings, boundaries and names.
 
 | Layer | Geometry | Attributes | Min zoom |
 |---|---|---|---|
-| `landcover` | polygon | `kind`: forest, grass, orchard, vineyard, scrub, heath, wetland, residential, industrial, farmyard, cemetery, park, allotments, quarry, rock, scree, sand, sport; `leaf`: needle (z12+) | 7–13 by kind |
+| `landcover` | polygon | `kind`: forest, grass, orchard, vineyard, scrub, heath, wetland, residential, industrial, farmyard, cemetery, park, allotments, quarry, rock, scree, sand, sport, pedestrian (squares and pedestrian areas, z13+); `leaf`: needle (z12+) | 7–13 by kind |
 | `water` | polygon | – | 6 |
 | `water_labels` | point | `name` | by area |
 | `waterway` | line | `kind`: river, stream; `intermittent`, `tunnel` (1), `name` | river 8, stream 12, ditch 14 |
 | `roads` | line | `kind`: motorway, trunk, primary, secondary, tertiary, minor, pedestrian, service, track, path, cycleway, steps; `link`, `bridge`, `tunnel` (1); `grade` (track, 1–5); `ref`; `name` | 5–14 by kind |
-| `rail` | line | `kind`: rail, narrow, tram; `service`, `bridge`, `tunnel` (1) | 8–13 |
+| `rail` | line | `kind`: rail, narrow, tram; `service`, `bridge`, `tunnel` (1). Parallel tram tracks (≤ 10 m apart) are one line | 8–13 |
 | `buildings` | polygon | – | 13 |
 | `protected` | polygon | `kind`: national_park, landscape (CHKO), reserve; `name` | 7 / 11 |
 | `boundaries` | line | `level`: 2 (state), 6 (region) | 0 / 7 |
