@@ -1,0 +1,446 @@
+*****************************************************************************************
+*                                      DATASOURCES                                      *
+*                                    ###############                                    *
+*****************************************************************************************
+
+
+
+AUSTRIA
+########
+
+- Amt der Burgenländischen Landesregierung: DGM 5 Meter
+https://geodaten.bgld.gv.at/de/downloads/fachdaten.html
+
+- Amt der Kärntner Landesregierung: DGM 5 Meter
+https://www.data.gv.at/katalog/dataset/a188992b-4071-45c3-99ce-65662395ebe6
+
+- Amt der Niederösterreichischen Landesregierung: DGM 10 Meter 
+https://noe.gv.at/noe/OGD_Detailseite.html?id=46a7a06a-f69b-405e-aac2-77f775449ad3
+
+- Amt der Oberösterreichischen Landesregierung: DGM 10 Meter
+https://www.land-oberoesterreich.gv.at/124923.htm
+
+- Amt der Salzburger Landesregierung: DGM 5 Meter
+https://service.salzburg.gv.at/ogd/client/showDetail/d585e816-1a36-4c76-b2dc-6db487d22ca3
+
+- Amt der Steiermärkischen Landesregierung: DGM 10 Meter
+https://data.steiermark.at/cms/beitrag/11822084/97108894/?AppInt_OGD_ID=63
+
+- Amt der Tiroler Landesregierung: DGM 10 Meter
+https://www.data.gv.at/katalog/dataset/land-tirol_tirolgelnde
+
+- Amt der Vorarlberger Landesregierung: DGM 10 Meter
+https://vorarlberg.at/-/geodaten-des-vorarlberger-geografischen-informationssystems-vogis-nutzen?article_id=327499
+
+- Magistrat der Stadt Wien: DGM 1 Meter
+https://www.wien.gv.at/stadtentwicklung/stadtvermessung/geodaten/dgm/
+
+
+
+BELGIUM
+########
+
+- Agentschap Informatie Vlaanderen: Digitaal Hoogtemodel Vlaanderen II: DTM 5 Meter
+http://www.geopunt.be/catalogus/datasetfolder/9b0f82c7-57c4-463a-8918-432e41a66355
+
+- Géoportail de la Wallonie: Relief de la Wallonie - Modèle Numérique de Terrain (MNT) 2013-2014 (DTM 1m)
+https://geoportail.wallonie.be/catalogue/6029e738-f828-438b-b10a-85e67f77af92.html
+
+
+
+CROATIA
+########
+
+- Viewfinder Panoramas by Jonathan de Ferranti: 1" DTMs
+http://viewfinderpanoramas.org/dem3.html
+Jonathan de Ferranti permitted me to use his elevation data within my DTM using the CC BY 4.0 license terms.
+
+- NASA: SRTM Version 3.0 Global 1" DTMs
+https://dwtkns.com/srtm30m/
+
+
+
+CYPRUS
+#######
+
+- Department of Lands and Surveys - INSPIRE GeoPortal: DTM 5 Meter
+https://eservices.dls.moi.gov.cy/#/national/inspiregeoportalmapviewer
+
+- NASA: SRTM Version 3.0 Global 1" DTMs
+https://dwtkns.com/srtm30m/
+
+
+
+CZECHIA
+########
+
+- Ceský úrad zememerický a katastrální (CÚZK): INSPIRE theme Elevation (EL) GRID: DTM 5 m
+https://geoportal.cuzk.cz/(S(vlcpw4sik4esfuwqissp0ngy))/Default.aspx?lng=EN&mode=TextMeta&side=vyskopis&metadataID=CZ-CUZK-EL&mapid=8&menu=304
+
+- Institut plánování a rozvoje hl. m. Prahy: Digitální model terénu - rastr: DTM 1 m
+https://www.geoportalpraha.cz/en/data/opendata/609AB233-4F4B-4010-A6E0-011E232E2390
+
+
+
+DENMARK (incl. Faroes, Greenland)
+##################################
+
+- Kortforsyningen | Styrelsen for DataForsyning og Effektivisering : DHM/Terræn (0,4 m grid): DTM 0.4 Meter
+https://download.kortforsyningen.dk/content/dhmterr%C3%A6n-04-m-grid
+
+- Umhvørvisstovan | DSM hæddarmodell: DTM 2 Meter
+https://www.foroyakort.fo/tak-datur-nidur/dsm-haeddarmodell/
+
+- Klimadatastyrelsen | Højdemodel Grønland: DTM 2 Meter
+https://dataforsyningen.dk/data/4780
+
+
+
+ESTONIA
+########
+
+- Estonian Land Board: DTM 10 Meter
+https://geoportaal.maaamet.ee/index.php?lang_id=1&page_id=607#tab3
+
+
+
+FINLAND
+########
+
+- Maanmittauslaitos (National Land Survey of Finland): DTM 10 Meter
+https://www.maanmittauslaitos.fi/en/e-services/open-data-file-download-service
+
+
+
+FRANCE (incl. Monaco, Guernsey, Jersey)
+########################################
+
+- Institut national de l’information géographique et forestière (IGN): RGE ALTI, DTM 5 m
+https://geoservices.ign.fr/rgealti
+
+- Métropole Bordeaux: DTM 0.5m
+https://data.bordeaux-metropole.fr/data.php
+
+- NASA: SRTM Version 3.0 Global 1" DTMs
+https://dwtkns.com/srtm30m/
+
+
+
+GERMANY
+########
+
+- Landesamt für Geoinformation und Landentwicklung Baden-Württemberg: DGM 1 m
+https://www.lgl-bw.de/Produkte/3D-Produkte/Digitale-Gelaendemodelle/
+
+- Bayerische Vermessungsverwaltung (www.geodaten.bayern.de): DTM 1 m
+https://geodaten.bayern.de/opengeodata/OpenDataDetail.html?pn=dgm1
+
+- Senatsverwaltung für Stadtentwicklung und Umwelt Berlin: ATKIS® DTM 1 m
+http://www.stadtentwicklung.berlin.de/geoinformation/geodateninfrastruktur/de/geodienste/atom.shtml
+Für die Verwendung der Daten gelten folgende Nutzungsbestimmungen: http://www.stadtentwicklung.berlin.de/geoinformation/download/nutzIII.pdf
+
+- Land Brandenburg, Landesvermessung und Geobasisinformation Brandenburg (LGB): DTM 1 m
+https://geoportal.brandenburg.de/detailansichtdienst/render?view=gdibb&url=https://geoportal.brandenburg.de/gs-json/xml?fileid=488a2b53-564f-43eb-88ec-0d87bb43ed20
+https://geobasis-bb.de/lgb/de/startseite/geodaten/3d-produkte/gelaendemodell/
+
+- Landesamt GeoInformation Bremen: DTM 5 m
+https://metaver.de/trefferanzeige?docuuid=8CCBF995-0CBB-4E6B-968A-C56BBE39EBC2
+
+- Freie und Hansestadt Hamburg, Landesbetrieb Geoinformation und Vermessung, 2014 : DTM 1 m
+https://metaver.de/trefferanzeige?docuuid=A39B4E86-15E2-4BF7-BA82-66F9913D5640
+
+- Hessisches Landesamt für Bodenmanagement und Geoinformation: DTM 1 m
+https://hvbg.hessen.de/landesvermessung/geotopographie/3d-daten/digitale-gelaendemodelle
+
+- Landesamt für innere Verwaltung Mecklenburg-Vorpommern: DTM 5 m 
+https://laiv.geodaten-mv.de/afgvk/Geotopographie/Beschreibung?produkt=DGM
+
+- Landesamt für Geoinformation und Landesvermessung Niedersachsen: DTM 1 m
+https://ni-lgln-opengeodata.hub.arcgis.com/apps/lgln-opengeodata::digitales-gel%C3%A4ndemodell-dgm1/about
+
+- Land Nordrhein-Westfalen (2017), DTM 1 m
+https://open.nrw/de/dataset/0c6796e5-9eca-4ae6-8b32-1fcc5ae5c481bkg
+
+- Landesamt für Vermessung und Geobasisinformation Rheinland-Pfalz: DTM 1 m
+https://geoshop.rlp.de/opendata-dgm1.html
+
+- Landesamt für Vermessung, Geoinformation und Landentwicklung Saarland: DTM 1 m
+https://www.saarland.de/lvgl/DE/themen-aufgaben/themen/geotopographie/digitalegelaendemodelle/digitalegelaendemodelle
+
+- Staatsbetrieb Geobasisinformation und Vermessung Sachsen : DTM 2 m
+https://www.geodaten.sachsen.de/digitale-hoehenmodelle-3994.html
+
+- Landesamt für Vermessung und Geoinformation Sachsen-Anhalt: DTM 5 m
+https://www.lvermgeo.sachsen-anhalt.de/de/kostenfreie_geobasisdaten_lvermgeo.html
+
+- Landesamt für Vermessung und Geoinformation Schleswig-Holstein: DTM 1 m
+https://geodaten.schleswig-holstein.de/gaialight-sh/_apps/dladownload/
+
+- Freistaat Thüringen, Landesamt für Vermessung und Geoinformation: DTM 1 m (2014-2019), DTM 2 m (2010-2013)
+http://www.geoportal-th.de/de-de/downloadbereiche/downloadoffenegeodatenth%C3%BCringen/downloadh%C3%B6hendaten.aspx
+
+
+
+HUNGARY
+########
+
+- NASA: SRTM Version 3.0 Global 1" DTMs
+https://dwtkns.com/srtm30m/
+
+- Viewfinder Panoramas by Jonathan de Ferranti: 1" DTMs
+http://viewfinderpanoramas.org/dem3.html
+Jonathan de Ferranti permitted me to use his elevation data within my DTM using the CC BY 4.0 license terms.
+
+
+
+ICELAND
+########
+
+- Landmælingar Íslands: ÍslandsDEM útgáfa 1.0 (DTM 10 m)
+https://gatt.lmi.is/geonetwork/srv/eng/catalog.search#/metadata/e6712430-a63c-4ae5-9158-c89d16da6361
+
+
+
+IRELAND
+########
+
+- Geological Survey Ireland: different DTM sources from 0.25m - 2m resolution
+https://data.gov.ie/dataset/open-topographic-lidar-data
+
+- NASA: SRTM Version 3.0 Global 1" DTMs
+http://dwtkns.com/srtm30m/
+
+
+
+ITALY (incl. San Marino, Vatican City, Malta)
+##############################################
+
+- Regione Abruzzo: DTM 10 m
+http://opendata.regione.abruzzo.it/content/modello-digitale-del-terreno-risoluzione-10x10-metri
+
+- Regione Basilicata: DTM 5 m
+http://rsdi.regione.basilicata.it/dbgt-ctr/
+
+- Regione Calabria: DTM 5 m
+http://geoportale.regione.calabria.it/opendata
+
+- Regione Campania - Citta Metropolitana di Napoli: DTM 1 m
+https://sit.cittametropolitana.na.it/
+
+- Regione Emilia-Romagna: DTM 5 m
+https://geoportale.regione.emilia-romagna.it/catalogo/dati-cartografici/altimetria/layer-2
+
+- Regione Autonoma Friuli Venezia Giulia: DTM 10 m
+http://irdat.regione.fvg.it/CTRN/ricerca-cartografia/
+
+- Regione Lazio: DTM 5 m
+https://geoportale.regione.lazio.it/documents/272
+
+- Regione Liguria: Modello Digitale del Terreno: DTM 5 m
+https://geoportal.regione.liguria.it/archivio-focus/item/803
+
+- Regione Lombardia: DTM 5X5 - Modello digitale del terreno (ed. 2015): DTM 5 m
+https://www.geoportale.regione.lombardia.it/en-GB/home
+
+- Regione Piemonte: RIPRESA AEREA ICE 2009-2011 - DTM:  DTM 5 m
+https://www.geoportale.piemonte.it/geonetwork/srv/api/records/r_piemon:224de2ac-023e-441c-9ae0-ea493b217a8e
+
+- Regione Puglia: DTM 8 m
+http://www.sit.puglia.it/portal/portale_cartografie_tecniche_tematiche/Download/Cartografie
+
+- Regione Autonoma della Sardegna, Sardegna Geoportale: DTM 1 m
+http://www.sardegnageoportale.it/webgis2/sardegnamappe/?map=download_raster
+DTM 1m dei centri urbani 2013, DTM 1m fascia costiera 2008; DTM MATTM 1m: Aree critiche, Costa della Gallura, Fasce fluviali
+
+- Regione Siciliana: MDT 2012-2013: DTM 2 m
+https://www.sitr.regione.sicilia.it/geoportale/it/metadata/details/947
+
+- Regione Toscana: DTM 10 m
+http://dati.toscana.it/dataset/dem10mt
+
+- Regione Toscana-Comune di Firenze : DTM 1m
+http://dati.toscana.it/dataset/dem10mt
+
+- Provincia Autonoma di Trento: Lidar 2014 PAT 0,5m / Lidar 2011 Campolongo 1m / Lidar 2009 PAT 1m+2m
+http://www.territorio.provincia.tn.it/portal/server.pt/community/lidar/847/lidar/23954
+
+- Autonome Provinz Bozen-Südtirol: DTM 2.5 m
+https://natur-raum.provinz.bz.it/de/digitale-hohenmodelle
+
+- Regione Autonoma Valle d'Aosta: DTM 2005 0.5m & DTM 2008 2m
+https://geoportale.regione.vda.it/download/dtm/
+
+- Tinitaly DEM v1.1: DTM 10 m
+http://tinitaly.pi.ingv.it/
+
+- Malta Planning Authority: DTM 10 m
+https://www.pa.org.mt/
+
+
+
+LATVIA
+#######
+
+- Latvian Geospatial Information Agency: DTM 20 Meter
+https://opendata.lgia.gov.lv/zf_wp/index.php/category/citi/
+
+
+
+LITHUANIA
+##########
+
+- Nacionaline žemes tarnyba prie Aplinkos ministerijos: DTM 5 Meter
+https://www.inspire-geoportal.lt/geonetwork/srv/api/records/7ce59d66-159c-4b81-9951-20f801f05748
+
+
+
+LUXEMBOURG
+###########
+
+- Luxembourg Administration du cadastre et de la topographie: DTM 0.5 m
+https://data.public.lu/fr/datasets/lidar-2019-modele-numerique-de-terrain-mnt/
+
+
+
+NETHERLANDS
+############
+
+- Actueel Hoogtebestand Nederland (AHN2): DTM 5 Meter
+http://www.ahn.nl/index.html
+https://www.pdok.nl/introductie?articleid=1948857
+
+
+
+NORWAY (incl. Svalbard, Jan Mayen)
+###################################
+
+- Kartverket Høydedata: DTM 10 Meter
+https://hoydedata.no/LaserInnsyn/
+
+- Norwegian Polar Institute: S0 Terrengmodell (DTM 20 Meter), J0 Terrengmodell (DTM 25 Meter)
+https://geodata.npolar.no/
+
+
+
+POLAND
+#######
+
+- Glówny Urzad Geodezji i Kartografii: DTM 1 Meter
+https://www.geoportal.gov.pl/en/dane/numeryczny-model-terenu
+
+
+
+PORTUGAL (incl. Madeira, Azores) 
+#################################
+
+- Direção-Geral do Território: DTM 2m
+https://cdd.dgterritorio.gov.pt/dgt-fe/catalogos
+
+- Secretaria Regional do Ambiente e Alterações Climáticas/Governo dos Açores: Modelo Digital do Terreno: DTM 0.5m
+https://sma.idea.azores.gov.pt/geonetwork/srv/por/catalog.search#/metadata/13e9d67a-dfa5-46d1-9ab8-210c4d7fb2f7
+
+- Direção Regional do Ordenamento do Território: Modelo Digital do Terreno da Ilha da Madeira, Porto Santo: DTM 10m
+https://catalogo-irig.madeira.gov.pt
+
+- NASA: SRTM Version 3.0 Global 1" DTMs
+https://dwtkns.com/srtm30m/
+
+- JAXA ALOS World 3D: 1" DTMs
+http://www.eorc.jaxa.jp/ALOS/en/aw3d30/data/index.htm
+
+
+
+ROMANIA
+########
+
+- Agentia Nationala de Cadastru si Publicitate Imobiliara (ANCPI): LAKI II MNT (DTM 1 Meter)
+https://geoportal.ancpi.ro/portal/apps/webappviewer/index.html?id=3f34ee5af71c400396dda574f0d53274
+
+- NASA: SRTM Version 3.0 Global 1" DTMs
+https://dwtkns.com/srtm30m/
+
+- Viewfinder Panoramas by Jonathan de Ferranti: 1" DTMs
+http://viewfinderpanoramas.org/dem3.html
+Jonathan de Ferranti permitted me to use his elevation data within my DTM using the CC BY 4.0 license terms.
+
+
+
+SLOVAKIA
+#########
+
+- Geodetický a kartografický ústav Bratislava: DTM v5.0 (1 Meter)
+https://www.geoportal.sk/en/zbgis/als-dtm.html
+
+
+
+SLOVENIA
+#########
+
+- Slovenian ministry of Environment and Spatial Planning: DTM 1 Meter
+http://gis.arso.gov.si/evode/profile.aspx?id=atlas_voda_Lidar@Arso&culture=en-US
+CC BY 4.0
+
+
+
+SPAIN (incl. Canaries, Andorra, Gibraltar)
+###########################################
+
+- LiDAR-PNOA assigned by Instituto Geográfico Nacional (IGN):
+1) DTM05, LIDAR 1st Coverage, download month 2019-11: DTM 5m
+2) DTM02, LIDAR 2nd Coverage, download month 2019-11: DTM 2m
+https://centrodedescargas.cnig.es/CentroDescargas/
+
+
+
+SWEDEN
+#######
+
+- Lantmäteriet (Swedish Land Survey): "Höjddata, grid 50+" DTM 50 Meter
+https://www.lantmateriet.se/en/maps-and-geographic-information/geodataprodukter/produktlista/hojddata-grid-50/
+
+
+
+SWITZERLAND (incl. Liechtenstein)
+##################################
+
+- Bundesamt für Landestopografie swisstopo: swissALTI3D DTM 2m
+https://www.swisstopo.admin.ch/de/geodata/height/alti3d.html
+
+
+
+UNITED KINGDOM (incl. Isle of Man)
+###################################
+
+- Environment Agency: LiDAR Composite DTM 10 m 
+https://environment.data.gov.uk/dataset/ce8fe7e7-bed0-4889-8825-19b042e128d2
+
+- Welsh Government: LiDAR DTM 1 m
+https://datamap.gov.wales/maps/lidar-viewer/
+
+- Scottish Government: Different LiDAR sources DTM 0.5 - 2 m
+https://remotesensingdata.gov.scot/
+
+- Ordnance Survey of Northern Ireland, Land & Property Services: 10m DTM-Sheets, River Basin LIDAR 2004-2014 DTM 1m
+- Department for Infrastructure of Northern Ireland: LIDAR Belfast 2006 DTM 0.5m, LIDAR Lough Neagh Environs 2014 DTM 1m
+https://www.opendatani.gov.uk/
+
+- Department of Infrastructure, Isle of Man: DTM 20m
+https://www.gov.im/categories/planning-and-building-control/mapping/
+
+- Ordnance Survey: OS Terrain DTM 50m
+https://www.ordnancesurvey.co.uk/business-government/products/terrain-50
+
+
+
+DTMs FOR FILLING AREAS WITHOUT LIDAR-SOURCE DATA
+#################################################
+
+- NASA: SRTM Version 3.0 Global 1" DTMs
+https://dwtkns.com/srtm30m/
+
+- JAXA ALOS World 3D: 1" DTMs
+http://www.eorc.jaxa.jp/ALOS/en/aw3d30/data/index.htm
+
+- Viewfinder Panoramas by Jonathan de Ferranti: 1" DTMs
+http://viewfinderpanoramas.org/dem3.html
+Jonathan de Ferranti permitted me to use his elevation data within my DTM using the CC BY 4.0 license terms.

@@ -4,8 +4,9 @@ The vector tiles are made from this file by Planetiler (profile "contours").
 
 Source (--source):
 - sonny: Sonny's LiDAR DTM of Europe, 1" HGT files (https://sonny.4lima.de, CC BY 4.0).
-  It is a terrain model (no trees, no buildings). The files cannot be downloaded by a
-  script; put the downloaded *.zip or *.hgt files into data/sonny/ (subfolders are fine).
+  It is a terrain model (no trees, no buildings). The tiles of the map area are in
+  terrain/sonny/ (Git LFS). More tiles: download *.zip into data/sonny/ (subfolders are
+  fine); Google Drive does not allow script downloads.
 - copernicus: the Copernicus DSM in data/dem/ (from build_relief.py). It is a surface
   model with trees and buildings, so contours bend around forest edges. Use it only
   for tests.
@@ -118,11 +119,11 @@ def contour_tile(job):
 def build(args):
     root = Path(args.data_dir)
     if args.source == "sonny":
-        files = find_sonny(root / "sonny")
+        files = find_sonny(root)
         if not files:
             sys.exit(
-                "No HGT files in data/sonny/. Download Sonny's 1\" DTM "
-                "(https://sonny.4lima.de) and put the zip files there."
+                "No HGT files in terrain/sonny/ or data/sonny/. Run git lfs pull, "
+                "or download Sonny's 1\" DTM (https://sonny.4lima.de) into data/sonny/."
             )
     else:
         files = find_copernicus(root / "dem")
@@ -166,10 +167,16 @@ def build(args):
                     append=tmp.exists(),
                 )
                 count += len(geoms)
-            log(f"tile {i}/{len(tiles)}: {len(geoms)} lines ({time.time() - started:.0f} s)")
+            log(
+                f"tile {i}/{len(tiles)}: {len(geoms)} lines "
+                f"({time.time() - started:.0f} s)"
+            )
     tmp.replace(output)
     size = output.stat().st_size / 1e6
-    log(f"wrote {output} ({count} lines, {size:.0f} MB) in {time.time() - started:.0f} s")
+    log(
+        f"wrote {output} ({count} lines, {size:.0f} MB) "
+        f"in {time.time() - started:.0f} s"
+    )
 
 
 def main():
@@ -179,12 +186,24 @@ def main():
     parser.add_argument("--source", choices=["sonny", "copernicus"], default="sonny")
     parser.add_argument("--interval", type=float, default=10, help="metres")
     parser.add_argument("--sigma", type=float, default=1.5, help="smoothing in pixels")
-    parser.add_argument("--simplify", type=float, default=0.25, help="tolerance in pixels")
-    parser.add_argument("--min-loop", type=float, default=12, help="pixels; shorter loops go")
-    parser.add_argument("--border", type=int, default=8, help="pixels from neighbour tiles")
-    parser.add_argument("--margin", type=float, default=0.03, help="degrees around area")
-    parser.add_argument("--only", nargs="*", help="only these tiles, e.g. 49,16 (tests)")
-    parser.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) // 2))
+    parser.add_argument(
+        "--simplify", type=float, default=0.25, help="tolerance in pixels"
+    )
+    parser.add_argument(
+        "--min-loop", type=float, default=12, help="pixels; shorter loops go"
+    )
+    parser.add_argument(
+        "--border", type=int, default=8, help="pixels from neighbour tiles"
+    )
+    parser.add_argument(
+        "--margin", type=float, default=0.03, help="degrees around area"
+    )
+    parser.add_argument(
+        "--only", nargs="*", help="only these tiles, e.g. 49,16 (tests)"
+    )
+    parser.add_argument(
+        "--workers", type=int, default=max(1, (os.cpu_count() or 2) // 2)
+    )
     build(parser.parse_args())
 
 

@@ -57,7 +57,7 @@ Short closed loops (noise) are dropped.
 
 ## relief.pmtiles
 
-- Source: Sonny's LiDAR DTM 1" (`data/sonny/`); fallback Copernicus DEM GLO-30 (30 m)
+- Source: Sonny's LiDAR DTM 1" (`terrain/sonny/`, `data/sonny/`); fallback Copernicus DEM GLO-30 (30 m)
 - Encoding: [Terrarium](https://github.com/tilezen/joerd/blob/master/docs/formats.md#terrarium):
   `height = R * 256 + G + B / 256 - 32768`
 - Heights are rounded to 0.25 m (`--step`). This makes the tiles much smaller with no visible change in hillshading.

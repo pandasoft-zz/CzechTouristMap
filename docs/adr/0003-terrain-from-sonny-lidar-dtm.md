@@ -22,8 +22,11 @@ Options checked:
 
 ## Decision
 
-- Use Sonny's 1" DTM for contours and relief. The files are put into `data/sonny/` by hand
-  (Google Drive does not allow script downloads). Zip files are read directly.
+- Use Sonny's 1" DTM for contours and relief. Zip files are read directly.
+- The tiles of the map area are stored in the repository in `terrain/sonny/` with Git LFS, so CI
+  can build without the manual download (Google Drive does not allow script downloads).
+  Only the map area is stored: GitHub's free LFS quota is 10 GiB storage and 10 GiB download per
+  month, and all of Europe is about 4.8 GB. More tiles can be put into `data/sonny/` locally.
 - Contours are precomputed, not computed in the browser:
   `relief/build_contours.py` (smoothing, contourpy, clipping) writes `data/contours.gpkg`,
   Planetiler (profile `contours`) builds `dist/contours.pmtiles`.
@@ -32,6 +35,8 @@ Options checked:
 ## Consequences
 
 - Contours and hillshading come from the same terrain model.
-- One manual download step before a full build.
+- `git lfs pull` after cloning; CI checks out with `lfs: true`. A new region needs a manual
+  download once, then its tiles are committed to `terrain/sonny/`.
+- Every CI run that checks out the LFS files uses about 160 MB of the download quota.
 - Attribution: "© Sonny's LiDAR DTM, © ČÚZK" (and the other national sources outside Czechia).
 - The pipeline works for any 1 x 1 degree tiles, so new regions only need more HGT files.

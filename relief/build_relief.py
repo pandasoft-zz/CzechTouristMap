@@ -1,9 +1,11 @@
 """Build relief.pmtiles: elevation tiles (Terrarium encoding) for MapLibre hillshading.
 
 Source (--source):
-- sonny: Sonny's LiDAR DTM of Europe, 1" HGT files in data/sonny/ (https://sonny.4lima.de,
-  CC BY 4.0). A terrain model without trees and buildings. Default when data/sonny/ has files.
-- copernicus: Copernicus DEM GLO-30 (public AWS bucket, about 30 m), downloaded by this script.
+- sonny: Sonny's LiDAR DTM of Europe, 1" HGT files in terrain/sonny/ (Git LFS) and
+  data/sonny/ (https://sonny.4lima.de, CC BY 4.0). A terrain model without trees and
+  buildings. Default when these folders have files.
+- copernicus: Copernicus DEM GLO-30 (public AWS bucket, about 30 m), downloaded by
+  this script.
   A surface model: forest edges and buildings show in the shading.
 
 Steps:
@@ -40,8 +42,7 @@ from scipy import ndimage
 from dem_sources import find_sonny, tile_key
 
 DEM_URL = (
-    "https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com/"
-    "{name}/{name}.tif"
+    "https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com/" "{name}/{name}.tif"
 )
 POLY_URL = "https://download.openstreetmap.fr/polygons/europe/czech_republic.poly"
 
@@ -172,7 +173,9 @@ def fill_nan(array):
         return array
     if mask.all():
         return np.zeros_like(array)
-    idx = ndimage.distance_transform_edt(mask, return_distances=False, return_indices=True)
+    idx = ndimage.distance_transform_edt(
+        mask, return_distances=False, return_indices=True
+    )
     return array[tuple(idx)]
 
 
@@ -181,16 +184,18 @@ def build(args):
     lon0, lat0, lon1, lat1 = args.dem_bbox
     source = args.source
     if source == "auto":
-        source = "sonny" if find_sonny(root / "sonny") else "copernicus"
+        source = "sonny" if find_sonny(root) else "copernicus"
     if source == "sonny":
-        tiles = find_sonny(root / "sonny")
+        tiles = find_sonny(root)
         dem_files = [
             path
             for (lat, lon), path in sorted(tiles.items())
             if lat0 <= lat <= lat1 and lon0 <= lon <= lon1
         ]
         if not dem_files:
-            sys.exit("No HGT files in data/sonny/ (see build_contours.py)")
+            sys.exit(
+                "No HGT files in terrain/sonny/ or data/sonny/ (see build_contours.py)"
+            )
         log(f"{len(dem_files)} DEM tiles from Sonny's LiDAR DTM")
         # Tiles in the margin without Sonny data: Copernicus underneath. The mosaic is
         # filled in list order, so the Sonny tiles come last and win where both exist.
@@ -292,7 +297,9 @@ def build(args):
     total = 0
     with open(tmp, "wb") as f, ProcessPoolExecutor(args.workers) as pool:
         writer = Writer(f)
-        for i, (tile_id, data) in enumerate(pool.map(encode_tile, jobs, chunksize=16), 1):
+        for i, (tile_id, data) in enumerate(
+            pool.map(encode_tile, jobs, chunksize=16), 1
+        ):
             writer.write_tile(tile_id, data)
             total += len(data)
             if i % 2000 == 0:
@@ -342,7 +349,9 @@ def main():
     parser.add_argument("--minzoom", type=int, default=6)
     parser.add_argument("--maxzoom", type=int, default=12)
     parser.add_argument("--margin", type=int, default=2, help="extra tiles around area")
-    parser.add_argument("--step", type=float, default=0.25, help="height step in metres")
+    parser.add_argument(
+        "--step", type=float, default=0.25, help="height step in metres"
+    )
     parser.add_argument("--format", choices=["webp", "png"], default="webp")
     parser.add_argument("--workers", type=int, default=os.cpu_count())
     build(parser.parse_args())

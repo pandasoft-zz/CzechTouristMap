@@ -10,7 +10,10 @@ All documentation, code, and comments must be written in **plain technical Engli
 ## Architecture
 
 - `tiles/` — Planetiler profiles (Java 21, Maven). `BaseProfile` → `base.pmtiles`, `RoutesProfile` → `routes.pmtiles`.
-- `relief/build_relief.py` — Copernicus DEM → `relief.pmtiles` (Terrarium WebP).
+- `relief/build_relief.py` — DTM → `relief.pmtiles` (Terrarium WebP).
+- `relief/build_contours.py` — DTM → `data/contours.gpkg`; Planetiler profile `contours` → `contours.pmtiles`.
+- `terrain/sonny/` — Sonny's LiDAR DTM tiles of the map area (Git LFS). Do not add tiles outside the map area
+  without asking: the LFS download quota is 10 GiB per month.
 - `style/` — MapLibre style as JS modules. `style/index.mjs` exports `buildStyle({ variant })`.
   There are two maps: `tourist` (Turistická, default) and `topo` (Topografická, inspired by ČÚZK ZTM10).
   Their themes (colours, widths, labels) are in `style/themes/`, see `docs/style-variants.md`.
