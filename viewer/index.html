@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Czech Tourist Map</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/vendor/maplibre-gl/maplibre-gl.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="/vendor/pmtiles/pmtiles.js"></script>
+</head>
+<body>
+  <div id="map"></div>
+  <form id="panel" class="panel">
+    <fieldset>
+      <legend>Vrstvy</legend>
+      <label><input type="checkbox" name="base" checked> Základní mapa</label>
+      <label><input type="checkbox" name="relief" checked> Reliéf</label>
+      <label><input type="checkbox" name="hiking" checked> Turistické trasy</label>
+      <label><input type="checkbox" name="cycling" checked> Cyklotrasy</label>
+    </fieldset>
+    <fieldset>
+      <legend>Debug</legend>
+      <label><input type="checkbox" name="inspect"> Inspect features</label>
+      <label><input type="checkbox" name="tiles"> Tile borders</label>
+      <button type="button" id="reload" title="Shortcut: R">Reload style</button>
+    </fieldset>
+    <div id="status" class="status"></div>
+  </form>
+  <script type="module" src="main.js"></script>
+</body>
+</html>

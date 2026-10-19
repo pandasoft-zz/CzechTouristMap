@@ -6,13 +6,13 @@ end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-# XSLT / XML — 4-space indent
-[*.{xslt,xml,xsd}]
+# XML (Maven) — 4-space indent
+[*.xml]
 indent_style = space
 indent_size = 4
 
-# Kotlin
-[*.{kt,kts}]
+# Java
+[*.java]
 indent_style = space
 indent_size = 4
 max_line_length = 120
@@ -23,8 +23,8 @@ indent_style = space
 indent_size = 4
 max_line_length = 88
 
-# JavaScript / CSS / HTML
-[*.{js,css,html}]
+# JavaScript / CSS / HTML / JSON
+[*.{js,mjs,css,html,json}]
 indent_style = space
 indent_size = 2
 
@@ -33,19 +33,6 @@ indent_size = 2
 indent_style = space
 indent_size = 2
 
-# Makefile — tabs required
-[Makefile]
-indent_style = tab
-
 # Markdown — preserve trailing spaces (line breaks)
 [*.md]
-trim_trailing_whitespace = false
-
-# INI / config files
-[*.{cfg,ini}]
-indent_style = space
-indent_size = 4
-
-# CSV — no indent rules, just encoding
-[*.csv]
 trim_trailing_whitespace = false
