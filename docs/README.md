@@ -3,6 +3,7 @@
 | File | Content |
 |---|---|
 | `tile-schema.md` | Layers and attributes in the PMTiles files |
+| `adr/` | Architecture decision records |
 | `design-manual-project.md` | Colours, line widths and zoom levels of this map |
 | `design-manual-mapycz.md` | Reference: Mapy.cz tourist map style |
 | `design-manual-cuzk.md` | Reference: ČÚZK base map style |

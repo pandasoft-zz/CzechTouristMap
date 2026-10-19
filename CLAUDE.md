@@ -16,6 +16,7 @@ All documentation, code, and comments must be written in **plain technical Engli
 - `tools/czmap.mjs` — the only entry point for build, serve, render.
 
 The tile schema is in `docs/tile-schema.md`. Update it when you change a profile.
+Architecture decisions are in `docs/adr/`. Add a new ADR when you change a tool or language.
 
 ## Map rules
 

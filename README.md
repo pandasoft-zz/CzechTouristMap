@@ -95,6 +95,7 @@ the viewer uses for the layer switches.
 ## Documentation
 
 - [docs/tile-schema.md](docs/tile-schema.md) — layers and attributes in the PMTiles files
+- [docs/adr/](docs/adr/) — architecture decisions (why Planetiler / Java)
 - [docs/design-manual-project.md](docs/design-manual-project.md) — colours and line widths
 - [docs/design-manual-mapycz.md](docs/design-manual-mapycz.md), [docs/design-manual-cuzk.md](docs/design-manual-cuzk.md) — reference styles
 - [docs/design-manual-typography.md](docs/design-manual-typography.md) — labels
