@@ -17,7 +17,8 @@ Size goal: max 500 MB per PMTiles file (`czmap info` checks it).
 ## Requirements
 
 - Node.js 20+
-- Java 21+ and Maven (vector tiles, [Planetiler](https://github.com/onthegomap/planetiler))
+- Java 21+ and Maven (vector tiles, [Planetiler](https://github.com/onthegomap/planetiler)),
+  or Docker. Without native Java 21+ the build runs in Docker. Set `CZMAP_DOCKER=1` to force Docker.
 - Python 3.11+ (relief; packages in `relief/requirements.txt`, installed into `.venv` automatically)
 - About 10 GB free disk and 8 GB RAM for a full build
 

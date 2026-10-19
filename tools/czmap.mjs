@@ -11,7 +11,9 @@ import { ROOT, DATA, DIST } from './paths.mjs';
 const OSM_URL = 'https://download.openstreetmap.fr/extracts/europe/czech_republic-latest.osm.pbf';
 const OSM_FILE = path.join(DATA, 'czech-republic.osm.pbf');
 const TILES_JAR = path.join(ROOT, 'tiles/target/czmap-tiles.jar');
-const VENV_PYTHON = path.join(ROOT, '.venv/bin/python');
+const VENV_PYTHON = process.platform === 'win32'
+  ? path.join(ROOT, '.venv/Scripts/python.exe')
+  : path.join(ROOT, '.venv/bin/python');
 const SIZE_LIMIT = 500 * 1000 * 1000;
 
 const HELP = `czmap - build, view and check the Czech Tourist Map
@@ -70,28 +72,89 @@ function download() {
   run('curl', ['-fSL', '--retry', '3', '-C', '-', '-o', OSM_FILE, OSM_URL]);
 }
 
+// Major Java version of the native "java" command, or 0 if it is missing.
+function nativeJavaVersion() {
+  const result = spawnSync('java', ['-version'], { encoding: 'utf8' });
+  const match = /version "(\d+)(?:\.(\d+))?/.exec(`${result.stderr}${result.stdout}`);
+  if (result.error || !match) {
+    return 0;
+  }
+  // Java 8 and older report "1.8.0".
+  return match[1] === '1' ? Number(match[2]) : Number(match[1]);
+}
+
+function hasCommand(cmd) {
+  // shell: true resolves .cmd wrappers (mvn.cmd) on Windows.
+  const result = spawnSync(cmd, ['--version'], { stdio: 'ignore', shell: true });
+  return !result.error && result.status === 0;
+}
+
+// Native Java 21+ is used when available. Otherwise Java and Maven run in Docker.
+// Set CZMAP_DOCKER=1 to force Docker.
+function useDocker() {
+  if (useDocker.value === undefined) {
+    useDocker.value = process.env.CZMAP_DOCKER === '1' || nativeJavaVersion() < 21;
+    if (useDocker.value) {
+      if (!hasCommand('docker')) {
+        console.error('Java 21+ or Docker is required to build vector tiles.');
+        process.exit(1);
+      }
+      console.log('Java 21+ not found, using Docker.');
+    }
+  }
+  return useDocker.value;
+}
+
+// Path relative to the project root with forward slashes (valid in the container and on the host).
+function rel(file) {
+  return path.relative(ROOT, file).split(path.sep).join('/');
+}
+
+function runInDocker(image, args) {
+  const user = process.getuid ? ['--user', `${process.getuid()}:${process.getgid()}`] : [];
+  run('docker', ['run', '--rm', ...user, '-v', `${ROOT}:/work`, '-w', '/work', image, ...args]);
+}
+
+function runMaven(args) {
+  if (useDocker() || !hasCommand('mvn')) {
+    // Keep the Maven repository in data/ so downloads are cached between runs.
+    runInDocker('maven:3.9-eclipse-temurin-21', ['mvn', '-Dmaven.repo.local=data/m2', ...args]);
+  } else {
+    run('mvn', args, { shell: process.platform === 'win32' });
+  }
+}
+
+function runJava(args) {
+  if (useDocker()) {
+    runInDocker('eclipse-temurin:21-jre', ['java', ...args]);
+  } else {
+    run('java', args);
+  }
+}
+
 function buildVector(profile, extra) {
   if (!fs.existsSync(OSM_FILE)) {
     download();
   }
   if (newestMtime(path.join(ROOT, 'tiles'), ['target']) > mtime(TILES_JAR)) {
-    run('mvn', ['-q', '-B', '-f', 'tiles/pom.xml', 'package']);
+    runMaven(['-q', '-B', '-f', 'tiles/pom.xml', 'package']);
   }
   // Write to a temp file first, so the old file stays usable in the viewer during the build.
+  // Paths are relative to the project root, so they work both natively and in Docker.
   const output = path.join(DIST, `${profile}.pmtiles`);
   const tmp = path.join(DIST, `${profile}.tmp.pmtiles`);
-  run('java', ['-Xmx6g', '-jar', TILES_JAR,
+  runJava(['-Xmx6g', '-jar', rel(TILES_JAR),
     `--profile=${profile}`,
-    `--osm_path=${OSM_FILE}`,
-    `--output=${tmp}`,
-    `--tmpdir=${path.join(DATA, 'tmp')}`,
+    `--osm_path=${rel(OSM_FILE)}`,
+    `--output=${rel(tmp)}`,
+    `--tmpdir=${rel(path.join(DATA, 'tmp'))}`,
     ...extra]);
   fs.renameSync(tmp, output);
 }
 
 function buildRelief(extra) {
   if (!fs.existsSync(VENV_PYTHON)) {
-    run('python3', ['-m', 'venv', '.venv']);
+    run(process.platform === 'win32' ? 'python' : 'python3', ['-m', 'venv', '.venv']);
     run(VENV_PYTHON, ['-m', 'pip', 'install', '-r', 'relief/requirements.txt']);
   }
   run(VENV_PYTHON, ['relief/build_relief.py', ...extra]);
@@ -133,6 +196,13 @@ async function style({ tiles, stdout, out }) {
 }
 
 async function serve({ port, host }) {
+  // The viewer loads MapLibre and PMTiles from node_modules. Without them the page stays blank.
+  for (const dep of ['maplibre-gl', 'pmtiles']) {
+    if (!fs.existsSync(path.join(ROOT, 'node_modules', dep))) {
+      console.error(`node_modules/${dep} is missing. Run: npm install`);
+      process.exit(1);
+    }
+  }
   const { startServer } = await import('./server.mjs');
   const { url } = await startServer({ port: Number(port || 8080), host: host || '127.0.0.1' });
   console.log(`Viewer: ${url}`);

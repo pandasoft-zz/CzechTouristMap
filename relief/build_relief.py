@@ -47,18 +47,29 @@ def log(message):
     print(f"[relief] {message}", flush=True)
 
 
-def download(url, path):
+def download(url, path, attempts=4):
     if path.exists():
         return True
     tmp = path.with_suffix(path.suffix + ".part")
-    try:
-        with urllib.request.urlopen(url, timeout=120) as resp, open(tmp, "wb") as out:
-            while chunk := resp.read(1 << 20):
-                out.write(chunk)
-    except urllib.error.HTTPError as err:
-        if err.code in (403, 404):
-            return False
-        raise
+    for attempt in range(1, attempts + 1):
+        try:
+            with (
+                urllib.request.urlopen(url, timeout=120) as resp,
+                open(tmp, "wb") as out,
+            ):
+                while chunk := resp.read(1 << 20):
+                    out.write(chunk)
+            break
+        except urllib.error.HTTPError as err:
+            if err.code in (403, 404):
+                return False
+            raise
+        except (urllib.error.URLError, OSError) as err:
+            # Connection resets and timeouts: wait and try again.
+            if attempt == attempts:
+                raise
+            log(f"download failed ({err}), retry {attempt}/{attempts - 1}")
+            time.sleep(5 * attempt)
     tmp.rename(path)
     return True
 
