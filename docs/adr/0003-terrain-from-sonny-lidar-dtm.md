@@ -37,6 +37,6 @@ Options checked:
 - Contours and hillshading come from the same terrain model.
 - `git lfs pull` after cloning; CI checks out with `lfs: true`. A new region needs a manual
   download once, then its tiles are committed to `terrain/sonny/`.
-- Every CI run that checks out the LFS files uses about 160 MB of the download quota.
+- Every CI run that checks out the LFS files uses about 200 MB of the download quota.
 - Attribution: "© Sonny's LiDAR DTM, © ČÚZK" (and the other national sources outside Czechia).
 - The pipeline works for any 1 x 1 degree tiles, so new regions only need more HGT files.

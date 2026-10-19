@@ -12,6 +12,12 @@ const isCapital = ['==', ['get', 'name'], 'Praha'];
 
 const upper = (on) => (on ? 'uppercase' : 'none');
 
+// Road numbers only for motorways and I. and II. class roads. III. class roads have numbers of
+// four or more digits; some of them are tagged "secondary" in OSM, so these numbers are hidden too.
+const MAJOR_REF = ['all',
+  ['in', ['get', 'kind'], ['literal', ['motorway', 'trunk', 'primary', 'secondary']]],
+  ['<', ['to-number', ['get', 'ref'], 0], 1000]];
+
 export function labelLayers(t) {
   const l = t.labels;
   const halo = {
@@ -40,7 +46,7 @@ export function labelLayers(t) {
       source: SOURCE,
       'source-layer': 'roads',
       minzoom: 10,
-      filter: ['all', ['has', 'ref'], filter],
+      filter: ['all', ['has', 'ref'], MAJOR_REF, filter],
       layout: {
         'symbol-placement': 'line',
         'symbol-spacing': 500,

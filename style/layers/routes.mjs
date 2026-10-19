@@ -7,8 +7,10 @@ const SOURCE = 'routes';
 // Width of one hiking colour stripe.
 const STRIPE = { 9: 1.2, 12: 2.2, 14: 3, 17: 5 };
 
+// factor can be a number or a data expression.
 function stripeWidth(factor = 1, extra = 0) {
-  const stops = Object.entries(STRIPE).flatMap(([z, w]) => [Number(z), w * factor + extra]);
+  const value = (w) => (typeof factor === 'number' ? w * factor + extra : ['+', ['*', factor, w], extra]);
+  const stops = Object.entries(STRIPE).flatMap(([z, w]) => [Number(z), value(w)]);
   return ['interpolate', ['exponential', 1.4], ['zoom'], ...stops];
 }
 
@@ -18,6 +20,11 @@ function stripeOffset() {
   const stops = Object.entries(STRIPE).flatMap(([z, w]) => [Number(z), ['*', centre, w]]);
   return ['interpolate', ['exponential', 1.4], ['zoom'], ...stops];
 }
+
+// Learning trails (naučné stezky): a thinner dash-dot line without casing, so they do not
+// dominate the map like marked trails.
+const isLearning = ['==', ['get', 'kind'], 'learning'];
+const LEARNING_WIDTH = 0.5;
 
 // Casing width depends on the number of stripes, so it uses a data expression per stop.
 function casingWidth() {
@@ -35,7 +42,7 @@ export function hikingLayers(t) {
       source: SOURCE,
       'source-layer': 'hiking',
       minzoom: h.minzoom,
-      filter: ['==', ['get', 'slot'], 0],
+      filter: ['all', ['==', ['get', 'slot'], 0], ['!', ['all', isLearning, ['==', ['get', 'count'], 1]]]],
       layout: { 'line-join': 'round', 'line-cap': 'round' },
       paint: {
         'line-color': h.casing,
@@ -58,9 +65,9 @@ export function hikingLayers(t) {
           'green', h.green,
           'yellow', h.yellow,
           '#808080'],
-        'line-width': stripeWidth(),
+        'line-width': stripeWidth(['case', isLearning, LEARNING_WIDTH, 1]),
         'line-offset': stripeOffset(),
-        'line-dasharray': ['match', ['get', 'kind'], 'learning', ['literal', [2, 1]], ['literal', [1, 0]]],
+        'line-dasharray': ['case', isLearning, ['literal', [4, 2, 1, 2]], ['literal', [1, 0]]],
       },
       metadata: group,
     },
