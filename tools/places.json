@@ -1,0 +1,15 @@
+{
+  "cz": { "center": [15.5, 49.8], "zoom": 7, "note": "whole country" },
+  "praha": { "center": [14.4205, 50.0875], "zoom": 13 },
+  "brno": { "center": [16.6078, 49.1951], "zoom": 13 },
+  "snezka": { "center": [15.7400, 50.7360], "zoom": 13, "note": "Krkonose, highest peak" },
+  "krkonose": { "center": [15.6500, 50.7200], "zoom": 11 },
+  "praded": { "center": [17.2310, 50.0830], "zoom": 13, "note": "Jeseniky, Praded" },
+  "sumava": { "center": [13.5500, 49.0500], "zoom": 11 },
+  "cesky-raj": { "center": [15.1900, 50.5500], "zoom": 13, "note": "Prachov rocks" },
+  "ceske-svycarsko": { "center": [14.3300, 50.8800], "zoom": 13, "note": "Pravcicka brana" },
+  "moravsky-kras": { "center": [16.7300, 49.3700], "zoom": 13 },
+  "beskydy": { "center": [18.2700, 49.4900], "zoom": 12, "note": "Radhost" },
+  "palava": { "center": [16.6500, 48.8600], "zoom": 13 },
+  "karlstejn": { "center": [14.1880, 49.9390], "zoom": 15, "note": "detail of village and castle" }
+}

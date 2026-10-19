@@ -1,34 +1,28 @@
-# Generated map theme output
-themes/*.xml
+# Downloaded input data (OSM extract, DEM tiles)
+data/
 
-# Downloaded map data
-maps/*.map
+# Built PMTiles and production style
+dist/
 
-# Python
+# Rendered preview images
+out/
+
+# Dependencies and build output
+node_modules/
+.venv/
+tiles/target/
 __pycache__/
-.pytest_cache/
 *.pyc
-*.pyo
-
-# Gradle / Kotlin build artifacts
-tile-server/build/
-tile-server/.gradle/
-*.jar
-*.class
 
 # Editor & IDE
 .history/
 .idea/
 .vscode/
 *.swp
-*.swo
 *~
 
 # Claude Code local settings
 .claude/settings.local.json
-
-# Playwright
-.playwright-mcp/
 
 # OS
 .DS_Store
@@ -37,5 +31,3 @@ Thumbs.db
 # Local env overrides
 .env
 .env.local
-docker-compose.override.yml
-.claude/*

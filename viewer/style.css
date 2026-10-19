@@ -1,0 +1,73 @@
+html,
+body {
+  margin: 0;
+  height: 100%;
+  font: 13px/1.4 system-ui, sans-serif;
+  background: #fbfaf0;
+}
+
+#map {
+  position: absolute;
+  inset: 0;
+}
+
+.panel {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  max-width: 220px;
+}
+
+.panel fieldset {
+  border: 0;
+  margin: 0 0 6px;
+  padding: 0;
+}
+
+.panel legend {
+  font-weight: 600;
+  padding: 0;
+  margin-bottom: 2px;
+}
+
+.panel label {
+  display: block;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.panel button {
+  margin-top: 4px;
+}
+
+.status {
+  color: #555;
+  font-variant-numeric: tabular-nums;
+}
+
+.render .panel,
+.render .maplibregl-ctrl {
+  display: none;
+}
+
+.inspect {
+  max-height: 260px;
+  overflow: auto;
+  font: 11px/1.3 ui-monospace, monospace;
+}
+
+.inspect b {
+  display: block;
+  margin-top: 4px;
+}
+
+@media (max-width: 480px) {
+  .panel {
+    max-width: calc(100% - 52px);
+  }
+}
