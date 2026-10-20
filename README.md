@@ -133,6 +133,8 @@ bash tools/publish-r2.sh        # needs the R2_* variables and the AWS CLI
 
 ## Documentation
 
+- [site/](site/) — project page on GitHub Pages (description, both maps, live demo)
+
 - [docs/tile-schema.md](docs/tile-schema.md) — layers and attributes in the PMTiles files
 - [docs/publishing.md](docs/publishing.md) — release to Cloudflare R2, `latest.json`, Cloudflare setup
 - [docs/style-variants.md](docs/style-variants.md) — the two maps, their sources and limits
