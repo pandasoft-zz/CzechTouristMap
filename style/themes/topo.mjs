@@ -91,7 +91,11 @@ export default {
     // ZTM10 bridge edges are dark grey #58595B.
     bridge: { color: '#58595B', opacity: 0.85, width: 3 },
     // Ratios of the ZTM10 line widths (motorway 3.55, I. 2.55, II. 2.27, III. 1.99, other 1.99).
-    widthFactor: { motorway: 1.2, trunk: 1.3, minor: 1.3 },
+    widthFactor: {
+      motorway: 1.2, trunk: 1.3, minor: 1.3,
+      // Pedestrian streets wide, so they read as one surface with the squares (no source).
+      pedestrian: 1.6,
+    },
     // Motorways are two carriageways with a grey line between them.
     centreLine: '#86888A',
     // "polní a lesní cesta udržovaná" solid, "neudržovaná" dashed.

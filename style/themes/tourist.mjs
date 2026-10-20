@@ -97,7 +97,11 @@ export default {
     bridge: { color: '#404040', opacity: 0.85, width: 3.4 },
     // Ratios of the manual's base widths (motorway 2.8, primary 3.0, secondary 2.8,
     // tertiary 2.5, residential 2.0, unclassified 2.5, service 2.2).
-    widthFactor: { motorway: 0.75, trunk: 0.8, primary: 0.95, minor: 1.2, service: 1.9 },
+    widthFactor: {
+      motorway: 0.75, trunk: 0.8, primary: 0.95, minor: 1.2, service: 1.9,
+      // Pedestrian streets wide, so they read as one surface with the squares (no source).
+      pedestrian: 1.8,
+    },
     centreLine: null,
     // Dash patterns: no source.
     track: { color: '#8C5A1E', dashGraded: [1, 0], dash: [5, 2] },
