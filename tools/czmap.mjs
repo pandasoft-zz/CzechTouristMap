@@ -7,36 +7,47 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { parseArgs } from 'node:util';
 import { ROOT, DATA, DIST } from './paths.mjs';
+import { loadCountries, selectParts, partFiles, loadPlaces, polyBounds } from './regions.mjs';
 
-const OSM_URL = 'https://download.openstreetmap.fr/extracts/europe/czech_republic-latest.osm.pbf';
-const OSM_FILE = path.join(DATA, 'czech-republic.osm.pbf');
 const TILES_JAR = path.join(ROOT, 'tiles/target/czmap-tiles.jar');
 const VENV_PYTHON = process.platform === 'win32'
   ? path.join(ROOT, '.venv/Scripts/python.exe')
   : path.join(ROOT, '.venv/bin/python');
+// Cloudflare caches files up to 512 MB (free plan); R2 free storage is 10 GB.
 const SIZE_LIMIT = 500 * 1000 * 1000;
+const TOTAL_LIMIT = 10 * 1000 * 1000 * 1000;
+const SETS = ['base', 'routes', 'relief', 'contours'];
 
 const HELP = `czmap - build, view and check the Czech Tourist Map
 
 Usage: node tools/czmap.mjs <command> [options]
 
+The map is built in parts (regions/): one part = one OSM extract, files in dist/<part>/.
+--country LIST and --part LIST select parts for download, build and info (default: all).
+
 Commands:
-  download                Download the OSM extract to data/
-  build <part...>         Build PMTiles into dist/. Parts: base, routes, relief, all
-  style [--tiles URL]     Write dist/style.json (production style)
-        [--stdout]        Print the style instead of writing it
+  download                Download the OSM extracts and area polygons to data/
+  build <set...>          Build PMTiles into dist/<part>/. Sets: base, routes, relief, contours, all
+                          Writes dist/regions.json (tile index for the viewer)
+  index                   Write dist/regions.json only
+  style [--tiles URL]     Write dist/style-tourist.json and dist/style-topo.json (production styles)
+        [--variant NAME]  Only this map: tourist or topo
+        [--stdout]        Print one style instead of writing it (default map: tourist)
   serve [--port 8080]     Start the viewer at http://localhost:8080
         [--host 0.0.0.0]  Listen on all interfaces (for phones in the same network)
   render                  Render PNG images of the map (headless Chromium)
-        --place NAME      Preset from tools/places.json ("all" = every preset)
+        --place NAME      Preset from regions/*/places.json ("all" = every preset)
         --center LON,LAT  Map centre (instead of --place)
         --zoom Z          Zoom level (default: preset zoom or 12)
         --size WxH        Image size in CSS px (default 1024x768)
         --ratio N         Pixel ratio (default 1)
         --layers LIST     Visible groups, e.g. base,relief (default: all)
+        --variant LIST    Maps to render: tourist, topo, or "all" (default: tourist)
+        --compare         One image with the maps side by side (all, or --variant LIST)
         --out FILE|DIR    Output file, or directory for --place all (default: out/)
-  info                    Show sizes of the PMTiles files against the 500 MB limit
-  places                  List render presets
+  sprite                  Generate the style sprite into sprite/ (after changing tools/sprite.mjs)
+  info                    Show PMTiles sizes: 500 MB per file (cache limit), 10 GB in total (R2)
+  places                  List render presets (regions/<country>/places.json)
 `;
 
 function run(cmd, args, options = {}) {
@@ -67,9 +78,29 @@ function newestMtime(dir, skip = []) {
   return newest;
 }
 
-function download() {
-  fs.mkdirSync(DATA, { recursive: true });
-  run('curl', ['-fSL', '--retry', '3', '-C', '-', '-o', OSM_FILE, OSM_URL]);
+function curl(url, file) {
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  run('curl', ['-fSL', '--retry', '3', '-C', '-', '-o', file, url]);
+}
+
+function download(parts) {
+  for (const part of parts) {
+    const files = partFiles(part);
+    curl(part.osm, files.osm);
+    curl(part.poly, files.poly);
+  }
+}
+
+// Download what a part needs and is missing.
+function ensureInputs(part, { osm = true } = {}) {
+  const files = partFiles(part);
+  if (!fs.existsSync(files.poly)) {
+    curl(part.poly, files.poly);
+  }
+  if (osm && !fs.existsSync(files.osm)) {
+    curl(part.osm, files.osm);
+  }
+  return files;
 }
 
 // Major Java version of the native "java" command, or 0 if it is missing.
@@ -132,67 +163,132 @@ function runJava(args) {
   }
 }
 
-function buildVector(profile, extra) {
-  if (!fs.existsSync(OSM_FILE)) {
-    download();
-  }
+function buildVector(part, profile, extra) {
+  const files = ensureInputs(part, { osm: profile !== 'contours' });
   if (newestMtime(path.join(ROOT, 'tiles'), ['target']) > mtime(TILES_JAR)) {
     runMaven(['-q', '-B', '-f', 'tiles/pom.xml', 'package']);
   }
   // Write to a temp file first, so the old file stays usable in the viewer during the build.
   // Paths are relative to the project root, so they work both natively and in Docker.
-  const output = path.join(DIST, `${profile}.pmtiles`);
-  const tmp = path.join(DIST, `${profile}.tmp.pmtiles`);
+  fs.mkdirSync(files.dist, { recursive: true });
+  const output = files.pmtiles(profile);
+  const tmp = path.join(files.dist, `${profile}.tmp.pmtiles`);
   runJava(['-Xmx6g', '-jar', rel(TILES_JAR),
     `--profile=${profile}`,
-    `--osm_path=${rel(OSM_FILE)}`,
+    `--osm_path=${rel(files.osm)}`,
+    `--contours_path=${rel(files.contours)}`,
     `--output=${rel(tmp)}`,
     `--tmpdir=${rel(path.join(DATA, 'tmp'))}`,
     ...extra]);
   fs.renameSync(tmp, output);
 }
 
-function buildRelief(extra) {
+function ensureVenv() {
   if (!fs.existsSync(VENV_PYTHON)) {
     run(process.platform === 'win32' ? 'python' : 'python3', ['-m', 'venv', '.venv']);
-    run(VENV_PYTHON, ['-m', 'pip', 'install', '-r', 'relief/requirements.txt']);
   }
-  run(VENV_PYTHON, ['relief/build_relief.py', ...extra]);
+  run(VENV_PYTHON, ['-m', 'pip', 'install', '-q', '-r', 'relief/requirements.txt']);
 }
 
-function build(parts, extra) {
-  if (parts.length === 0 || parts.includes('all')) {
-    parts = ['base', 'routes', 'relief'];
+function buildRelief(part, extra) {
+  const files = ensureInputs(part, { osm: false });
+  ensureVenv();
+  // --source is shared with the contours; other contour options are not for the relief.
+  const reliefExtra = extra.filter((a) => a.startsWith('--source') || !isContourOption(a));
+  fs.mkdirSync(files.dist, { recursive: true });
+  run(VENV_PYTHON, ['relief/build_relief.py', `--poly=${files.poly}`, `--output=${files.pmtiles('relief')}`,
+    ...reliefExtra]);
+}
+
+// Options of relief/build_contours.py; all other options go to Planetiler.
+const CONTOUR_OPTIONS = ['--source', '--interval', '--sigma', '--simplify', '--min-loop', '--border', '--margin',
+  '--only', '--workers'];
+
+const isContourOption = (a) => CONTOUR_OPTIONS.some((o) => a === o || a.startsWith(`${o}=`));
+
+// Contours: DTM -> data/contours/<part>.gpkg (Python) -> dist/<part>/contours.pmtiles (Planetiler).
+function buildContours(part, extra) {
+  const files = ensureInputs(part, { osm: false });
+  ensureVenv();
+  run(VENV_PYTHON, ['relief/build_contours.py', `--poly=${files.poly}`, `--output=${files.contours}`,
+    ...extra.filter(isContourOption)]);
+  buildVector(part, 'contours', extra.filter((a) => !isContourOption(a)));
+}
+
+function build(sets, extra, parts) {
+  if (sets.length === 0 || sets.includes('all')) {
+    sets = SETS;
   }
-  fs.mkdirSync(DIST, { recursive: true });
+  const unknown = sets.filter((s) => !SETS.includes(s));
+  if (unknown.length > 0) {
+    console.error(`Unknown set: ${unknown.join(', ')}. Sets: ${SETS.join(', ')}`);
+    process.exit(2);
+  }
   for (const part of parts) {
-    if (part === 'base' || part === 'routes') {
-      buildVector(part, extra);
-    } else if (part === 'relief') {
-      buildRelief(extra);
-    } else {
-      console.error(`Unknown part: ${part}`);
-      process.exit(2);
+    console.log(`== part ${part.id} (${part.name})`);
+    for (const set of sets) {
+      if (set === 'relief') {
+        buildRelief(part, extra);
+      } else if (set === 'contours') {
+        buildContours(part, extra);
+      } else {
+        buildVector(part, set, extra);
+      }
     }
   }
-  info();
+  writeIndex();
+  info(selectParts());
 }
 
-async function style({ tiles, stdout, out }) {
-  const { buildStyle } = await import('../style/index.mjs');
+// dist/regions.json: parts with their bounds and built sets. The viewer reads it to know which
+// file holds a tile (viewer/tiles.js) and where the map is.
+function writeIndex() {
+  const countries = loadCountries();
+  const parts = [];
+  for (const country of countries) {
+    for (const part of country.parts) {
+      const files = partFiles(part);
+      const sets = SETS.filter((s) => fs.existsSync(files.pmtiles(s)));
+      if (sets.length === 0 || !fs.existsSync(files.poly)) {
+        continue;
+      }
+      parts.push({ id: part.id, country: country.id, name: part.name, bounds: polyBounds(files.poly), sets });
+    }
+  }
+  const bounds = parts.length === 0 ? [-180, -85, 180, 85] : [
+    Math.min(...parts.map((p) => p.bounds[0])), Math.min(...parts.map((p) => p.bounds[1])),
+    Math.max(...parts.map((p) => p.bounds[2])), Math.max(...parts.map((p) => p.bounds[3])),
+  ];
+  const index = { view: countries[0]?.view, bounds, parts };
+  fs.mkdirSync(DIST, { recursive: true });
+  fs.writeFileSync(path.join(DIST, 'regions.json'), `${JSON.stringify(index, null, 2)}\n`);
+  console.log(`Wrote dist/regions.json (${parts.length} parts)`);
+}
+
+async function style({ tiles, stdout, out, variant }) {
+  const { buildStyle, THEMES, DEFAULT_THEME } = await import('../style/index.mjs');
   const tilesUrl = tiles || '.';
   const glyphs = tiles
     ? `${new URL('../fonts', `${tiles}/`).href}/{fontstack}/{range}.pbf`
     : './fonts/{fontstack}/{range}.pbf';
-  const json = JSON.stringify(buildStyle({ tiles: tilesUrl, glyphs }), null, 2);
+  const sprite = tiles ? new URL('../sprite/sprite', `${tiles}/`).href : './sprite/sprite';
+  const toJson = (id) => JSON.stringify(buildStyle({ tiles: tilesUrl, glyphs, sprite, variant: id }), null, 2);
   if (stdout) {
-    process.stdout.write(json);
+    process.stdout.write(toJson(variant || DEFAULT_THEME));
     return;
   }
-  const file = out || path.join(DIST, 'style.json');
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, `${json}\n`);
-  console.log(`Wrote ${path.relative(ROOT, file)}`);
+  // One file per map: dist/style-<id>.json.
+  const ids = variant ? [variant] : Object.keys(THEMES);
+  if (out && ids.length > 1) {
+    console.error('--out needs --variant.');
+    process.exit(2);
+  }
+  for (const id of ids) {
+    const file = out || path.join(DIST, `style-${id}.json`);
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, `${toJson(id)}\n`);
+    console.log(`Wrote ${path.relative(ROOT, file)}`);
+  }
 }
 
 async function serve({ port, host }) {
@@ -206,18 +302,32 @@ async function serve({ port, host }) {
   const { startServer } = await import('./server.mjs');
   const { url } = await startServer({ port: Number(port || 8080), host: host || '127.0.0.1' });
   console.log(`Viewer: ${url}`);
-  for (const name of ['base', 'routes', 'relief']) {
-    if (!fs.existsSync(path.join(DIST, `${name}.pmtiles`))) {
-      console.log(`Warning: dist/${name}.pmtiles is missing. Run: node tools/czmap.mjs build ${name}`);
-    }
+  if (!fs.existsSync(path.join(DIST, 'regions.json'))) {
+    console.log('Warning: dist/regions.json is missing. Run: node tools/czmap.mjs build (or index)');
   }
 }
 
-function loadPlaces() {
-  return JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/places.json'), 'utf8'));
+// One view per style variant, or one comparison view per place.
+// Every image name ends with the map id (out/praha-z13-tourist.png) or with "compare".
+function expandVariants(views, opts, themes, defaultTheme) {
+  const withSuffix = (file, suffix) => file.replace(/\.png$/, `-${suffix}.png`);
+  if (opts.compare) {
+    const variant = opts.variant && opts.variant !== 'all' ? opts.variant : undefined;
+    return views.map((v) => ({ ...v, compare: true, variant, out: withSuffix(v.out, 'compare') }));
+  }
+  const variant = opts.variant || defaultTheme;
+  const ids = variant === 'all' ? Object.keys(themes) : variant.split(',');
+  for (const id of ids) {
+    if (!themes[id]) {
+      console.error(`Unknown variant: ${id}. Known: ${Object.keys(themes).join(', ')}`);
+      process.exit(2);
+    }
+  }
+  return views.flatMap((v) => ids.map((id) => ({ ...v, variant: id, out: withSuffix(v.out, id) })));
 }
 
 async function renderCommand(opts) {
+  const { THEMES, DEFAULT_THEME } = await import('../style/themes/index.mjs');
   const { render } = await import('./render.mjs');
   const places = loadPlaces();
   const [width, height] = (opts.size || '1024x768').split('x').map(Number);
@@ -255,12 +365,13 @@ async function renderCommand(opts) {
     const out = opts.out || path.join('out', `${name}-z${zoom}${suffix}.png`);
     views = [{ name, center, zoom, out }];
   }
+  views = expandVariants(views, opts, THEMES, DEFAULT_THEME);
   const results = await render(views, {
     width, height, pixelRatio: Number(opts.ratio || 1), layers,
   });
   let failed = false;
   for (const r of results) {
-    console.log(`${r.out}  (${r.center.join(',')} z${r.zoom}, ${r.ms} ms)`);
+    console.log(`${r.out}  (${r.center.join(',')} z${r.zoom}${r.variant ? ` ${r.variant}` : ''}, ${r.ms} ms)`);
     for (const e of r.errors) {
       failed = true;
       console.log(`  error: ${e}`);
@@ -271,17 +382,28 @@ async function renderCommand(opts) {
   }
 }
 
-function info() {
-  console.log('PMTiles files (limit 500 MB each):');
-  for (const name of ['base', 'routes', 'relief']) {
-    const file = path.join(DIST, `${name}.pmtiles`);
-    if (!fs.existsSync(file)) {
-      console.log(`  ${name.padEnd(8)} missing`);
-      continue;
+function info(parts) {
+  const mb = (bytes) => `${(bytes / 1e6).toFixed(1).padStart(8)} MB`;
+  console.log('PMTiles files (limit 500 MB each, 10 GB in total):');
+  let total = 0;
+  let over = false;
+  for (const part of parts) {
+    for (const set of SETS) {
+      const file = partFiles(part).pmtiles(set);
+      const label = `  ${part.id}/${set}`.padEnd(22);
+      if (!fs.existsSync(file)) {
+        console.log(`${label} missing`);
+        continue;
+      }
+      const size = fs.statSync(file).size;
+      total += size;
+      over ||= size > SIZE_LIMIT;
+      console.log(`${label}${mb(size)}  ${size > SIZE_LIMIT ? 'OVER LIMIT' : 'ok'}`);
     }
-    const size = fs.statSync(file).size;
-    const mark = size > SIZE_LIMIT ? 'OVER LIMIT' : 'ok';
-    console.log(`  ${name.padEnd(8)} ${(size / 1e6).toFixed(1).padStart(8)} MB  ${mark}`);
+  }
+  console.log(`  ${'total'.padEnd(20)}${mb(total)}  ${total > TOTAL_LIMIT ? 'OVER LIMIT' : 'ok'}`);
+  if (over || total > TOTAL_LIMIT) {
+    process.exitCode = 1;
   }
 }
 
@@ -303,24 +425,43 @@ async function main() {
       size: { type: 'string' },
       ratio: { type: 'string' },
       layers: { type: 'string' },
+      variant: { type: 'string' },
+      compare: { type: 'boolean' },
+      country: { type: 'string' },
+      part: { type: 'string' },
     },
   });
-  // Unknown --options of "build" go to the tile builders.
-  const extra = rest.filter((a) => a.startsWith('--'));
+  // Unknown --options of "build" go to the tile builders (--country and --part are ours).
+  const own = (a) => ['--country', '--part'].some((o) => a === o || a.startsWith(`${o}=`));
+  const extra = rest.filter((a) => a.startsWith('--') && !own(a));
+  const parts = () => {
+    try {
+      return selectParts(values);
+    } catch (err) {
+      console.error(err.message);
+      return process.exit(2);
+    }
+  };
 
   switch (command) {
     case 'download':
-      return download();
+      return download(parts());
     case 'build':
-      return build(positionals, extra);
+      return build(positionals, extra, parts());
+    case 'index':
+      return writeIndex();
     case 'style':
       return style(values);
     case 'serve':
       return serve(values);
     case 'render':
       return renderCommand(values);
+    case 'sprite': {
+      const { writeSprite } = await import('./sprite.mjs');
+      return writeSprite();
+    }
     case 'info':
-      return info();
+      return info(parts());
     case 'places':
       for (const [name, p] of Object.entries(loadPlaces())) {
         console.log(`${name.padEnd(16)} z${p.zoom}  ${p.center.join(',')}  ${p.note || ''}`);

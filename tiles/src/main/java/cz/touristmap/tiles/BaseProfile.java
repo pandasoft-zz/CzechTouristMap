@@ -9,8 +9,13 @@ import com.onthegomap.planetiler.reader.SourceFeature;
 import com.onthegomap.planetiler.reader.osm.OsmElement;
 import com.onthegomap.planetiler.reader.osm.OsmRelationInfo;
 import com.onthegomap.planetiler.util.Parse;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.LineString;
 
 /**
  * Base map without POIs: land cover, water, roads, railways, buildings, boundaries and labels.
@@ -160,6 +165,17 @@ public class BaseProfile implements Profile {
                     .setMinZoom(features.getMinZoomForPixelSize(64))
                     .setPointLabelGridSizeAndLimit(13, 64, 1);
             }
+            return;
+        }
+
+        // Pedestrian areas: squares and pedestrian zones drawn as areas. They lie above other land cover.
+        if (sf.hasTag("highway", "pedestrian", "footway") && sf.hasTag("area", "yes")
+            || sf.hasTag("area:highway", "pedestrian", "footway") || sf.hasTag("place", "square")) {
+            features.polygon("landcover")
+                .setAttr("kind", "pedestrian")
+                .setMinZoom(13)
+                .setMinPixelSize(2)
+                .setSortKey(10);
             return;
         }
 
@@ -396,7 +412,8 @@ public class BaseProfile implements Profile {
     public List<VectorTile.Feature> postProcessLayerFeatures(String layer, int zoom, List<VectorTile.Feature> items)
         throws GeometryException {
         return switch (layer) {
-            case "roads", "rail", "waterway", "boundaries" ->
+            case "rail" -> FeatureMerge.mergeLineStrings(mergeParallelTram(items, zoom), zoom < 13 ? 0.5 : 0, 0.25, 4);
+            case "roads", "waterway", "boundaries" ->
                 FeatureMerge.mergeLineStrings(items, zoom < 13 ? 0.5 : 0, 0.25, 4);
             // Union only. mergeNearbyPolygons() would join close areas with bridges and make wedge artifacts.
             case "landcover", "water" -> zoom < 13
@@ -407,6 +424,53 @@ public class BaseProfile implements Profile {
                 : FeatureMerge.mergeMultiPolygon(items);
             default -> items;
         };
+    }
+
+    /** Distance in metres up to which two tram tracks count as one line. */
+    private static final double TRAM_TRACK_DISTANCE = 10;
+
+    /**
+     * Draw a double tram track as one line: from the longest track down, remove the parts of each
+     * track that run within {@link #TRAM_TRACK_DISTANCE} of a track already kept. Tracks that split
+     * (loops, junctions) stay. Geometries are in tile pixels (256 per tile).
+     */
+    static List<VectorTile.Feature> mergeParallelTram(List<VectorTile.Feature> items, int zoom)
+        throws GeometryException {
+        double metresPerPixel = 40_075_016.686 * Math.cos(Math.toRadians(49.8)) / (256.0 * (1 << zoom));
+        double distance = TRAM_TRACK_DISTANCE / metresPerPixel;
+        List<VectorTile.Feature> result = new ArrayList<>();
+        List<VectorTile.Feature> trams = new ArrayList<>();
+        Map<VectorTile.Feature, Geometry> geometries = new IdentityHashMap<>();
+        for (VectorTile.Feature item : items) {
+            if ("tram".equals(item.tags().get("kind"))) {
+                trams.add(item);
+                geometries.put(item, item.geometry().decode());
+            } else {
+                result.add(item);
+            }
+        }
+        trams.sort(Comparator.comparingDouble((VectorTile.Feature f) -> geometries.get(f).getLength()).reversed());
+        Geometry covered = null;
+        for (VectorTile.Feature tram : trams) {
+            Geometry line = geometries.get(tram);
+            Geometry rest = covered == null ? line : line.difference(covered);
+            List<Geometry> parts = new ArrayList<>();
+            for (int i = 0; i < rest.getNumGeometries(); i++) {
+                Geometry part = rest.getGeometryN(i);
+                // Short pieces are the ends of a removed track next to the kept one.
+                if (part instanceof LineString && part.getLength() > 2 * distance) {
+                    parts.add(part);
+                }
+            }
+            if (parts.isEmpty()) {
+                continue;
+            }
+            Geometry kept = line.getFactory().buildGeometry(parts);
+            result.add(tram.copyWithNewGeometry(kept));
+            Geometry area = kept.buffer(distance);
+            covered = covered == null ? area : covered.union(area);
+        }
+        return result;
     }
 
     @Override

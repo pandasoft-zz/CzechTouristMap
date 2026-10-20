@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Style Comparison</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/vendor/maplibre-gl/maplibre-gl.css">
+  <link rel="stylesheet" href="compare.css">
+  <script src="/vendor/pmtiles/pmtiles.js"></script>
+</head>
+<body>
+  <header class="bar">
+    <a href="index.html" id="back">← Mapa</a>
+    <span>Všechny mapy se posouvají společně. Kliknutím na název otevřeš styl v plné mapě.</span>
+    <span id="status" class="status"></span>
+  </header>
+  <main id="grid" class="grid"></main>
+  <script type="module" src="compare.js"></script>
+</body>
+</html>

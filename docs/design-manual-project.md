@@ -1,4 +1,4 @@
-# Design Manual — CzechTouristMap (current project style)
+# Design Manual — CzechTouristMap (basis of the tourist map)
 
 Source: `src/styles/CzechTouristMap/` XSLT files.
 Generated: 2026-03-27.

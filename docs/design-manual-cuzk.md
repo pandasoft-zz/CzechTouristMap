@@ -131,3 +131,39 @@ The standards do not specify font families explicitly but use:
 | Scale | 1:2 880 → 1:5 000 (cadastral) | 1:50 000+ (tourist) |
 
 SM5 is a **cadastral/technical** standard with very pale, low-contrast fills designed for precision cadastral work. Tourist maps use more saturated colors for readability at hiking scale.
+
+## 10. ZTM10 colours from the legend PDF
+
+Source: `docs/standards/vysvetlivky_ZTM10.pdf`. The values are read from the vector drawings
+in the PDF (PyMuPDF `get_drawings()`), so they are exact. They replace the "typical rendering"
+notes in section 4 and 5. The topographic map (`style/themes/topo.mjs`) is inspired by these colours;
+it does not follow the ZTM10 standard in full (see `docs/style-variants.md`).
+
+| Element | Hex | Notes |
+|---|---|---|
+| Arable and other land | `#FFFFFF` | Background |
+| Meadow, pasture | `#FFFBCC` | |
+| Quarry, open-pit mining | `#FFF7ED` | |
+| Orchard, garden, park, allotments, other permanent culture | `#F0F4D1` | |
+| Scrub, dwarf pine | `#E5F0D1` | |
+| Forest (all kinds) | `#CCE7D0` | Tree symbols `#2BB673`, forest boundary `#1C8B58` |
+| Industrial area, depot, railway station | `#F4ECEA` | |
+| Power plant, water treatment | `#FEE7D9` | |
+| Farm | `#FFEACD` | |
+| Water area | `#BEE7FB` | Outline `#00AEEF` |
+| Water line | `#00AEEF` | Flow arrows `#0089CF` |
+| Building | `#D3D5D6` | Outline `#86888A`; building block `#ABADB0` |
+| Motorway, expressway, road class I | `#FDBD4D` | Grey casing `#86888A`; motorway with centre line |
+| Road class II and III | `#FFF33E` | Grey casing `#86888A` |
+| Unregistered road | `#FFFFFF` | Grey casing `#86888A` |
+| Track, path | `#86888A` | Maintained solid, unmaintained long dash, path short dash |
+| Railway | `#58595B` | White dashes `#FFFFFF` |
+| State, region, district, municipality boundary | `#F172AC` | Dash patterns differ by level |
+| Protected area boundary | `#AB9544` | |
+| Contours, terrain edges, rocks | `#E9BC9A` | Contour labels in the same colour |
+| Spot heights, hill names | `#994739` | Hill names in upper case |
+| Water names | `#00AEEF` | Italic |
+| Other text | `#231F20` | Town: Arial Narrow Bold, upper case; village: Arial Narrow Bold; local part: Arial Italic |
+
+Line widths in the PDF (pt): motorway fill 3.55 / casing 4.96, road I 2.55 / 3.97, road II 2.27 / 3.40,
+road III 1.99 / 3.12, unregistered road 1.99 / 3.12.

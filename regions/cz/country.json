@@ -1,0 +1,13 @@
+{
+  "id": "cz",
+  "name": "Česko",
+  "view": { "center": [15.5, 49.8], "zoom": 7 },
+  "parts": [
+    {
+      "id": "cz",
+      "name": "Česko",
+      "osm": "https://download.openstreetmap.fr/extracts/europe/czech_republic-latest.osm.pbf",
+      "poly": "https://download.openstreetmap.fr/polygons/europe/czech_republic.poly"
+    }
+  ]
+}

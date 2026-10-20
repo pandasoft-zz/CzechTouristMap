@@ -3,57 +3,89 @@
 // Layer groups (used by the viewer to switch layers on and off):
 //   base    - own base map (land cover, water, roads, labels)
 //   relief  - hillshading from the elevation model
+//   contours - contour lines
 //   hiking  - KČT hiking routes
 //   cycling - cycling routes
+//
+// Style variants (colours, widths, labels) are in style/themes/.
 
 import { baseLayers, baseOverlayLayers } from './layers/base.mjs';
 import { reliefLayers } from './layers/relief.mjs';
 import { hikingLayers, cyclingLayers, cyclingLabelLayers } from './layers/routes.mjs';
 import { labelLayers } from './layers/labels.mjs';
+import { contourLayers, contourLabelLayers } from './layers/contours.mjs';
+import { getTheme, THEMES, DEFAULT_THEME } from './themes/index.mjs';
 
-export const GROUPS = ['base', 'relief', 'hiking', 'cycling'];
+export const GROUPS = ['base', 'relief', 'contours', 'hiking', 'cycling'];
+
+export { THEMES, DEFAULT_THEME };
 
 const ATTRIBUTION = [
   '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>',
   '<a href="https://spacedata.copernicus.eu/">© Copernicus DEM</a>',
 ].join(' ');
 
+const CONTOUR_ATTRIBUTION = [
+  '<a href="https://sonny.4lima.de/">© Sonny’s LiDAR DTM</a>',
+  '<a href="https://geoportal.cuzk.gov.cz/">© ČÚZK</a>',
+].join(' ');
+
 /**
  * Build the style.
  * @param {object} options
- * @param {string} options.tiles  Base URL of the PMTiles files, e.g. "https://example.com/tiles".
+ * @param {string} options.tiles  URL of the dist/ folder (regions.json, <part>/*.pmtiles).
  * @param {string} options.glyphs Glyph URL template with {fontstack} and {range}.
+ * @param {string} options.sprite Sprite base URL (without .json / .png), see tools/sprite.mjs.
+ * @param {string} [options.variant] Style variant id from style/themes/ (default: "tourist").
  */
-export function buildStyle({ tiles, glyphs }) {
+export function buildStyle({ tiles, glyphs, sprite, variant = DEFAULT_THEME }) {
+  const t = getTheme(variant);
   return {
     version: 8,
-    name: 'Czech Tourist Map',
+    name: `Czech Tourist Map – ${t.name}`,
+    metadata: { variant: t.id, 'czmap:tiles': tiles },
     glyphs,
+    sprite,
+    // Tiles come from the files of all parts (dist/<part>/<set>.pmtiles). The page registers the
+    // "czmap" protocol (viewer/tiles.js) with the URL in metadata["czmap:tiles"].
     sources: {
       base: {
         type: 'vector',
-        url: `pmtiles://${tiles}/base.pmtiles`,
+        tiles: ['czmap://base/{z}/{x}/{y}'],
+        maxzoom: 14,
         attribution: ATTRIBUTION,
       },
       routes: {
         type: 'vector',
-        url: `pmtiles://${tiles}/routes.pmtiles`,
+        tiles: ['czmap://routes/{z}/{x}/{y}'],
+        maxzoom: 14,
+      },
+      contours: {
+        type: 'vector',
+        tiles: ['czmap://contours/{z}/{x}/{y}'],
+        minzoom: 11,
+        maxzoom: 14,
+        attribution: CONTOUR_ATTRIBUTION,
       },
       relief: {
         type: 'raster-dem',
-        url: `pmtiles://${tiles}/relief.pmtiles`,
+        tiles: ['czmap://relief/{z}/{x}/{y}'],
+        minzoom: 6,
+        maxzoom: 12,
         encoding: 'terrarium',
         tileSize: 256,
       },
     },
     layers: [
-      ...baseLayers(),
-      ...reliefLayers(),
-      ...baseOverlayLayers(),
-      ...cyclingLayers(),
-      ...hikingLayers(),
-      ...labelLayers(),
-      ...cyclingLabelLayers(),
+      ...baseLayers(t),
+      ...reliefLayers(t),
+      ...contourLayers(t),
+      ...baseOverlayLayers(t),
+      ...cyclingLayers(t),
+      ...hikingLayers(t),
+      ...contourLabelLayers(t),
+      ...labelLayers(t),
+      ...cyclingLabelLayers(t),
     ],
   };
 }

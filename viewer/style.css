@@ -41,6 +41,16 @@ body {
   white-space: nowrap;
 }
 
+.panel select {
+  width: 100%;
+  font: inherit;
+}
+
+.compare-link {
+  display: inline-block;
+  margin-top: 4px;
+}
+
 .panel button {
   margin-top: 4px;
 }

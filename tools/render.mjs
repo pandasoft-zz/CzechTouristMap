@@ -18,7 +18,8 @@ function chromiumPath() {
 
 /**
  * Render one or more views.
- * @param {Array<{center: number[], zoom: number, out: string}>} views
+ * @param {Array<{center: number[], zoom: number, out: string, variant?: string, compare?: boolean}>} views
+ *   variant: style variant of the view; compare: render the side-by-side page (compare.html)
  * @param {object} options
  * @param {number} options.width
  * @param {number} options.height
@@ -49,15 +50,19 @@ export async function render(views, { width, height, pixelRatio, layers, timeout
       if (layers) {
         query.set('layers', layers.join(','));
       }
+      if (view.variant) {
+        query.set(view.compare ? 'variants' : 'variant', view.variant);
+      }
       const [lon, lat] = view.center;
-      const target = `${url}/?${query}#${view.zoom}/${lat}/${lon}`;
+      const file = view.compare ? 'compare.html' : '';
+      const target = `${url}/${file}?${query}#${view.zoom}/${lat}/${lon}`;
       const started = Date.now();
       // A new document per view, so "idle" means this view is complete.
       await page.goto('about:blank');
       await page.goto(target);
       await page.waitForFunction(() => window.__mapIdle === true, null, { timeout });
       fs.mkdirSync(path.dirname(path.resolve(view.out)), { recursive: true });
-      await page.locator('#map').screenshot({ path: view.out });
+      await page.locator(view.compare ? '#grid' : '#map').screenshot({ path: view.out });
       const mapErrors = await page.evaluate(() => window.__mapErrors);
       results.push({ ...view, ms: Date.now() - started, errors: [...new Set([...mapErrors, ...consoleErrors])] });
     }

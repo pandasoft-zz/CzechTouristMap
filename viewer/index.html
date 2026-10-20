@@ -13,9 +13,15 @@
   <div id="map"></div>
   <form id="panel" class="panel">
     <fieldset>
+      <legend>Mapa</legend>
+      <select name="variant" aria-label="Mapa"></select>
+      <a id="compare" class="compare-link" href="compare.html">Porovnat mapy</a>
+    </fieldset>
+    <fieldset>
       <legend>Vrstvy</legend>
       <label><input type="checkbox" name="base" checked> Základní mapa</label>
       <label><input type="checkbox" name="relief" checked> Reliéf</label>
+      <label><input type="checkbox" name="contours" checked> Vrstevnice</label>
       <label><input type="checkbox" name="hiking" checked> Turistické trasy</label>
       <label><input type="checkbox" name="cycling" checked> Cyklotrasy</label>
     </fieldset>

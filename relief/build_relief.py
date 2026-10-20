@@ -1,9 +1,15 @@
 """Build relief.pmtiles: elevation tiles (Terrarium encoding) for MapLibre hillshading.
 
-Source: Copernicus DEM GLO-30 (public AWS bucket, about 30 m resolution).
+Source (--source):
+- sonny: Sonny's LiDAR DTM of Europe, 1" HGT files in terrain/sonny/ (Git LFS) and
+  data/sonny/ (https://sonny.4lima.de, CC BY 4.0). A terrain model without trees and
+  buildings. Default when these folders have files.
+- copernicus: Copernicus DEM GLO-30 (public AWS bucket, about 30 m), downloaded by
+  this script.
+  A surface model: forest edges and buildings show in the shading.
 
 Steps:
-1. Download DEM tiles (1 x 1 degree GeoTIFF) for the area.
+1. Find or download DEM tiles (1 x 1 degree) for the area.
 2. Reproject the mosaic to Web Mercator at the max zoom grid.
 3. Keep only tiles near the area polygon (the OSM extract border).
 4. Build lower zooms by 2 x 2 averaging.
@@ -33,11 +39,11 @@ from rasterio.transform import from_origin
 from rasterio.warp import Resampling, reproject
 from scipy import ndimage
 
+from dem_sources import find_sonny, tile_key
+
 DEM_URL = (
-    "https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com/"
-    "{name}/{name}.tif"
+    "https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com/" "{name}/{name}.tif"
 )
-POLY_URL = "https://download.openstreetmap.fr/polygons/europe/czech_republic.poly"
 
 TILE_SIZE = 256
 WORLD = 20037508.342789244  # half of the Web Mercator world width in metres
@@ -166,18 +172,55 @@ def fill_nan(array):
         return array
     if mask.all():
         return np.zeros_like(array)
-    idx = ndimage.distance_transform_edt(mask, return_distances=False, return_indices=True)
+    idx = ndimage.distance_transform_edt(
+        mask, return_distances=False, return_indices=True
+    )
     return array[tuple(idx)]
+
+
+def dem_bbox(rings, margin=0.1):
+    """Whole-degree DEM tiles around the area: lon0, lat0, lon1, lat1 (inclusive)."""
+    lons = [p[0] for r in rings for p in r]
+    lats = [p[1] for r in rings for p in r]
+    return (
+        math.floor(min(lons) - margin),
+        math.floor(min(lats) - margin),
+        math.floor(max(lons) + margin),
+        math.floor(max(lats) + margin),
+    )
 
 
 def build(args):
     root = Path(args.data_dir)
-    lon0, lat0, lon1, lat1 = args.dem_bbox
-    dem_files = download_dem(root / "dem", (lon0, lon1), (lat0, lat1))
-    poly_path = root / "area.poly"
-    if not download(args.poly_url, poly_path):
-        sys.exit(f"Cannot download {args.poly_url}")
-    rings = read_poly(poly_path)
+    rings = read_poly(Path(args.poly))
+    lon0, lat0, lon1, lat1 = args.dem_bbox or dem_bbox(rings)
+    log(f"DEM tiles {lon0}..{lon1} E, {lat0}..{lat1} N")
+    source = args.source
+    if source == "auto":
+        source = "sonny" if find_sonny(root) else "copernicus"
+    if source == "sonny":
+        tiles = find_sonny(root)
+        dem_files = [
+            path
+            for (lat, lon), path in sorted(tiles.items())
+            if lat0 <= lat <= lat1 and lon0 <= lon <= lon1
+        ]
+        if not dem_files:
+            sys.exit(
+                "No HGT files in terrain/sonny/ or data/sonny/ (see build_contours.py)"
+            )
+        log(f"{len(dem_files)} DEM tiles from Sonny's LiDAR DTM")
+        # Tiles in the margin without Sonny data: Copernicus underneath. The mosaic is
+        # filled in list order, so the Sonny tiles come last and win where both exist.
+        fallback = [
+            path
+            for path in download_dem(root / "dem", (lon0, lon1), (lat0, lat1))
+            if tile_key(path.name) not in tiles
+        ]
+        log(f"{len(fallback)} Copernicus tiles fill the rest of the margin")
+        dem_files = fallback + dem_files
+    else:
+        dem_files = download_dem(root / "dem", (lon0, lon1), (lat0, lat1))
     lons = [p[0] for r in rings for p in r]
     lats = [p[1] for r in rings for p in r]
     area_bounds = (min(lons), min(lats), max(lons), max(lats))
@@ -263,7 +306,9 @@ def build(args):
     total = 0
     with open(tmp, "wb") as f, ProcessPoolExecutor(args.workers) as pool:
         writer = Writer(f)
-        for i, (tile_id, data) in enumerate(pool.map(encode_tile, jobs, chunksize=16), 1):
+        for i, (tile_id, data) in enumerate(
+            pool.map(encode_tile, jobs, chunksize=16), 1
+        ):
             writer.write_tile(tile_id, data)
             total += len(data)
             if i % 2000 == 0:
@@ -300,17 +345,24 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--data-dir", default="data")
     parser.add_argument("--output", default="dist/relief.pmtiles")
-    parser.add_argument("--poly-url", default=POLY_URL)
+    parser.add_argument(
+        "--source", choices=["auto", "sonny", "copernicus"], default="auto"
+    )
+    parser.add_argument(
+        "--poly", required=True, help="area polygon (.poly), e.g. data/poly/cz.poly"
+    )
     parser.add_argument(
         "--dem-bbox",
         type=lambda s: [int(v) for v in s.split(",")],
-        default=[11, 48, 18, 51],
-        help="whole-degree DEM tiles to download: lon0,lat0,lon1,lat1",
+        default=None,
+        help="whole-degree DEM tiles: lon0,lat0,lon1,lat1 (default: from --poly)",
     )
     parser.add_argument("--minzoom", type=int, default=6)
     parser.add_argument("--maxzoom", type=int, default=12)
     parser.add_argument("--margin", type=int, default=2, help="extra tiles around area")
-    parser.add_argument("--step", type=float, default=0.25, help="height step in metres")
+    parser.add_argument(
+        "--step", type=float, default=0.25, help="height step in metres"
+    )
     parser.add_argument("--format", choices=["webp", "png"], default="webp")
     parser.add_argument("--workers", type=int, default=os.cpu_count())
     build(parser.parse_args())

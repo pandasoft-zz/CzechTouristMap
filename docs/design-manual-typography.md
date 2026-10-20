@@ -20,7 +20,7 @@ Applied to: `points-places.xslt`, `points-natural.xslt`,
 
 ### Design rationale
 - Capitals use `text-transform="uppercase"` — classical paper map convention
-- Cities/towns use upright bold, not italic (mapy.cz approach)
+- Cities/towns use upright bold, not italic (cleaner, modern)
 - Villages and smaller settlements use grey `#666666` to reduce visual weight
 - Halo reduced from 3 px → 2 px for a cleaner, less "bloated" look
 
@@ -58,7 +58,7 @@ Applied to: `points-places.xslt`, `points-natural.xslt`,
 
 ### Design rationale
 - Motorway/trunk: blue shield → **red shield** (matches D-road red fill color)
-- Primary: green shield → **blue shield** (matches mapy.cz blue oval convention)
+- Primary: green shield → **blue shield** (separates I. class roads from II. and III. class)
 - Stroke-width 5 px on motorway gives a wider, more visible shield effect
 
 ---
@@ -116,7 +116,7 @@ Applied to: `points-places.xslt`, `points-natural.xslt`,
 | Village halo | 2–3 px | 2 px | Consistent |
 | Suburb fill | `#000000` black | `#666666` grey | Same as village |
 | Motorway shield | blue `#1076BA` 4 px | **red `#A82020` 5 px** | Matches road color |
-| Primary shield | green `#008700` 3 px | **blue `#1040C8` 4 px** | mapy.cz convention |
+| Primary shield | green `#008700` 3 px | **blue `#1040C8` 4 px** | Separates road classes |
 | Peak name style | bold italic | **bold upright** | Cleaner |
 | Peak halo | 1.5 px | 2 px | Better legibility |
 | Contour label style | bold | **italic** | Paper map convention |
