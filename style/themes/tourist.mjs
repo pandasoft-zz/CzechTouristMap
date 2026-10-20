@@ -178,7 +178,9 @@ export default {
     // Road numbers in shields: text colour and shield colour.
     // Motorway shields follow the green motorway colour. II. and III. class shields use the road colour
     // (manual: green #008700), so they do not look like motorway shields.
+    // Only motorways and roads with one- or two-digit numbers (I. class, expressways).
     roadRef: {
+      maxNumber: 100,
       shields: true,
       haloWidth: 0,
       kinds: {

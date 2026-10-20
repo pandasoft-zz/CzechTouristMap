@@ -12,11 +12,17 @@ const isCapital = ['==', ['get', 'name'], 'Praha'];
 
 const upper = (on) => (on ? 'uppercase' : 'none');
 
-// Road numbers only for motorways and I. and II. class roads. III. class roads have numbers of
-// four or more digits; some of them are tagged "secondary" in OSM, so these numbers are hidden too.
-const MAJOR_REF = ['all',
-  ['in', ['get', 'kind'], ['literal', ['motorway', 'trunk', 'primary', 'secondary']]],
-  ['<', ['to-number', ['get', 'ref'], 0], 1000]];
+// Which road numbers to show. Motorway numbers (D1, ...) always; other roads only when the number
+// is below maxNumber: 100 = I. class (one or two digits), 1000 = also II. class (three digits).
+// III. class roads have four or more digits; some of them are tagged "secondary" in OSM.
+// Numbers with letters or several refs ("D1;23") convert to 0, so they are shown.
+function majorRef(maxNumber) {
+  return ['all',
+    ['in', ['get', 'kind'], ['literal', ['motorway', 'trunk', 'primary', 'secondary']]],
+    ['any',
+      ['==', ['get', 'kind'], 'motorway'],
+      ['<', ['to-number', ['get', 'ref'], 0], maxNumber]]];
+}
 
 export function labelLayers(t) {
   const l = t.labels;
@@ -46,7 +52,7 @@ export function labelLayers(t) {
       source: SOURCE,
       'source-layer': 'roads',
       minzoom: 10,
-      filter: ['all', ['has', 'ref'], MAJOR_REF, filter],
+      filter: ['all', ['has', 'ref'], majorRef(ref.maxNumber ?? 1000), filter],
       layout: {
         'symbol-placement': 'line',
         'symbol-spacing': 500,

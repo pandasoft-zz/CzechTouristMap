@@ -183,7 +183,9 @@ export default {
     refFont: 'sansBold',
     // Road numbers are black bold text without a shield.
     // Motorway and expressway numbers: green shield as in the tourist map (no source).
+    // Numbers of motorways, I. and II. class roads.
     roadRef: {
+      maxNumber: 1000,
       shields: ['motorway', 'trunk'],
       haloWidth: 2,
       kinds: {
