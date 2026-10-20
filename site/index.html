@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Czech Tourist Map</title>
+  <meta name="description" content="Turistická a topografická mapa Česka z otevřených dat: značky KČT, reliéf a vrstevnice z lidaru. Pro web i offline v mobilu.">
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="hero">
+    <img class="hero-map" src="img/hero.webp" alt="Turistická mapa Krkonoš: hřebeny se Sněžkou, značené trasy, vrstevnice a stínovaný reliéf" width="2700" height="1350">
+    <div class="hero-post">
+      <p class="sign sign-red"><span class="sign-name">Czech Tourist Map</span><span class="sign-sub">turistická a topografická mapa Česka</span></p>
+      <h1>Turistická mapa, která vypadá česky</h1>
+      <p class="lead">Značky KČT tak, jak je znáte z lesa, reliéf a vrstevnice z leteckého laserového skenování a dva styly: turistický a topografický. Celá z otevřených dat, pro web i offline v mobilu.</p>
+      <p class="actions">
+        <a class="button" href="#live">Vyzkoušet mapu</a>
+        <a class="button button-quiet" href="https://github.com/pandasoft-zz/CzechTouristMap">Zdrojový kód na GitHubu</a>
+      </p>
+    </div>
+  </header>
+
+  <main>
+    <section class="section" id="why" aria-labelledby="why-title">
+      <h2 id="why-title" class="mark mark-red">Proč vznikla</h2>
+      <div class="prose">
+        <p>Mapy z otevřených dat většinou vypadají jako OpenStreetMap s barevnými čárami navíc. Kdo chodí po Česku, zná ale jiný obraz: bílo-červené pruhy na stromech, hnědé vrstevnice, jemně stínované kopce a popisky, ze kterých hned poznáte město od samoty.</p>
+        <p>Czech Tourist Map tenhle obraz skládá z volně dostupných dat. Začala jako vzhled pro offline mapy v Androidu (Mapsforge), dnes je to sada souborů PMTiles a stylů pro MapLibre. Stejná mapa tak běží na webu i v mobilní aplikaci bez signálu.</p>
+        <p>Mapa se jednou měsíčně postaví znovu z aktuálních dat OpenStreetMap. Vše, co k tomu potřebuje, je v repozitáři.</p>
+      </div>
+    </section>
+
+    <section class="section" id="maps" aria-labelledby="maps-title">
+      <h2 id="maps-title" class="mark mark-blue">Dvě mapy z jedněch dat</h2>
+      <div class="pair">
+        <article class="map-card">
+          <img src="img/snezka-tourist.webp" alt="Turistická mapa: Sněžka a okolí" width="1800" height="1200" loading="lazy">
+          <h3>Turistická</h3>
+          <p>Pro výlety. Sytý les, výrazný reliéf, značené trasy KČT v pruzích vedle sebe, cyklotrasy s čísly. Dálnice jsou zelené, aby v krajině nekřičely, pěší zóny ve městech tvoří jednu světlou plochu.</p>
+        </article>
+        <article class="map-card">
+          <img src="img/snezka-topo.webp" alt="Topografická mapa: Sněžka a okolí" width="1800" height="1200" loading="lazy">
+          <h3>Topografická</h3>
+          <p>Inspirovaná Základní topografickou mapou ČÚZK (ZTM10). Bílý podklad, světlý les, azurová voda, silnice v oranžové a žluté, názvy vrchů velkými písmeny a písma podle legendy ZTM10.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section section-wide" id="compare" aria-labelledby="compare-title">
+      <h2 id="compare-title" class="mark mark-green">Stejné místo, dva pohledy</h2>
+      <p class="hint">Posuňte jezdcem a porovnejte obě mapy. Místo vyberete pod obrázkem.</p>
+      <div class="slider" id="slider">
+        <img class="slider-img" id="slider-topo" src="img/snezka-topo.webp" alt="" width="1800" height="1200">
+        <img class="slider-img slider-top" id="slider-tourist" src="img/snezka-tourist.webp" alt="" width="1800" height="1200">
+        <span class="slider-label slider-label-left">Turistická</span>
+        <span class="slider-label slider-label-right">Topografická</span>
+        <span class="slider-handle" aria-hidden="true"></span>
+        <input class="slider-range" id="slider-range" type="range" min="0" max="100" value="50" aria-label="Poměr turistické a topografické mapy">
+      </div>
+      <div class="places" id="places" role="group" aria-label="Místo na mapě"></div>
+    </section>
+
+    <section class="section section-wide" id="live" aria-labelledby="live-title">
+      <h2 id="live-title" class="mark mark-yellow">Živá mapa</h2>
+      <p class="hint">Obě mapy se posouvají spolu. Přibližte si třeba svůj oblíbený kopec.</p>
+      <div class="live" id="live-maps">
+        <figure class="live-map"><div id="live-tourist" class="live-canvas"></div><figcaption>Turistická</figcaption></figure>
+        <figure class="live-map"><div id="live-topo" class="live-canvas"></div><figcaption>Topografická</figcaption></figure>
+      </div>
+      <p class="live-status" id="live-status" role="status"></p>
+    </section>
+
+    <section class="section" id="data" aria-labelledby="data-title">
+      <h2 id="data-title" class="mark mark-red">Z čeho je mapa</h2>
+      <dl class="sources">
+        <dt>Silnice, cesty, lesy, vody, budovy, trasy</dt>
+        <dd><a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, licence ODbL</dd>
+        <dt>Reliéf a vrstevnice</dt>
+        <dd><a href="https://sonny.4lima.de/">Sonny’s LiDAR DTM</a> z dat <a href="https://geoportal.cuzk.gov.cz/">ČÚZK DMR 4G</a>, licence CC BY 4.0</dd>
+        <dt>Barvy topografické mapy</dt>
+        <dd>legenda ZTM10, ČÚZK</dd>
+        <dt>Písma</dt>
+        <dd>Noto Sans, Liberation Sans, Barlow Condensed, Roboto</dd>
+        <dt>Zobrazení</dt>
+        <dd><a href="https://maplibre.org/">MapLibre GL JS</a> a <a href="https://protomaps.com/">PMTiles</a></dd>
+      </dl>
+    </section>
+
+    <section class="section" id="embed" aria-labelledby="embed-title">
+      <h2 id="embed-title" class="mark mark-blue">Mapa na vašem webu</h2>
+      <div class="prose">
+        <p>Stačí jeden skript. Vrátí běžnou mapu MapLibre, takže přidáte značky, trasy i vlastní vrstvy jako obvykle.</p>
+      </div>
+      <pre class="code"><code>&lt;div id="map" style="height: 500px"&gt;&lt;/div&gt;
+&lt;script src="https://maps.gotrasio.cz/map.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  CzechTouristMap.createMap('map', { style: 'topo', center: [16.6, 49.2], zoom: 12 });
+&lt;/script&gt;</code></pre>
+      <div class="prose">
+        <p>Styl <code>tourist</code> nebo <code>topo</code>. Seznam souborů pro offline stažení je v <a href="https://maps.gotrasio.cz/latest.json">latest.json</a>, popis v <a href="https://github.com/pandasoft-zz/CzechTouristMap/blob/main/docs/publishing.md">dokumentaci</a>.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Czech Tourist Map je otevřený projekt. Mapová data © přispěvatelé OpenStreetMap, výšky © Sonny, © ČÚZK.</p>
+  </footer>
+
+  <script src="main.js" type="module"></script>
+</body>
+</html>

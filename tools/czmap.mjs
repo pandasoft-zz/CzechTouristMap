@@ -45,6 +45,9 @@ Commands:
         --variant LIST    Maps to render: tourist, topo, or "all" (default: tourist)
         --compare         One image with the maps side by side (all, or --variant LIST)
         --out FILE|DIR    Output file, or directory for --place all (default: out/)
+  release --base-url URL  Prepare a release in dist/: dist/latest.json (catalog) and styles with
+          [--version ID]  absolute URLs into v/<version>/ (default version: UTC time, 20261020-0315)
+  check                   Validate the styles (both maps) against the MapLibre style spec
   sprite                  Generate the style sprite into sprite/ (after changing tools/sprite.mjs)
   info                    Show PMTiles sizes: 500 MB per file (cache limit), 10 GB in total (R2)
   places                  List render presets (regions/<country>/places.json)
@@ -382,6 +385,26 @@ async function renderCommand(opts) {
   }
 }
 
+// Validate the styles of all maps. Exit code 1 on errors.
+async function check() {
+  const { validateStyleMin } = await import('@maplibre/maplibre-gl-style-spec');
+  const { buildStyle, THEMES } = await import('../style/index.mjs');
+  let failed = false;
+  for (const id of Object.keys(THEMES)) {
+    const style = buildStyle({ tiles: 'https://example.com/v/1', glyphs: 'https://example.com/{fontstack}/{range}.pbf',
+      sprite: 'https://example.com/sprite', variant: id });
+    const errors = validateStyleMin(style);
+    console.log(`style ${id}: ${errors.length === 0 ? 'ok' : `${errors.length} errors`}`);
+    for (const e of errors) {
+      console.log(`  ${e.message}`);
+    }
+    failed ||= errors.length > 0;
+  }
+  if (failed) {
+    process.exitCode = 1;
+  }
+}
+
 function info(parts) {
   const mb = (bytes) => `${(bytes / 1e6).toFixed(1).padStart(8)} MB`;
   console.log('PMTiles files (limit 500 MB each, 10 GB in total):');
@@ -428,6 +451,8 @@ async function main() {
       variant: { type: 'string' },
       compare: { type: 'boolean' },
       country: { type: 'string' },
+      'base-url': { type: 'string' },
+      version: { type: 'string' },
       part: { type: 'string' },
     },
   });
@@ -450,6 +475,16 @@ async function main() {
       return build(positionals, extra, parts());
     case 'index':
       return writeIndex();
+    case 'release': {
+      if (!values['base-url']) {
+        console.error('release needs --base-url, e.g. https://maps.gotrasio.cz');
+        process.exit(2);
+      }
+      const { release } = await import('./release.mjs');
+      return release({ baseUrl: values['base-url'], version: values.version });
+    }
+    case 'check':
+      return check();
     case 'style':
       return style(values);
     case 'serve':

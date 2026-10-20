@@ -32,8 +32,8 @@ Option 2.
   are split, for example Germany by states (`de-by`, `de-sn`, ...), like the Geofabrik extracts.
 - Every part has its own files: `dist/<part>/base.pmtiles`, `routes`, `relief`, `contours`.
 - `dist/regions.json` lists the parts with their bounds and built sets. The build writes it.
-- The style has the same four sources as before, with tile URLs `czmap://<set>/{z}/{x}/{y}`.
-  `viewer/tiles.js` registers the `czmap` protocol: for a tile it takes the parts whose bounds
+- The style has the same four sources as before, with tile URLs `tiles://<set>/{z}/{x}/{y}`.
+  `viewer/tiles.js` registers the `tiles` protocol: for a tile it takes the parts whose bounds
   touch the tile and returns the tile of the first part file that has it.
 - `node tools/czmap.mjs info` checks both limits (500 MB per file, 10 GB in total).
 - The name stays "Czech Tourist Map": the look is based on Czech topographic maps, other
@@ -43,7 +43,7 @@ Option 2.
 
 - The style and the number of layers do not depend on the number of parts.
 - A page that shows the map must load `viewer/tiles.js` (and `pmtiles.js`) and call
-  `registerTiles(maplibregl, <dist URL>)`. The dist URL is in the style metadata `czmap:tiles`.
+  `registerTiles(maplibregl, <dist URL>)`. The dist URL is in the style metadata `tiles:url`.
 - **Open for the second part:** neighbour parts overlap at their borders (each extract has a
   margin). The build must give every tile at a border to one part only, otherwise the first part
   hides the data of the other in that tile. This is not done yet, because there is one part.
