@@ -5,7 +5,7 @@
 # Order (the live map stays complete the whole time):
 #   1. upload all files to v/<version>/   (new folder, not used by anyone yet)
 #   2. check that every file is there
-#   3. upload latest.json                 (switch: clients now use the new version)
+#   3. upload latest.json                 (switch: clients now use the new version) and map.js
 #   4. delete old versions, keep the newest R2_KEEP_VERSIONS (default 2)
 #
 # Environment:
@@ -79,8 +79,19 @@ if [ "${DRY_RUN:-}" != "1" ]; then
   done
 fi
 
+# Libraries of the loader: folders named by version, so they never change.
+# Browsers load ES modules only with a JavaScript MIME type, so the types are set here.
+s3 cp dist/lib "s3://${R2_BUCKET}/lib" --recursive --exclude "*" --include "*.mjs" --include "*.js" \
+  --cache-control "$IMMUTABLE" --content-type text/javascript
+s3 cp dist/lib "s3://${R2_BUCKET}/lib" --recursive --exclude "*" --include "*.css" \
+  --cache-control "$IMMUTABLE" --content-type text/css
+s3 cp dist/lib "s3://${R2_BUCKET}/lib" --recursive --exclude "*" --include "*.txt" \
+  --cache-control "$IMMUTABLE" --content-type text/plain
+
 echo "== switch latest.json to ${VERSION}"
 s3 cp dist/latest.json "s3://${R2_BUCKET}/latest.json" --cache-control "$SHORT" --content-type application/json
+# The loader reads latest.json, so it works with any version; upload it after the switch.
+s3 cp dist/map.js "s3://${R2_BUCKET}/map.js" --cache-control "$SHORT" --content-type text/javascript
 
 echo "== delete old versions (keep ${KEEP})"
 if [ "${DRY_RUN:-}" != "1" ]; then

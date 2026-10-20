@@ -110,7 +110,8 @@ the viewer uses for the layer switches.
 
 The map is published to Cloudflare R2 at `https://maps.gotrasio.cz` by GitHub Actions
 (`.github/workflows/maps.yml`), once a month and on demand. Every release goes to its own folder
-`v/<version>/`; `latest.json` switches to it after the upload. See [docs/publishing.md](docs/publishing.md)
+`v/<version>/`; `latest.json` switches to it after the upload. Web pages embed the map with the loader
+`https://maps.gotrasio.cz/map.js` (`CzechTouristMap.createMap('map')`). See [docs/publishing.md](docs/publishing.md)
 for the bucket layout, the `latest.json` format (also for the mobile app) and the Cloudflare setup.
 
 ```

@@ -1,6 +1,6 @@
 // Tile routing for a map built in parts (dist/regions.json, see docs/adr/0004).
 //
-// Style sources use tile URLs like czmap://base/{z}/{x}/{y}. For each tile the protocol takes the
+// Style sources use tile URLs like tiles://base/{z}/{x}/{y}. For each tile the protocol takes the
 // parts whose bounds touch the tile and reads the tile from the first part file that has it.
 // The build gives every tile to one part only, so the order of parts does not change the map.
 //
@@ -21,7 +21,7 @@ function touches(a, b) {
 }
 
 /**
- * Register the "czmap" protocol in MapLibre.
+ * Register the "tiles" protocol in MapLibre.
  * @param {object} maplibregl MapLibre module
  * @param {string} baseUrl    URL of the dist/ folder (with regions.json and <part>/<set>.pmtiles)
  * @returns {Promise<object>} the parsed regions.json
@@ -42,8 +42,8 @@ export async function registerTiles(maplibregl, baseUrl) {
     return archives.get(key);
   };
 
-  maplibregl.addProtocol('czmap', async (params, abort) => {
-    const m = /^czmap:\/\/(\w+)\/(\d+)\/(\d+)\/(\d+)/.exec(params.url);
+  maplibregl.addProtocol('tiles', async (params, abort) => {
+    const m = /^tiles:\/\/(\w+)\/(\d+)\/(\d+)\/(\d+)/.exec(params.url);
     if (!m) {
       throw new Error(`Invalid tile URL ${params.url}`);
     }

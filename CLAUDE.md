@@ -13,7 +13,7 @@ All documentation, code, and comments must be written in **plain technical Engli
 - `relief/build_relief.py` — DTM → `relief.pmtiles` (Terrarium WebP).
 - `relief/build_contours.py` — DTM → `data/contours/<part>.gpkg`; Planetiler profile `contours` → `contours.pmtiles`.
 - `regions/` — countries and parts. A part is one OSM extract; its files are in `dist/<part>/`.
-  `dist/regions.json` is the tile index; `viewer/tiles.js` routes `czmap://` tiles to the part files (ADR 0004).
+  `dist/regions.json` is the tile index; `viewer/tiles.js` routes `tiles://` tiles to the part files (ADR 0004).
 - `terrain/sonny/` — Sonny's LiDAR DTM tiles of the map area (Git LFS). Do not add tiles outside the map area
   without asking: the LFS download quota is 10 GiB per month.
 - `style/` — MapLibre style as JS modules. `style/index.mjs` exports `buildStyle({ variant })`.

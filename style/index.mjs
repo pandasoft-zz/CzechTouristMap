@@ -43,33 +43,33 @@ export function buildStyle({ tiles, glyphs, sprite, variant = DEFAULT_THEME }) {
   return {
     version: 8,
     name: `Czech Tourist Map – ${t.name}`,
-    metadata: { variant: t.id, 'czmap:tiles': tiles },
+    metadata: { variant: t.id, 'tiles:url': tiles },
     glyphs,
     sprite,
     // Tiles come from the files of all parts (dist/<part>/<set>.pmtiles). The page registers the
-    // "czmap" protocol (viewer/tiles.js) with the URL in metadata["czmap:tiles"].
+    // "tiles" protocol (viewer/tiles.js) with the URL in metadata["tiles:url"].
     sources: {
       base: {
         type: 'vector',
-        tiles: ['czmap://base/{z}/{x}/{y}'],
+        tiles: ['tiles://base/{z}/{x}/{y}'],
         maxzoom: 14,
         attribution: ATTRIBUTION,
       },
       routes: {
         type: 'vector',
-        tiles: ['czmap://routes/{z}/{x}/{y}'],
+        tiles: ['tiles://routes/{z}/{x}/{y}'],
         maxzoom: 14,
       },
       contours: {
         type: 'vector',
-        tiles: ['czmap://contours/{z}/{x}/{y}'],
+        tiles: ['tiles://contours/{z}/{x}/{y}'],
         minzoom: 11,
         maxzoom: 14,
         attribution: CONTOUR_ATTRIBUTION,
       },
       relief: {
         type: 'raster-dem',
-        tiles: ['czmap://relief/{z}/{x}/{y}'],
+        tiles: ['tiles://relief/{z}/{x}/{y}'],
         minzoom: 6,
         maxzoom: 12,
         encoding: 'terrarium',

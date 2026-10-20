@@ -2,7 +2,7 @@
 
 Every part of the map (`regions/`, ADR 0004) has the four files below in `dist/<part>/`.
 `dist/regions.json` lists the parts, their bounds and built sets. The style reads the sets as
-four sources with tile URLs `czmap://<set>/{z}/{x}/{y}` (routed by `viewer/tiles.js`).
+four sources with tile URLs `tiles://<set>/{z}/{x}/{y}` (routed by `viewer/tiles.js`).
 
 
 | File | Source | Type | Zoom | Built by |

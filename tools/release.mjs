@@ -8,14 +8,48 @@
 // Writes:
 //   dist/style-<map>.json  styles with absolute URLs into the version folder
 //   dist/latest.json       catalog: version, styles, countries, parts, files (size, sha256, updated)
+//   dist/map.js            loader for web pages (viewer/map.js with viewer/tiles.js inside)
+//   dist/lib/              MapLibre and PMTiles for the loader, in folders named by version
 
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import { DIST } from './paths.mjs';
+import { ROOT, DIST } from './paths.mjs';
 import { loadCountries, partFiles } from './regions.mjs';
 
 const SCHEMA = 1;
+
+// Library files for the loader: [package, file in the package]. They go to lib/<package>@<version>/.
+const LIB_FILES = [
+  ['maplibre-gl', 'dist/maplibre-gl.mjs'],
+  ['maplibre-gl', 'dist/maplibre-gl-worker.mjs'],
+  ['maplibre-gl', 'dist/maplibre-gl.css'],
+  ['maplibre-gl', 'LICENSE.txt'],
+  ['pmtiles', 'dist/pmtiles.js'],
+];
+
+const packageVersion = (name) => JSON.parse(
+  fs.readFileSync(path.join(ROOT, 'node_modules', name, 'package.json'), 'utf8')).version;
+
+// dist/lib/<package>@<version>/: the libraries for the loader.
+function copyLibs() {
+  for (const [name, file] of LIB_FILES) {
+    const dir = path.join(DIST, 'lib', `${name}@${packageVersion(name)}`);
+    fs.mkdirSync(dir, { recursive: true });
+    fs.copyFileSync(path.join(ROOT, 'node_modules', name, file), path.join(dir, path.basename(file)));
+  }
+}
+
+// dist/map.js: the loader template with the host, the library versions and viewer/tiles.js.
+function writeLoader(baseUrl) {
+  const tiles = fs.readFileSync(path.join(ROOT, 'viewer/tiles.js'), 'utf8').replace(/^export /m, '');
+  const loader = fs.readFileSync(path.join(ROOT, 'viewer/map.js'), 'utf8')
+    .replaceAll('__HOST__', baseUrl)
+    .replaceAll('__MAPLIBRE__', packageVersion('maplibre-gl'))
+    .replaceAll('__PMTILES__', packageVersion('pmtiles'))
+    .replace('/* __TILES_JS__ */', tiles.trim().split('\n').join('\n  '));
+  fs.writeFileSync(path.join(DIST, 'map.js'), loader);
+}
 
 /** Version id from the time (UTC), sorts by time: 20261020-0315. */
 export function versionId(date = new Date()) {
@@ -117,9 +151,11 @@ export async function release({ baseUrl, version = versionId() }) {
     countries,
   };
   fs.writeFileSync(path.join(DIST, 'latest.json'), `${JSON.stringify(catalog, null, 2)}\n`);
+  copyLibs();
+  writeLoader(baseUrl);
   const changed = countries.flatMap((c) => c.parts).flatMap((p) => Object.values(p.files))
     .filter((f) => f.updated === published).length;
   console.log(`Release ${version}: ${Object.keys(styles).length} styles, ${changed} changed files`);
-  console.log('Wrote dist/latest.json and dist/style-*.json');
+  console.log('Wrote dist/latest.json, dist/style-*.json, dist/map.js and dist/lib/');
   return catalog;
 }

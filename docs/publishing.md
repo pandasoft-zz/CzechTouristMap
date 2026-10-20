@@ -7,6 +7,9 @@ GitHub Actions (`.github/workflows/maps.yml`) builds and uploads it once a month
 
 ```
 latest.json                      catalog of the live version (short cache: 5 min)
+map.js                           loader for web pages (short cache: 5 min)
+lib/maplibre-gl@<v>/             MapLibre and PMTiles for the loader, folder per library version
+lib/pmtiles@<v>/pmtiles.js
 v/<version>/                     one folder per release, never changed after upload
   catalog.json                   copy of latest.json of this release
   regions.json                   tile index for viewer/tiles.js
@@ -30,7 +33,7 @@ R2 has no symlinks. The switch is the upload of one small file:
 4. `tools/publish-r2.sh`:
    1. uploads everything to `v/<version>/` (the live map still uses the old version),
    2. checks that every file is in the bucket,
-   3. uploads `latest.json` — from now on clients use the new version,
+   3. uploads `lib/`, then `latest.json` — from now on clients use the new version — and `map.js`,
    4. deletes old versions and keeps the newest two (`R2_KEEP_VERSIONS`).
 
 If any step fails, `latest.json` is not changed and the old version stays live.
@@ -94,11 +97,34 @@ Files in `v/` get `Cache-Control: public, max-age=31536000, immutable`; `latest.
 
 ### Web page
 
+The simplest way is the loader `map.js`. It reads `latest.json`, loads MapLibre and PMTiles from
+`lib/`, registers the `tiles://` protocol and returns a normal `maplibregl.Map`:
+
+```html
+<div id="map" style="height: 500px"></div>
+<script src="https://maps.gotrasio.cz/map.js"></script>
+<script>
+  CzechTouristMap.createMap('map', { style: 'topo', center: [16.6, 49.2], zoom: 12 })
+    .then((map) => {
+      new CzechTouristMap.maplibregl.Marker().setLngLat([16.6, 49.2]).addTo(map);
+    });
+</script>
+```
+
+- `style`: `tourist` (default) or `topo`. All other options go to `new maplibregl.Map`.
+- `maplibregl`: pass your own MapLibre module (version 5 or newer); the loader then does not load it.
+- The page stays on the version it was loaded with. A new version is used after a reload.
+
+A page can also create the map itself and use only the protocol from the loader:
+
 ```js
-const catalog = await fetch('https://maps.gotrasio.cz/latest.json').then((r) => r.json());
-await registerTiles(maplibregl, catalog.baseUrl);            // viewer/tiles.js
+const catalog = await CzechTouristMap.getCatalog();               // latest.json
+await CzechTouristMap.registerTiles(maplibregl, catalog.baseUrl); // tiles:// for this version
 new maplibregl.Map({ container: 'map', style: catalog.styles.tourist.url });
 ```
+
+The source of the loader is `viewer/map.js`; `czmap release` inserts the host, the library versions
+(from `package.json`) and `viewer/tiles.js`.
 
 ## Cloudflare setup (once, by hand)
 
