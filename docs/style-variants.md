@@ -66,6 +66,7 @@ Not like ZTM10:
 - Contours (group `contours`): every 10 m from z13, 50 m from z12, 100 m from z11; 50 m lines are thicker
   and carry the height. Tourist map: `#C07030` / `#D09060` (project manual), topographic map: `#E9BC9A` (ZTM10).
 - Waterways are drawn under water areas. A river with an area shows no centre line.
+- Pedestrian streets and squares are drawn under the buildings, so building outlines stay sharp.
 - Bridges have a thin grey outline instead of the road casing. It ends at the bridge and does not cover the road.
 - Railways are thin. Sidings and yard tracks (`service`) are thinner and lighter, so large stations stay readable.
   Tram lines are a thin line with small cross ties (from z15).

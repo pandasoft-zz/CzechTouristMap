@@ -46,7 +46,9 @@ function roadLayers(t, structure) {
     : ['has', structure];
   const id = (name) => `${structure}-${name}`;
   const isTunnel = structure === 'tunnel';
-  const paved = ['all', filterStructure, ['in', ['get', 'kind'], ['literal', PAVED]]];
+  // Surface pedestrian streets are drawn under the buildings (pedestrian-street), not here.
+  const kinds = structure === 'surface' ? PAVED.filter((k) => k !== 'pedestrian') : PAVED;
+  const paved = ['all', filterStructure, ['in', ['get', 'kind'], ['literal', kinds]]];
   const isBridge = structure === 'bridge';
   // Bridges get their own thin outline instead of the road casing. Butt caps keep it off the road
   // that continues past the bridge ends.
@@ -350,6 +352,20 @@ export function baseOverlayLayers(t) {
       'source-layer': 'landcover',
       filter: ['==', ['get', 'kind'], 'pedestrian'],
       paint: { 'fill-color': t.landcover.pedestrian },
+      metadata: group,
+    },
+    // Pedestrian streets on the surface: under the buildings, so building outlines stay sharp.
+    {
+      id: 'pedestrian-street',
+      type: 'line',
+      source: SOURCE,
+      'source-layer': 'roads',
+      filter: ['all', ['==', ['get', 'kind'], 'pedestrian'], ['!', ['has', 'tunnel']], ['!', ['has', 'bridge']]],
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: {
+        'line-color': t.road.fill.pedestrian,
+        'line-width': roadWidth(t),
+      },
       metadata: group,
     },
     {
