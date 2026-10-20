@@ -32,7 +32,7 @@ These values differ from the manuals on purpose. They come from the first MapLib
 | Water | `#B8D8F0`, labels `#2060A0` / `#4040FF` | `#A9D3F2`, labels `#1B5FA8` | Water stands out better |
 | Hiking routes | from z11 | from z9 (main routes) | Main routes are visible in the overview |
 | Peak names | bold | italic | Peaks are less dominant |
-| Pedestrian streets and squares | dark grey `#707070` lines, half width; squares not drawn | one light surface `#E8E3DC`: squares as areas, streets in the same colour without outline | Dark streets looked heavy in town centres |
+| Pedestrian streets and squares | dark grey `#707070` lines, half width; squares not drawn | one light surface `#F7F3EC`: squares as areas, streets in the same colour without outline | Dark streets looked heavy in town centres |
 | Motorways, expressways | red `#D42020`, casing `#880000` | green `#6DB85A`, casing `#2F6E2A` | Red was too loud in towns |
 | Road numbers | all road classes | only motorways and roads with one- or two-digit numbers | II. and III. class numbers are not useful for hiking |
 | Road number shields | halo around text; II./III. class green `#008700` | real shields with padding; motorway green, II./III. class in road colour | More room around numbers; II./III. shields do not look like motorway shields |

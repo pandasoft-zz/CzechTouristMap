@@ -38,7 +38,7 @@ export default {
     // no source
     sport: '#DCEDD0',
     // Squares and pedestrian zones: light warm grey, the same as pedestrian streets (no source).
-    pedestrian: '#E8E3DC',
+    pedestrian: '#F7F3EC',
   },
 
   // Kept from the first style: more saturated than the manual (#B8D8F0, #5080C0, #2060A0).
@@ -78,7 +78,7 @@ export default {
       service: '#FFFFFF',
       // Pedestrian streets: the colour of pedestrian areas, so streets and squares form one surface
       // (manual: dark grey #707070).
-      pedestrian: '#E8E3DC',
+      pedestrian: '#F7F3EC',
     },
     casing: {
       motorway: '#2F6E2A',
@@ -89,7 +89,7 @@ export default {
       minor: '#606060',
       service: '#707070',
       // The casing has the fill colour: no outline between pedestrian streets and squares.
-      pedestrian: '#E8E3DC',
+      pedestrian: '#F7F3EC',
     },
     // no source
     casingExtra: 1.2,
