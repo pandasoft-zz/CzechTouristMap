@@ -1,0 +1,113 @@
+# Build all PMTiles and publish them to Cloudflare R2 (docs/publishing.md).
+#
+# Runs once a month and on demand. The upload goes to a new version folder; latest.json is
+# switched only after all files are uploaded, so the live map never misses files.
+# Without the R2 secrets the workflow only builds.
+name: Build and publish maps
+
+on:
+  schedule:
+    # 03:00 UTC on the 1st of every month.
+    - cron: "0 3 1 * *"
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Upload to R2 and switch latest.json
+        type: boolean
+        default: true
+
+# Never run two releases at the same time.
+concurrency:
+  group: maps
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      MAPS_BASE_URL: ${{ vars.MAPS_BASE_URL || 'https://maps.gotrasio.cz' }}
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+      R2_KEEP_VERSIONS: ${{ vars.R2_KEEP_VERSIONS || '2' }}
+    steps:
+      # The build needs about 15 GB of disk. Remove tools the runner has but we do not use.
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h /
+
+      # LFS: the terrain tiles in terrain/sonny/ (about 200 MB of the LFS quota per run).
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+          cache-dependency-path: tiles/pom.xml
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: relief/requirements.txt
+
+      - name: Install
+        run: npm ci
+
+      - name: Check styles
+        run: node tools/czmap.mjs check
+
+      - name: Download OSM extracts
+        run: node tools/czmap.mjs download
+
+      - name: Build PMTiles
+        run: node tools/czmap.mjs build all
+
+      # Fails when a file is over 500 MB or all files are over 10 GB.
+      - name: Check sizes
+        run: node tools/czmap.mjs info | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Prepare release
+        run: node tools/czmap.mjs release --base-url "$MAPS_BASE_URL"
+
+      - name: Keep catalog
+        uses: actions/upload-artifact@v4
+        with:
+          name: catalog
+          path: |
+            dist/latest.json
+            dist/regions.json
+            dist/style-*.json
+
+      - name: Publish to R2
+        if: env.R2_BUCKET != '' && (github.event_name == 'schedule' || inputs.publish)
+        run: bash tools/publish-r2.sh
+
+      - name: Summary
+        if: always()
+        run: |
+          if [ -f dist/latest.json ]; then
+            node -e "
+              const c = require('./dist/latest.json');
+              console.log('### Release ' + c.version);
+              for (const country of c.countries) for (const p of country.parts) for (const [set, f] of Object.entries(p.files))
+                console.log('- ' + p.id + '/' + set + ': ' + (f.size / 1e6).toFixed(1) + ' MB, updated ' + f.updated);
+            " >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -z "$R2_BUCKET" ]; then
+            echo "R2 secrets are not set: built only, nothing uploaded." >> "$GITHUB_STEP_SUMMARY"
+          fi

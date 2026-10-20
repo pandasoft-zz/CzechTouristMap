@@ -63,6 +63,8 @@ All tasks use one CLI: `node tools/czmap.mjs <command>` (or `npx czmap <command>
 | `render --place praha --compare` | Render both maps side by side in one image |
 | `places` | List render presets (`regions/*/places.json`) |
 | `style --tiles https://example.com/map` | Write `dist/style-tourist.json` and `dist/style-topo.json` for production |
+| `release --base-url URL` | Prepare a release: `dist/latest.json` and styles for `v/<version>/` |
+| `check` | Validate the styles of both maps |
 | `info` | Show file sizes against the limits (500 MB per file, 10 GB in total) |
 
 ### Viewer
@@ -106,14 +108,16 @@ the viewer uses for the layer switches.
 
 ## Deploy
 
-1. `node tools/czmap.mjs build all`
-2. `node tools/czmap.mjs style --tiles https://example.com/map`
-3. Upload `dist/` (`regions.json`, `<part>/*.pmtiles`, `style-*.json`) to `https://example.com/map/` and `fonts/` to `https://example.com/fonts/`.
-   Upload `sprite/` to `https://example.com/sprite/`.
-   The server must support HTTP Range requests (most static hosts and S3-like storage do).
-4. In the web page, load `pmtiles.js` and `viewer/tiles.js` and call
-   `registerTiles(maplibregl, 'https://example.com/map')` before creating the map (see `viewer/main.js`).
-   The style asks for `czmap://<set>/{z}/{x}/{y}`; the protocol reads the tile from the right part file.
+The map is published to Cloudflare R2 at `https://maps.gotrasio.cz` by GitHub Actions
+(`.github/workflows/maps.yml`), once a month and on demand. Every release goes to its own folder
+`v/<version>/`; `latest.json` switches to it after the upload. See [docs/publishing.md](docs/publishing.md)
+for the bucket layout, the `latest.json` format (also for the mobile app) and the Cloudflare setup.
+
+```
+node tools/czmap.mjs build all
+node tools/czmap.mjs release --base-url https://maps.gotrasio.cz
+bash tools/publish-r2.sh        # needs the R2_* variables and the AWS CLI
+```
 
 ## Data and licenses
 
@@ -129,6 +133,7 @@ the viewer uses for the layer switches.
 ## Documentation
 
 - [docs/tile-schema.md](docs/tile-schema.md) — layers and attributes in the PMTiles files
+- [docs/publishing.md](docs/publishing.md) — release to Cloudflare R2, `latest.json`, Cloudflare setup
 - [docs/style-variants.md](docs/style-variants.md) — the two maps, their sources and limits
 - [docs/adr/](docs/adr/) — architecture decisions (Planetiler / Java, terrain data)
 - [docs/design-manual-project.md](docs/design-manual-project.md) — colours and line widths of the tourist map
