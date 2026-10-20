@@ -1,6 +1,9 @@
 # Tile schema
 
-The map uses four PMTiles files. The style (`style/`) reads them as four sources.
+Every part of the map (`regions/`, ADR 0004) has the four files below in `dist/<part>/`.
+`dist/regions.json` lists the parts, their bounds and built sets. The style reads the sets as
+four sources with tile URLs `czmap://<set>/{z}/{x}/{y}` (routed by `viewer/tiles.js`).
+
 
 | File | Source | Type | Zoom | Built by |
 |---|---|---|---|---|
@@ -46,7 +49,7 @@ One way can carry several hiking colours. Each colour is one feature. `count` is
 
 ## contours.pmtiles
 
-Contour lines from Sonny's LiDAR DTM (1"), via `data/contours.gpkg` (see ADR 0003).
+Contour lines from Sonny's LiDAR DTM (1"), via `data/contours/<part>.gpkg` (see ADR 0003).
 
 | Layer | Geometry | Attributes | Min zoom |
 |---|---|---|---|

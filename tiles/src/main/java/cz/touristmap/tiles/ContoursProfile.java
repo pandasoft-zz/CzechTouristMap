@@ -9,7 +9,7 @@ import com.onthegomap.planetiler.reader.SourceFeature;
 import java.util.List;
 
 /**
- * Contour lines from {@code data/contours.gpkg} (made by {@code relief/build_contours.py}).
+ * Contour lines from {@code data/contours/<part>.gpkg} (made by {@code relief/build_contours.py}).
  *
  * <p>One layer {@code contours} with the attribute {@code ele} (metres). Lines appear by height step:
  * every 100 m from zoom 11, every 50 m from zoom 12 and all lines (10 m) from zoom 13.

@@ -9,7 +9,7 @@ import java.nio.file.Path;
  * Builds one vector PMTiles file: base and routes from an OSM extract, contours from a GeoPackage.
  *
  * <p>Usage: {@code java -jar czmap-tiles.jar --profile=base|routes|contours --osm_path=FILE --output=FILE.pmtiles}
- * <br>Contours read {@code --contours_path} (default {@code data/contours.gpkg}).
+ * <br>Contours read {@code --contours_path} (default {@code data/contours/cz.gpkg}).
  */
 public class Main {
 
@@ -20,7 +20,7 @@ public class Main {
         ));
         String name = arguments.getString("profile", "tile set to build: base, routes or contours", "base");
         Path osm = arguments.file("osm_path", "OSM input file", Path.of("data/czech-republic.osm.pbf"));
-        Path contours = arguments.file("contours_path", "contour GeoPackage", Path.of("data/contours.gpkg"));
+        Path contours = arguments.file("contours_path", "contour GeoPackage", Path.of("data/contours/cz.gpkg"));
         Path output = arguments.file("output", "output file", Path.of("dist", name + ".pmtiles"));
 
         Profile profile = switch (name) {

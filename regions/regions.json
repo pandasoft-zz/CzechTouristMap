@@ -1,0 +1,4 @@
+{
+  "comment": "Countries in the map, in build order. Each has regions/<id>/country.json.",
+  "countries": ["cz"]
+}

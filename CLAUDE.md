@@ -11,7 +11,9 @@ All documentation, code, and comments must be written in **plain technical Engli
 
 - `tiles/` — Planetiler profiles (Java 21, Maven). `BaseProfile` → `base.pmtiles`, `RoutesProfile` → `routes.pmtiles`.
 - `relief/build_relief.py` — DTM → `relief.pmtiles` (Terrarium WebP).
-- `relief/build_contours.py` — DTM → `data/contours.gpkg`; Planetiler profile `contours` → `contours.pmtiles`.
+- `relief/build_contours.py` — DTM → `data/contours/<part>.gpkg`; Planetiler profile `contours` → `contours.pmtiles`.
+- `regions/` — countries and parts. A part is one OSM extract; its files are in `dist/<part>/`.
+  `dist/regions.json` is the tile index; `viewer/tiles.js` routes `czmap://` tiles to the part files (ADR 0004).
 - `terrain/sonny/` — Sonny's LiDAR DTM tiles of the map area (Git LFS). Do not add tiles outside the map area
   without asking: the LFS download quota is 10 GiB per month.
 - `style/` — MapLibre style as JS modules. `style/index.mjs` exports `buildStyle({ variant })`.
@@ -29,7 +31,10 @@ Architecture decisions are in `docs/adr/`. Add a new ADR when you change a tool 
 ## Map rules
 
 - No POIs in the map. Only land cover, water, transport, buildings, boundaries, names, routes and relief.
-- Every PMTiles file must stay under 500 MB. Check with `node tools/czmap.mjs info` after a build.
+- Every PMTiles file must stay under 500 MB (Cloudflare cache limit) and all files together under 10 GB
+  (R2 free storage). Check with `node tools/czmap.mjs info` after a build. Split a country into parts when a
+  file gets bigger.
+- The project name stays "Czech Tourist Map" also with other countries.
 - Every style layer needs `metadata.group`: `base`, `relief`, `contours`, `hiking` or `cycling`.
 
 ## Workflow for style changes

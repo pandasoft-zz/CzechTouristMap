@@ -1,4 +1,4 @@
-"""Build data/contours.gpkg: contour lines from a digital terrain model (DTM).
+"""Build data/contours/<part>.gpkg: contour lines from a digital terrain model (DTM).
 
 The vector tiles are made from this file by Planetiler (profile "contours").
 
@@ -130,7 +130,7 @@ def build(args):
         log("WARNING: Copernicus is a surface model; use it only for tests")
     log(f"{len(files)} DEM tiles from {args.source}")
 
-    rings = read_poly(root / "area.poly")
+    rings = read_poly(Path(args.poly))
     area = shapely.unary_union([shapely.Polygon(r) for r in rings]).buffer(args.margin)
     west, south, east, north = area.bounds
     tiles = [
@@ -182,7 +182,10 @@ def build(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--data-dir", default="data")
-    parser.add_argument("--output", default="data/contours.gpkg")
+    parser.add_argument(
+        "--poly", required=True, help="area polygon (.poly), e.g. data/poly/cz.poly"
+    )
+    parser.add_argument("--output", default="data/contours/cz.gpkg")
     parser.add_argument("--source", choices=["sonny", "copernicus"], default="sonny")
     parser.add_argument("--interval", type=float, default=10, help="metres")
     parser.add_argument("--sigma", type=float, default=1.5, help="smoothing in pixels")

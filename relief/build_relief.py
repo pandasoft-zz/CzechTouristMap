@@ -44,7 +44,6 @@ from dem_sources import find_sonny, tile_key
 DEM_URL = (
     "https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com/" "{name}/{name}.tif"
 )
-POLY_URL = "https://download.openstreetmap.fr/polygons/europe/czech_republic.poly"
 
 TILE_SIZE = 256
 WORLD = 20037508.342789244  # half of the Web Mercator world width in metres
@@ -179,9 +178,23 @@ def fill_nan(array):
     return array[tuple(idx)]
 
 
+def dem_bbox(rings, margin=0.1):
+    """Whole-degree DEM tiles around the area: lon0, lat0, lon1, lat1 (inclusive)."""
+    lons = [p[0] for r in rings for p in r]
+    lats = [p[1] for r in rings for p in r]
+    return (
+        math.floor(min(lons) - margin),
+        math.floor(min(lats) - margin),
+        math.floor(max(lons) + margin),
+        math.floor(max(lats) + margin),
+    )
+
+
 def build(args):
     root = Path(args.data_dir)
-    lon0, lat0, lon1, lat1 = args.dem_bbox
+    rings = read_poly(Path(args.poly))
+    lon0, lat0, lon1, lat1 = args.dem_bbox or dem_bbox(rings)
+    log(f"DEM tiles {lon0}..{lon1} E, {lat0}..{lat1} N")
     source = args.source
     if source == "auto":
         source = "sonny" if find_sonny(root) else "copernicus"
@@ -208,10 +221,6 @@ def build(args):
         dem_files = fallback + dem_files
     else:
         dem_files = download_dem(root / "dem", (lon0, lon1), (lat0, lat1))
-    poly_path = root / "area.poly"
-    if not download(args.poly_url, poly_path):
-        sys.exit(f"Cannot download {args.poly_url}")
-    rings = read_poly(poly_path)
     lons = [p[0] for r in rings for p in r]
     lats = [p[1] for r in rings for p in r]
     area_bounds = (min(lons), min(lats), max(lons), max(lats))
@@ -339,12 +348,14 @@ def main():
     parser.add_argument(
         "--source", choices=["auto", "sonny", "copernicus"], default="auto"
     )
-    parser.add_argument("--poly-url", default=POLY_URL)
+    parser.add_argument(
+        "--poly", required=True, help="area polygon (.poly), e.g. data/poly/cz.poly"
+    )
     parser.add_argument(
         "--dem-bbox",
         type=lambda s: [int(v) for v in s.split(",")],
-        default=[11, 48, 18, 51],
-        help="whole-degree DEM tiles to download: lon0,lat0,lon1,lat1",
+        default=None,
+        help="whole-degree DEM tiles: lon0,lat0,lon1,lat1 (default: from --poly)",
     )
     parser.add_argument("--minzoom", type=int, default=6)
     parser.add_argument("--maxzoom", type=int, default=12)

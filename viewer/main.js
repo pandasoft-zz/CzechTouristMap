@@ -7,6 +7,7 @@
 //   #zoom/lat/lon        map position
 
 import * as maplibregl from '/vendor/maplibre-gl/maplibre-gl.mjs';
+import { registerTiles } from './tiles.js';
 
 const GROUPS = ['base', 'relief', 'contours', 'hiking', 'cycling'];
 const STORAGE_KEY = 'czmap.layers';
@@ -24,8 +25,9 @@ if (renderMode) {
   document.body.classList.add('render');
 }
 
-const protocol = new pmtiles.Protocol({ metadata: true });
-maplibregl.addProtocol('pmtiles', protocol.tile);
+// Tiles of all built parts; regions.json also gives the start view and the bounds.
+const regions = await registerTiles(maplibregl, '/tiles');
+const [west, south, east, north] = regions.bounds;
 
 function initialGroups() {
   if (params.has('layers')) {
@@ -64,10 +66,10 @@ for (const group of GROUPS) {
 const map = new maplibregl.Map({
   container: 'map',
   style: styleUrl(),
-  center: [15.5, 49.8],
-  zoom: 7,
+  center: regions.view?.center ?? [(west + east) / 2, (south + north) / 2],
+  zoom: regions.view?.zoom ?? 7,
   hash: true,
-  maxBounds: [[10.5, 47.8], [20.5, 51.8]],
+  maxBounds: [[west - 2, south - 2], [east + 2, north + 1]],
   attributionControl: { compact: false },
   fadeDuration: renderMode ? 0 : 300,
   canvasContextAttributes: { preserveDrawingBuffer: renderMode },

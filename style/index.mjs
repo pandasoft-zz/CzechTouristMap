@@ -33,7 +33,7 @@ const CONTOUR_ATTRIBUTION = [
 /**
  * Build the style.
  * @param {object} options
- * @param {string} options.tiles  Base URL of the PMTiles files, e.g. "https://example.com/tiles".
+ * @param {string} options.tiles  URL of the dist/ folder (regions.json, <part>/*.pmtiles).
  * @param {string} options.glyphs Glyph URL template with {fontstack} and {range}.
  * @param {string} options.sprite Sprite base URL (without .json / .png), see tools/sprite.mjs.
  * @param {string} [options.variant] Style variant id from style/themes/ (default: "tourist").
@@ -43,27 +43,35 @@ export function buildStyle({ tiles, glyphs, sprite, variant = DEFAULT_THEME }) {
   return {
     version: 8,
     name: `Czech Tourist Map – ${t.name}`,
-    metadata: { variant: t.id },
+    metadata: { variant: t.id, 'czmap:tiles': tiles },
     glyphs,
     sprite,
+    // Tiles come from the files of all parts (dist/<part>/<set>.pmtiles). The page registers the
+    // "czmap" protocol (viewer/tiles.js) with the URL in metadata["czmap:tiles"].
     sources: {
       base: {
         type: 'vector',
-        url: `pmtiles://${tiles}/base.pmtiles`,
+        tiles: ['czmap://base/{z}/{x}/{y}'],
+        maxzoom: 14,
         attribution: ATTRIBUTION,
       },
       routes: {
         type: 'vector',
-        url: `pmtiles://${tiles}/routes.pmtiles`,
+        tiles: ['czmap://routes/{z}/{x}/{y}'],
+        maxzoom: 14,
       },
       contours: {
         type: 'vector',
-        url: `pmtiles://${tiles}/contours.pmtiles`,
+        tiles: ['czmap://contours/{z}/{x}/{y}'],
+        minzoom: 11,
+        maxzoom: 14,
         attribution: CONTOUR_ATTRIBUTION,
       },
       relief: {
         type: 'raster-dem',
-        url: `pmtiles://${tiles}/relief.pmtiles`,
+        tiles: ['czmap://relief/{z}/{x}/{y}'],
+        minzoom: 6,
+        maxzoom: 12,
         encoding: 'terrarium',
         tileSize: 256,
       },

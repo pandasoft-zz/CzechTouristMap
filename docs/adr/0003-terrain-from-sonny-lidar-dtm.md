@@ -28,8 +28,8 @@ Options checked:
   Only the map area is stored: GitHub's free LFS quota is 10 GiB storage and 10 GiB download per
   month, and all of Europe is about 4.8 GB. More tiles can be put into `data/sonny/` locally.
 - Contours are precomputed, not computed in the browser:
-  `relief/build_contours.py` (smoothing, contourpy, clipping) writes `data/contours.gpkg`,
-  Planetiler (profile `contours`) builds `dist/contours.pmtiles`.
+  `relief/build_contours.py` (smoothing, contourpy, clipping) writes `data/contours/<part>.gpkg`,
+  Planetiler (profile `contours`) builds `dist/<part>/contours.pmtiles`.
 - Copernicus stays as a fallback (`--source=copernicus`) for tests and areas without Sonny data.
 
 ## Consequences

@@ -6,6 +6,7 @@
 //   #zoom/lat/lon           map position
 
 import * as maplibregl from '/vendor/maplibre-gl/maplibre-gl.mjs';
+import { registerTiles } from './tiles.js';
 
 const params = new URLSearchParams(location.search);
 const renderMode = params.has('render');
@@ -19,13 +20,13 @@ if (renderMode) {
   document.body.classList.add('render');
 }
 
-const protocol = new pmtiles.Protocol({ metadata: true });
-maplibregl.addProtocol('pmtiles', protocol.tile);
+const regions = await registerTiles(maplibregl, '/tiles');
+const [west, south, east, north] = regions.bounds;
 
 function parseHash() {
   const [zoom, lat, lon] = location.hash.slice(1).split('/').map(Number);
   if ([zoom, lat, lon].some(Number.isNaN)) {
-    return { zoom: 7, center: [15.5, 49.8] };
+    return { zoom: regions.view?.zoom ?? 7, center: regions.view?.center ?? [(west + east) / 2, (south + north) / 2] };
   }
   return { zoom, center: [lon, lat] };
 }
@@ -59,7 +60,7 @@ for (const v of variants) {
     style: `/style.json?variant=${encodeURIComponent(v.id)}`,
     center: start.center,
     zoom: start.zoom,
-    maxBounds: [[10.5, 47.8], [20.5, 51.8]],
+    maxBounds: [[west - 2, south - 2], [east + 2, north + 1]],
     attributionControl: false,
     fadeDuration: renderMode ? 0 : 300,
     canvasContextAttributes: { preserveDrawingBuffer: renderMode },

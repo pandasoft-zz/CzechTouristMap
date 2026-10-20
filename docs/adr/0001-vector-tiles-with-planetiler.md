@@ -11,7 +11,7 @@ We need a tool that turns OSM data into vector tiles. Requirements:
 - Output PMTiles directly.
 - Read route relations (hiking, cycling) and copy their tags to member ways.
   The style needs this to draw KČT colours as parallel stripes.
-- Merge and simplify geometry per zoom level. Each PMTiles file must stay under 500 MB.
+- Merge and simplify geometry per zoom level. Each PMTiles file must stay under 500 MB (see ADR 0004).
 - Fast build on one machine (4 cores, 8 GB RAM).
 - Open source license with no use limits.
 
