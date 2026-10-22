@@ -31,3 +31,6 @@ Thumbs.db
 # Local env overrides
 .env
 .env.local
+
+# Written at deploy by .github/workflows/pages.yml
+site/config.js

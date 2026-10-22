@@ -1,6 +1,7 @@
 // Project page: comparison slider and the two live maps.
 //
-// The live maps use the loader of the map host. ?maps=URL uses another host (for local tests).
+// The live maps use the loader of the map host. The host comes from config.js (written at deploy
+// from the GitHub variable MAPS_BASE_URL); ?maps=URL overrides it (for local tests).
 
 // Places of the slider. Images: site/img/<id>-tourist.webp and <id>-topo.webp (tools/site-images.mjs).
 const PLACES = [
@@ -12,7 +13,18 @@ const PLACES = [
   { id: 'krkonose', name: 'Krkonoše', center: [15.6500, 50.7200], zoom: 11 },
 ];
 
-const MAPS_HOST = new URLSearchParams(location.search).get('maps') || 'https://maps.gotrasio.cz';
+const MAPS_HOST = (new URLSearchParams(location.search).get('maps') || window.CZMAP_CONFIG?.mapsHost || '')
+  .replace(/\/+$/, '');
+
+// Show the real host in the embed example.
+for (const el of document.querySelectorAll('[data-host]')) {
+  el.textContent = MAPS_HOST || el.textContent;
+}
+for (const el of document.querySelectorAll('[data-host-link]')) {
+  if (MAPS_HOST) {
+    el.href = MAPS_HOST + el.dataset.hostLink;
+  }
+}
 
 // ---------- Comparison slider ----------
 
@@ -73,8 +85,10 @@ function loadScript(src) {
 
 function offline() {
   liveSection.classList.add('live-offline');
-  status.textContent = 'Živou mapu se nepodařilo načíst: mapový server maps.gotrasio.cz neodpovídá. '
-    + 'Ukázky výše jsou z téže mapy.';
+  const host = MAPS_HOST ? new URL(MAPS_HOST).host : '';
+  status.textContent = host
+    ? `Živou mapu se nepodařilo načíst: mapový server ${host} neodpovídá. Ukázky výše jsou z téže mapy.`
+    : 'Živá mapa není nastavená (chybí adresa mapového serveru). Ukázky výše jsou z téže mapy.';
 }
 
 // Keep both maps at the same view.
@@ -102,6 +116,10 @@ function flyLive(place) {
 }
 
 async function startLive() {
+  if (!MAPS_HOST) {
+    offline();
+    return;
+  }
   try {
     await loadScript(`${MAPS_HOST}/map.js`);
     const view = { center: currentPlace.center, zoom: currentPlace.zoom, cooperativeGestures: true };

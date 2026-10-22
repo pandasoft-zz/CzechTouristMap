@@ -29,14 +29,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 300
     env:
-      MAPS_BASE_URL: ${{ vars.MAPS_BASE_URL || 'https://maps.gotrasio.cz' }}
-      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      # Public URL of the bucket, e.g. https://maps.gotrasio.cz (GitHub variable, required).
+      MAPS_BASE_URL: ${{ vars.MAPS_BASE_URL }}
+      # S3 API URL of the bucket from the Cloudflare dashboard (variable or secret).
+      R2_ENDPOINT: ${{ vars.R2_ENDPOINT || secrets.R2_ENDPOINT }}
       R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
       R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
       R2_BUCKET: ${{ secrets.R2_BUCKET }}
       R2_KEEP_VERSIONS: ${{ vars.R2_KEEP_VERSIONS || '2' }}
-      # "eu" for a bucket with the EU jurisdiction (it has its own endpoint).
-      R2_JURISDICTION: ${{ vars.R2_JURISDICTION }}
     steps:
       # The build needs about 15 GB of disk. Remove tools the runner has but we do not use.
       - name: Free disk space
@@ -84,7 +84,12 @@ jobs:
         run: node tools/czmap.mjs info | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Prepare release
-        run: node tools/czmap.mjs release --base-url "$MAPS_BASE_URL"
+        run: |
+          if [ -z "$MAPS_BASE_URL" ]; then
+            echo "::error::Set the GitHub variable MAPS_BASE_URL (Settings > Secrets and variables > Actions > Variables)"
+            exit 1
+          fi
+          node tools/czmap.mjs release --base-url "$MAPS_BASE_URL"
 
       - name: Keep catalog
         uses: actions/upload-artifact@v4

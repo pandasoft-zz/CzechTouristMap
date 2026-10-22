@@ -97,12 +97,12 @@
         <p>Stačí jeden skript. Vrátí běžnou mapu MapLibre, takže přidáte značky, trasy i vlastní vrstvy jako obvykle.</p>
       </div>
       <pre class="code"><code>&lt;div id="map" style="height: 500px"&gt;&lt;/div&gt;
-&lt;script src="https://maps.gotrasio.cz/map.js"&gt;&lt;/script&gt;
+&lt;script src="<span data-host>https://maps.example.com</span>/map.js"&gt;&lt;/script&gt;
 &lt;script&gt;
   CzechTouristMap.createMap('map', { style: 'topo', center: [16.6, 49.2], zoom: 12 });
 &lt;/script&gt;</code></pre>
       <div class="prose">
-        <p>Styl <code>tourist</code> nebo <code>topo</code>. Seznam souborů pro offline stažení je v <a href="https://maps.gotrasio.cz/latest.json">latest.json</a>, popis v <a href="https://github.com/pandasoft-zz/CzechTouristMap/blob/main/docs/publishing.md">dokumentaci</a>.</p>
+        <p>Styl <code>tourist</code> nebo <code>topo</code>. Seznam souborů pro offline stažení je v <a href="latest.json" data-host-link="/latest.json">latest.json</a>, popis v <a href="https://github.com/pandasoft-zz/CzechTouristMap/blob/main/docs/publishing.md">dokumentaci</a>.</p>
       </div>
     </section>
   </main>
@@ -111,6 +111,8 @@
     <p>Czech Tourist Map je otevřený projekt. Mapová data © přispěvatelé OpenStreetMap, výšky © Sonny, © ČÚZK.</p>
   </footer>
 
+  <!-- config.js is written by .github/workflows/pages.yml from the variable MAPS_BASE_URL. -->
+  <script src="config.js"></script>
   <script src="main.js" type="module"></script>
 </body>
 </html>
