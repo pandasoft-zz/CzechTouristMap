@@ -35,6 +35,8 @@ jobs:
       R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
       R2_BUCKET: ${{ secrets.R2_BUCKET }}
       R2_KEEP_VERSIONS: ${{ vars.R2_KEEP_VERSIONS || '2' }}
+      # "eu" for a bucket with the EU jurisdiction (it has its own endpoint).
+      R2_JURISDICTION: ${{ vars.R2_JURISDICTION }}
     steps:
       # The build needs about 15 GB of disk. Remove tools the runner has but we do not use.
       - name: Free disk space

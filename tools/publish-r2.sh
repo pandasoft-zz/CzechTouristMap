@@ -11,6 +11,7 @@
 # Environment:
 #   R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET   (required)
 #   R2_KEEP_VERSIONS                                                   (optional, default 2)
+#   R2_JURISDICTION    eu or fedramp, for buckets created with a jurisdiction (optional)
 #   R2_ENDPOINT                                                        (optional, for tests)
 #   DRY_RUN=1                                                          (print, do not upload)
 set -euo pipefail
@@ -27,8 +28,11 @@ export AWS_DEFAULT_REGION=auto
 # R2 does not accept the default CRC checksums of new AWS CLI versions.
 export AWS_REQUEST_CHECKSUM_CALCULATION=when_required
 export AWS_RESPONSE_CHECKSUM_VALIDATION=when_required
+# Buckets with a jurisdiction have their own endpoint, e.g. <account>.eu.r2.cloudflarestorage.com.
+# With the default endpoint such a bucket answers "Access Denied".
 # R2_ENDPOINT overrides the endpoint (for tests against a local S3 server).
-ENDPOINT="${R2_ENDPOINT:-https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com}"
+JURISDICTION="${R2_JURISDICTION:+.${R2_JURISDICTION}}"
+ENDPOINT="${R2_ENDPOINT:-https://${R2_ACCOUNT_ID}${JURISDICTION}.r2.cloudflarestorage.com}"
 
 cd "$(dirname "$0")/.."
 VERSION=$(node -p "require('./dist/latest.json').version")
@@ -53,7 +57,7 @@ KEYS=$(node -e "
   keys.push('regions.json', 'catalog.json', ...Object.keys(c.styles).map((id) => 'style-' + id + '.json'));
   console.log(keys.join('\n'));")
 
-echo "== upload version ${VERSION}"
+echo "== upload version ${VERSION} to ${R2_BUCKET}${JURISDICTION:+ (jurisdiction ${R2_JURISDICTION})}"
 for key in $KEYS; do
   case "$key" in
     *.pmtiles)

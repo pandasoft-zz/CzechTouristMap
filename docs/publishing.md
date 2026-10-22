@@ -148,7 +148,9 @@ The source of the loader is `viewer/map.js`; `czmap release` inserts the host, t
 6. **GitHub** (Settings → Secrets and variables → Actions):
    - secrets `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`
    - variables (optional) `MAPS_BASE_URL` (default `https://maps.gotrasio.cz`),
-     `R2_KEEP_VERSIONS` (default `2`)
+     `R2_KEEP_VERSIONS` (default `2`), `R2_JURISDICTION` (`eu` for a bucket created with the EU
+     jurisdiction: such a bucket has the endpoint `<account>.eu.r2.cloudflarestorage.com`, and the
+     default endpoint answers "Access Denied")
 
 Without the secrets the workflow builds and checks the map but does not upload.
 
