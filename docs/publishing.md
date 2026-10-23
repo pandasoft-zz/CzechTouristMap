@@ -168,10 +168,16 @@ MultiPolygon. The map has data only inside it, so a page can draw another map ou
    }]
    ```
 5. **R2 API token** with *Object Read & Write* for the bucket.
-6. **GitHub** (Settings → Secrets and variables → Actions):
-   - secrets `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`
-   - variables (optional) `MAPS_BASE_URL` (default `https://maps.gotrasio.cz`),
-     `R2_KEEP_VERSIONS` (default `2`)
+6. **S3 API URL**: bucket → *Settings* → *S3 API*, for example
+   `https://<account>.eu.r2.cloudflarestorage.com/maps`. A bucket with the EU jurisdiction has the
+   `.eu.` endpoint; the endpoint without it answers "Access Denied". The bucket name at the end is
+   removed by the script.
+7. **GitHub** (Settings → Secrets and variables → Actions):
+   - secrets `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`
+   - variable `R2_ENDPOINT`: the S3 API URL from step 6 (a secret of the same name works too)
+   - variable `MAPS_BASE_URL`: the public URL of the bucket, `https://maps.gotrasio.cz`.
+     `maps.yml` writes it into the release, `pages.yml` into the project page.
+   - variable `R2_KEEP_VERSIONS` (optional, default `2`)
 
 Without the secrets the workflow builds and checks the map but does not upload.
 
@@ -186,7 +192,7 @@ Without the secrets the workflow builds and checks the map but does not upload.
 ```
 node tools/czmap.mjs build all
 node tools/czmap.mjs release --base-url https://maps.gotrasio.cz
-R2_ACCOUNT_ID=… R2_ACCESS_KEY_ID=… R2_SECRET_ACCESS_KEY=… R2_BUCKET=maps bash tools/publish-r2.sh
+R2_ENDPOINT=https://….r2.cloudflarestorage.com R2_ACCESS_KEY_ID=… R2_SECRET_ACCESS_KEY=… R2_BUCKET=maps bash tools/publish-r2.sh
 ```
 
 `DRY_RUN=1` prints the upload commands without running them. The script needs the AWS CLI.

@@ -9,13 +9,14 @@
 #   4. delete old versions, keep the newest R2_KEEP_VERSIONS (default 2)
 #
 # Environment:
-#   R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET   (required)
+#   R2_ENDPOINT        S3 API URL of the bucket from the Cloudflare dashboard (required),
+#                      e.g. https://<account>.eu.r2.cloudflarestorage.com (a /<bucket> suffix is fine)
+#   R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET                  (required)
 #   R2_KEEP_VERSIONS                                                   (optional, default 2)
-#   R2_ENDPOINT                                                        (optional, for tests)
 #   DRY_RUN=1                                                          (print, do not upload)
 set -euo pipefail
 
-: "${R2_ACCOUNT_ID:?R2_ACCOUNT_ID is not set}"
+: "${R2_ENDPOINT:?R2_ENDPOINT is not set (S3 API URL of the bucket, see docs/publishing.md)}"
 : "${R2_ACCESS_KEY_ID:?R2_ACCESS_KEY_ID is not set}"
 : "${R2_SECRET_ACCESS_KEY:?R2_SECRET_ACCESS_KEY is not set}"
 : "${R2_BUCKET:?R2_BUCKET is not set}"
@@ -27,8 +28,11 @@ export AWS_DEFAULT_REGION=auto
 # R2 does not accept the default CRC checksums of new AWS CLI versions.
 export AWS_REQUEST_CHECKSUM_CALCULATION=when_required
 export AWS_RESPONSE_CHECKSUM_VALIDATION=when_required
-# R2_ENDPOINT overrides the endpoint (for tests against a local S3 server).
-ENDPOINT="${R2_ENDPOINT:-https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com}"
+# The dashboard shows the S3 API URL with the bucket name at the end; the AWS CLI wants the
+# endpoint without it. Buckets with a jurisdiction (EU) have their own endpoint
+# (<account>.eu.r2.cloudflarestorage.com); the wrong one answers "Access Denied".
+ENDPOINT="${R2_ENDPOINT%/}"
+ENDPOINT="${ENDPOINT%/"${R2_BUCKET}"}"
 
 cd "$(dirname "$0")/.."
 VERSION=$(node -p "require('./dist/latest.json').version")

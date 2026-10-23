@@ -27,6 +27,17 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      # The page gets the map host from the GitHub variable MAPS_BASE_URL.
+      - name: Write site/config.js
+        env:
+          MAPS_BASE_URL: ${{ vars.MAPS_BASE_URL }}
+        run: |
+          if [ -z "$MAPS_BASE_URL" ]; then
+            echo "::error::Set the GitHub variable MAPS_BASE_URL (Settings > Secrets and variables > Actions > Variables)"
+            exit 1
+          fi
+          printf 'window.CZMAP_CONFIG = { mapsHost: %s };\n' "$(node -p 'JSON.stringify(process.env.MAPS_BASE_URL)')" > site/config.js
+          cat site/config.js
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
