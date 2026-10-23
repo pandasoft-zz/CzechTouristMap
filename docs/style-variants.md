@@ -37,8 +37,14 @@ These values differ from the manuals on purpose. They come from the first MapLib
 | Road numbers | all road classes | only motorways and roads with one- or two-digit numbers | II. and III. class numbers are not useful for hiking |
 | Road number shields | halo around text; II./III. class green `#008700` | real shields with padding; motorway green, II./III. class in road colour | More room around numbers; II./III. shields do not look like motorway shields |
 
-The manuals do not cover boundaries, hillshading and cycle routes. These values are our own choice.
+The manuals do not cover boundaries, hillshading, hypsometric tint and cycle routes. These values are our own choice.
 The hillshading is strong and stays strong at large zoom, so steep valley sides read as steep.
+The elevation tiles end at zoom 12, and MapLibre flattens slopes of tiles below zoom 15. So the exaggeration
+is close to 1 from zoom 13; otherwise small hills disappear.
+The elevation data has only about 30 m resolution, so small landforms stay soft
+(see "Known limit" in `tile-schema.md`).
+At small zoom a hypsometric tint (layer `hypsometric-tint`, like OpenTopoMap) colours lowlands green and
+mountains brown. It fades out until zoom 12. Both maps have it; the topo tint is paler.
 
 ## Topografická (`topo`)
 

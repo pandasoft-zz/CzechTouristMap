@@ -142,10 +142,28 @@ export default {
     // classic cartographic choice; a weaker light from the west keeps slopes readable on all sides.
     // The exaggeration stays high at large zoom, so steep valley sides still look steep there.
     lights: [
-      { direction: 315, altitude: 35, shadow: 'rgba(85, 70, 55, 0.7)', highlight: 'rgba(255, 255, 255, 0.55)' },
-      { direction: 270, altitude: 40, shadow: 'rgba(85, 70, 55, 0.3)', highlight: 'rgba(255, 255, 255, 0.2)' },
+      { direction: 315, altitude: 30, shadow: 'rgba(70, 55, 40, 0.8)', highlight: 'rgba(255, 255, 255, 0.55)' },
+      { direction: 270, altitude: 40, shadow: 'rgba(70, 55, 40, 0.35)', highlight: 'rgba(255, 255, 255, 0.2)' },
     ],
-    exaggeration: [6, 0.7, 12, 0.6, 16, 0.55],
+    // The elevation tiles end at zoom 12. MapLibre flattens the slopes of tiles below zoom 15, so
+    // the overzoomed tiles need full exaggeration; otherwise small hills disappear at large zoom.
+    exaggeration: [6, 0.6, 11, 0.65, 13, 0.85],
+    // Hypsometric tint like OpenTopoMap: green lowlands, yellow uplands, brown mountains.
+    // Elevations in metres (Czechia: 115–1603 m).
+    tint: {
+      colors: [
+        150, '#9FCB8A',
+        300, '#C5DD98',
+        450, '#E8E6A6',
+        600, '#EBD49A',
+        800, '#DDB683',
+        1100, '#C99A72',
+        1400, '#B4876A',
+        1700, '#C9B4A8',
+      ],
+      opacity: [6, 0.75, 9, 0.6, 11, 0.25, 12, 0],
+      maxzoom: 12,
+    },
   },
 
   // design-manual-project.md, section 5: major #C07030, medium #D09060.

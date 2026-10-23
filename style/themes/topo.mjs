@@ -137,10 +137,26 @@ export default {
   // in the tourist map, but stays strong at large zoom, so steep slopes read as steep.
   relief: {
     lights: [
-      { direction: 315, altitude: 35, shadow: 'rgba(100, 85, 70, 0.6)', highlight: 'rgba(255, 255, 255, 0.4)' },
-      { direction: 270, altitude: 40, shadow: 'rgba(100, 85, 70, 0.25)', highlight: 'rgba(255, 255, 255, 0.15)' },
+      { direction: 315, altitude: 30, shadow: 'rgba(90, 75, 60, 0.85)', highlight: 'rgba(255, 255, 255, 0.45)' },
+      { direction: 270, altitude: 40, shadow: 'rgba(90, 75, 60, 0.35)', highlight: 'rgba(255, 255, 255, 0.15)' },
     ],
-    exaggeration: [6, 0.6, 12, 0.55, 16, 0.5],
+    // Full exaggeration on the overzoomed elevation tiles (zoom 13+), see tourist.mjs.
+    exaggeration: [6, 0.55, 11, 0.65, 13, 0.95],
+    // no source: ZTM10 has no tint. A paler tint than the tourist map, only for the overview.
+    tint: {
+      colors: [
+        150, '#B5D3A0',
+        300, '#D2E2AE',
+        450, '#EBE8BC',
+        600, '#ECDCB2',
+        800, '#E0C49E',
+        1100, '#CFAE90',
+        1400, '#BE9D86',
+        1700, '#D2C3BA',
+      ],
+      opacity: [6, 0.65, 9, 0.5, 11, 0.2, 12, 0],
+      maxzoom: 12,
+    },
   },
 
   // ZTM10: all contours #E9BC9A; index contours thicker (0.85 pt against 0.37 pt).
