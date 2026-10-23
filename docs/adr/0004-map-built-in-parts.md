@@ -31,7 +31,8 @@ Option 2.
   unit: one OSM extract and one area polygon. Small countries have one part (`cz`); large ones
   are split, for example Germany by states (`de-by`, `de-sn`, ...), like the Geofabrik extracts.
 - Every part has its own files: `dist/<part>/base.pmtiles`, `routes`, `relief`, `contours`.
-- `dist/regions.json` lists the parts with their bounds and built sets. The build writes it.
+- `dist/regions.json` lists the parts with their bounds, area polygons and built sets. The build
+  writes it.
 - The style has the same four sources as before, with tile URLs `tiles://<set>/{z}/{x}/{y}`.
   `viewer/tiles.js` registers the `tiles` protocol: for a tile it takes the parts whose bounds
   touch the tile and returns the tile of the first part file that has it.

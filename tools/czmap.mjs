@@ -7,7 +7,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { parseArgs } from 'node:util';
 import { ROOT, DATA, DIST } from './paths.mjs';
-import { loadCountries, selectParts, partFiles, loadPlaces, polyBounds } from './regions.mjs';
+import { loadCountries, selectParts, partFiles, loadPlaces, polyBounds, polyArea } from './regions.mjs';
 
 const TILES_JAR = path.join(ROOT, 'tiles/target/czmap-tiles.jar');
 const VENV_PYTHON = process.platform === 'win32'
@@ -255,7 +255,14 @@ function writeIndex() {
       if (sets.length === 0 || !fs.existsSync(files.poly)) {
         continue;
       }
-      parts.push({ id: part.id, country: country.id, name: part.name, bounds: polyBounds(files.poly), sets });
+      parts.push({
+        id: part.id,
+        country: country.id,
+        name: part.name,
+        bounds: polyBounds(files.poly),
+        area: polyArea(files.poly),
+        sets,
+      });
     }
   }
   const bounds = parts.length === 0 ? [-180, -85, 180, 85] : [

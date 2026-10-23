@@ -12,7 +12,7 @@ lib/maplibre-gl@<v>/             MapLibre and PMTiles for the loader, folder per
 lib/pmtiles@<v>/pmtiles.js
 v/<version>/                     one folder per release, never changed after upload
   catalog.json                   copy of latest.json of this release
-  regions.json                   tile index for viewer/tiles.js
+  regions.json                   tile index for viewer/tiles.js and the map area
   style-tourist.json             styles with absolute URLs into this folder
   style-topo.json
   <part>/base.pmtiles            routes, relief, contours: one set of files per part
@@ -125,6 +125,29 @@ new maplibregl.Map({ container: 'map', style: catalog.styles.tourist.url });
 
 The source of the loader is `viewer/map.js`; `czmap release` inserts the host, the library versions
 (from `package.json`) and `viewer/tiles.js`.
+
+## regions.json
+
+The tile index of one version. `viewer/tiles.js` reads `bounds` and `sets` of every part to route
+tiles. `area` is the area polygon of the part (from the `.poly` file of the OSM extract) as a GeoJSON
+MultiPolygon. The map has data only inside it, so a page can draw another map outside the area.
+
+```json
+{
+  "view": { "center": [15.5, 49.8], "zoom": 7 },
+  "bounds": [12.07, 48.53, 18.88, 51.075],
+  "parts": [
+    {
+      "id": "cz",
+      "country": "cz",
+      "name": "Česko",
+      "bounds": [12.07, 48.53, 18.88, 51.075],
+      "area": { "type": "MultiPolygon", "coordinates": [[[[18.418, 49.335], "…"]]] },
+      "sets": ["base", "routes", "relief", "contours"]
+    }
+  ]
+}
+```
 
 ## Cloudflare setup (once, by hand)
 

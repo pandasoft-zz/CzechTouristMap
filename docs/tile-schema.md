@@ -1,7 +1,7 @@
 # Tile schema
 
 Every part of the map (`regions/`, ADR 0004) has the four files below in `dist/<part>/`.
-`dist/regions.json` lists the parts, their bounds and built sets. The style reads the sets as
+`dist/regions.json` lists the parts, their bounds, area polygons and built sets. The style reads the sets as
 four sources with tile URLs `tiles://<set>/{z}/{x}/{y}` (routed by `viewer/tiles.js`).
 
 
