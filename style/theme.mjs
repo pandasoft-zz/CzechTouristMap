@@ -26,20 +26,33 @@ export function linear(...stops) {
   return ['interpolate', ['linear'], ['zoom'], ...stops];
 }
 
+function hex(color) {
+  if (!/^#[0-9A-Fa-f]{6}$/.test(color)) {
+    throw new Error(`Sprite colour must be #RRGGBB: ${color}`);
+  }
+  return color.slice(1).toLowerCase();
+}
+
 // Number shield: a rounded rectangle from the sprite, stretched around the text (see tools/sprite.mjs).
 // There is one image per colour ("shield-2f7d32"): MapLibre Native draws SDF images with stretch areas
 // far too big, so the shields are not coloured with icon-color.
 export function shieldImage(color) {
-  if (!/^#[0-9A-Fa-f]{6}$/.test(color)) {
-    throw new Error(`Shield colour must be #RRGGBB: ${color}`);
-  }
-  return `shield-${color.slice(1).toLowerCase()}`;
+  return `shield-${hex(color)}`;
 }
 
 // Shield colours of a style variant. The sprite has an image for each of them.
 export function shieldColors(t) {
   const ref = t.labels.roadRef;
   return [...Object.values(ref.kinds), ref.default].map((s) => s.shield);
+}
+
+// Line pattern for cliffs and banks, one image per colour (see tools/sprite.mjs).
+export function cliffImage(color) {
+  return `cliff-${hex(color)}`;
+}
+
+export function cliffColors(t) {
+  return Object.values(t.cliff).map((c) => c.color);
 }
 
 // The padding (top, right, bottom, left in px) gives the numbers room inside the shield.

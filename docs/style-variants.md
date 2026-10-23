@@ -74,6 +74,8 @@ Not like ZTM10:
 - Waterways are drawn under water areas. A river with an area shows no centre line.
 - Pedestrian streets and squares are drawn under the buildings, so building outlines stay sharp.
 - Bridges have a thin grey outline instead of the road casing. It ends at the bridge and does not cover the road.
+- Cliffs and steep banks (`cliffs`): a line with short ticks on the lower side, like the ZTM10 symbol
+  "terénní stupeň". Cliffs are darker than banks. The pattern is a sprite image per colour (`cliff-<colour>`).
 - Railways are thin. Sidings and yard tracks (`service`) are thinner and lighter, so large stations stay readable.
   Tram lines are a thin line with small cross ties (from z15).
 - Number shields use the `shield-<colour>` images from the sprite: all road numbers in the tourist map, only motorway

@@ -27,6 +27,7 @@ No POIs. Only land cover, water, transport, buildings, boundaries and names.
 | `roads` | line | `kind`: motorway, trunk, primary, secondary, tertiary, minor, pedestrian, service, track, path, cycleway, steps; `link`, `bridge`, `tunnel` (1); `grade` (track, 1–5); `ref`; `name` | 5–14 by kind |
 | `rail` | line | `kind`: rail, narrow, tram; `service`, `bridge`, `tunnel` (1). Parallel tram tracks (≤ 10 m apart) are one line | 8–13 |
 | `buildings` | polygon | – | 13 |
+| `cliffs` | line | `kind`: cliff (`natural=cliff`), bank (`natural=earth_bank`, `man_made=embankment`). The lower side is on the right of the line direction; lines are not merged, so the direction is kept | cliff 13, bank 14 |
 | `protected` | polygon | `kind`: national_park, landscape (CHKO), reserve; `name` | 7 / 11 |
 | `boundaries` | line | `level`: 2 (state), 6 (region) | 0 / 7 |
 | `places` | point | `kind`: city, town, village, suburb, hamlet, isolated_dwelling, locality; `name` | 5–14 |

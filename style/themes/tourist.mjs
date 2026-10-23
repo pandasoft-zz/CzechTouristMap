@@ -166,6 +166,13 @@ export default {
     },
   },
 
+  // Cliffs and steep banks: a line with ticks on the lower side, like the ZTM10 "terénní stupeň".
+  // Colours: no source. Cliffs are darker, so rock walls stand out from field edges and embankments.
+  cliff: {
+    cliff: { color: '#5E534C', width: 1 },
+    bank: { color: '#8C8178', width: 0.75 },
+  },
+
   // design-manual-project.md, section 5: major #C07030, medium #D09060.
   // Labels: design-manual-typography.md, section 4 (italic, #906010, no halo).
   contours: {

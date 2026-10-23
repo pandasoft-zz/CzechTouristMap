@@ -1,7 +1,7 @@
 // Base map layers: land cover, water, boundaries, buildings, roads and railways.
 // Labels are in labels.mjs, so they stay on top of the route overlays.
 
-import { width, linear, matchKind } from '../theme.mjs';
+import { width, linear, matchKind, cliffImage } from '../theme.mjs';
 
 const SOURCE = 'base';
 const group = { group: 'base' };
@@ -32,6 +32,8 @@ const river = (big, small) => ['match', ['get', 'kind'], 'river', big, small];
 const steps = (value, other) => ['match', ['get', 'kind'], 'steps', value, other];
 
 const PAVED = ['motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'minor', 'pedestrian', 'service'];
+
+const widthByKind = (values) => Object.fromEntries(Object.entries(values).map(([kind, v]) => [kind, v.width]));
 
 // Value per protected area kind from the theme, e.g. protectedValue(t, 'color').
 function protectedValue(t, key, literal = false) {
@@ -275,6 +277,27 @@ export function baseOverlayLayers(t) {
         'fill-color': t.water.fill,
         // The outline is only drawn from zoom 12; at low zoom it makes small lakes look jagged.
         ...(t.water.outline ? { 'fill-outline-color': ['step', ['zoom'], t.water.fill, 12, t.water.outline] } : {}),
+      },
+      metadata: group,
+    },
+    // Cliffs and banks (line pattern from the sprite). The ticks point to the lower side.
+    {
+      id: 'cliffs',
+      type: 'line',
+      source: SOURCE,
+      'source-layer': 'cliffs',
+      minzoom: 13,
+      layout: { 'line-join': 'round' },
+      paint: {
+        'line-pattern': matchKind(
+          Object.fromEntries(Object.entries(t.cliff).map(([kind, c]) => [kind, cliffImage(c.color)])),
+          cliffImage(t.cliff.bank.color),
+        ),
+        // The pattern is 10 px high; the line width scales it.
+        'line-width': ['interpolate', ['linear'], ['zoom'],
+          13, ['*', 6, matchKind(widthByKind(t.cliff), 1)],
+          16, ['*', 10, matchKind(widthByKind(t.cliff), 1)],
+          18, ['*', 14, matchKind(widthByKind(t.cliff), 1)]],
       },
       metadata: group,
     },

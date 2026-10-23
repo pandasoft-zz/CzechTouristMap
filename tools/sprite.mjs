@@ -5,13 +5,14 @@
 //   shield-<rrggbb>  rounded rectangle for road numbers, one per colour; it stretches to the text
 //                    (icon-text-fit). Not SDF: MapLibre Native draws SDF images with stretch areas
 //                    far too big (docs/native.md).
+//   cliff-<rrggbb>   line pattern for cliffs and banks: a line with ticks on the lower side.
 
 import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
 import { ROOT } from './paths.mjs';
 import { THEMES } from '../style/themes/index.mjs';
-import { shieldColors, shieldImage } from '../style/theme.mjs';
+import { cliffColors, cliffImage, shieldColors, shieldImage } from '../style/theme.mjs';
 
 const SPRITE_DIR = path.join(ROOT, 'sprite');
 
@@ -53,10 +54,32 @@ function shield(color) {
   };
 }
 
-// One shield per colour used by any style variant.
+// Cliff pattern (line-pattern). MapLibre centres the image on the line and repeats it along the line, so
+// the base line is in the middle and the ticks fill one half. The image top is drawn on the right side
+// of the line direction (tested in MapLibre Native and GL JS), which is the lower side in OSM.
+function cliff(color) {
+  const width = 4;
+  const height = 10;
+  const line = { x0: -1, y0: 4.4, x1: width + 1, y1: 5.6, r: 0 };
+  const tick = { x0: 1.5, y0: 1, x1: 2.5, y1: 5, r: 0 };
+  const rgb = hexColor(color);
+  return {
+    width,
+    height,
+    pixel: (x, y, px) => {
+      const coverage = (rect) => Math.min(1, Math.max(0, 0.5 - roundedRectDistance(x, y, rect) / px));
+      return [...rgb, Math.max(coverage(line), coverage(tick))];
+    },
+  };
+}
+
+// One image per colour used by any style variant.
 function images() {
-  const colors = new Set(Object.values(THEMES).flatMap(shieldColors).map((c) => c.toUpperCase()));
-  return Object.fromEntries([...colors].sort().map((c) => [shieldImage(c), shield(c)]));
+  const colors = (fn) => [...new Set(Object.values(THEMES).flatMap(fn).map((c) => c.toUpperCase()))].sort();
+  return {
+    ...Object.fromEntries(colors(shieldColors).map((c) => [shieldImage(c), shield(c)])),
+    ...Object.fromEntries(colors(cliffColors).map((c) => [cliffImage(c), cliff(c)])),
+  };
 }
 
 function encodePng(width, height, rgba) {
@@ -114,9 +137,8 @@ function buildSprite(ratio) {
       width: w,
       height: h,
       pixelRatio: ratio,
-      stretchX: scale(img.stretchX),
-      stretchY: scale(img.stretchY),
-      content: img.content.map((v) => v * ratio),
+      ...(img.stretchX ? { stretchX: scale(img.stretchX), stretchY: scale(img.stretchY) } : {}),
+      ...(img.content ? { content: img.content.map((v) => v * ratio) } : {}),
     };
     left += w;
   }

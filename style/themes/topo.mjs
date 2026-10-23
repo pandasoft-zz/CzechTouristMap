@@ -159,6 +159,14 @@ export default {
     },
   },
 
+  // ZTM10 "terénní stupeň, násep, zářez, srázný břeh": grey line with short ticks (#8D8F90, sampled from
+  // docs/standards/znacky10.pdf). ZTM10 draws rock walls as brown rock hachures; the map uses the same
+  // line in a darker grey for cliffs instead (no source).
+  cliff: {
+    cliff: { color: '#6A6C6D', width: 1 },
+    bank: { color: '#8D8F90', width: 0.75 },
+  },
+
   // ZTM10: all contours #E9BC9A; index contours thicker (0.85 pt against 0.37 pt).
   // Labels: Arial Narrow, no halo. The colour is a bit darker than #E9BC9A, so the numbers stay readable
   // (no source).

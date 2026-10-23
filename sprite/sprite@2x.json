@@ -148,5 +148,33 @@
       30,
       26
     ]
+  },
+  "cliff-5e534c": {
+    "x": 192,
+    "y": 0,
+    "width": 8,
+    "height": 20,
+    "pixelRatio": 2
+  },
+  "cliff-6a6c6d": {
+    "x": 200,
+    "y": 0,
+    "width": 8,
+    "height": 20,
+    "pixelRatio": 2
+  },
+  "cliff-8c8178": {
+    "x": 208,
+    "y": 0,
+    "width": 8,
+    "height": 20,
+    "pixelRatio": 2
+  },
+  "cliff-8d8f90": {
+    "x": 216,
+    "y": 0,
+    "width": 8,
+    "height": 20,
+    "pixelRatio": 2
   }
 }
