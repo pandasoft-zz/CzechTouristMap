@@ -54,6 +54,15 @@ Files in `v/` get `Cache-Control: public, max-age=31536000, immutable`; `latest.
     "tourist": { "name": "Turistická", "url": ".../style-tourist.json" },
     "topo": { "name": "Topografická", "url": ".../style-topo.json" }
   },
+  "assets": {
+    "glyphs": ".../fonts/{fontstack}/{range}.pbf",
+    "sprite": ".../sprite/sprite",
+    "fonts": { "NotoSans-Regular": ["0-255", "256-511", "512-767", "7680-7935", "8192-8447"] },
+    "files": [
+      { "path": "fonts/NotoSans-Regular/0-255.pbf", "url": "...", "size": 70000, "sha256": "…" },
+      { "path": "sprite/sprite.json", "url": "...", "size": 1760, "sha256": "…" }
+    ]
+  },
   "countries": [
     {
       "id": "cz",
@@ -85,6 +94,9 @@ Files in `v/` get `Cache-Control: public, max-age=31536000, immutable`; `latest.
   version (same `sha256`), it keeps the old date. Relief and contours rarely change, so apps do not
   download them again every month.
 - Countries and parts are the offline download units. A large country has several parts.
+- `assets` lists the files the styles need besides PMTiles: the fonts that a style uses (all their glyph
+  ranges) and the sprite (`.json` and `.png`, 1x and @2x). `path` is relative to the version folder.
+  For offline use, download all `files` and keep their paths (about 4 MB).
 
 ### Mobile app
 

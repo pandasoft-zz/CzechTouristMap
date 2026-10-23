@@ -1,20 +1,20 @@
 // Generate the style sprite (sprite/sprite.json + .png, and @2x).
 //
-// All images are SDF images: the style colours them with icon-color and can draw an outline
-// with icon-halo-color. Run "node tools/czmap.mjs sprite" after changing this file.
+// Run "node tools/czmap.mjs sprite" after changing this file or a shield colour in style/themes/.
 //
-//   shield  rounded rectangle for road and route numbers; it stretches to the text (icon-text-fit)
+//   shield-<rrggbb>  rounded rectangle for road numbers, one per colour; it stretches to the text
+//                    (icon-text-fit). Not SDF: MapLibre Native draws SDF images with stretch areas
+//                    far too big (docs/native.md).
+//   cliff-<rrggbb>   line pattern for cliffs and banks: a line with ticks on the lower side.
 
 import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
 import { ROOT } from './paths.mjs';
+import { THEMES } from '../style/themes/index.mjs';
+import { cliffColors, cliffImage, shieldColors, shieldImage } from '../style/theme.mjs';
 
 const SPRITE_DIR = path.join(ROOT, 'sprite');
-
-// SDF encoding as in MapLibre: the edge is at alpha 0.75, one CSS pixel of distance is 1/8.
-const EDGE = 0.75;
-const SDF_PX = 8;
 
 // Signed distance from (x, y) to a rounded rectangle; negative inside.
 function roundedRectDistance(x, y, rect) {
@@ -28,24 +28,59 @@ function roundedRectDistance(x, y, rect) {
   return outside + Math.min(Math.max(qx, qy), 0) - rect.r;
 }
 
-// Image definitions in CSS pixels. "buffer" leaves room for the SDF halo.
-const IMAGES = {
-  shield: (() => {
-    const width = 22;
-    const height = 20;
-    const buffer = 4;
-    const r = 3;
-    const rect = { x0: buffer, y0: buffer, x1: width - buffer, y1: height - buffer, r };
-    return {
-      width,
-      height,
-      distance: (x, y) => roundedRectDistance(x, y, rect),
-      stretchX: [[buffer + r, width - buffer - r]],
-      stretchY: [[buffer + r, height - buffer - r]],
-      content: [buffer, buffer, width - buffer, height - buffer],
-    };
-  })(),
-};
+const hexColor = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+
+// Shield: a coloured rounded rectangle with a white outline. Sizes in CSS pixels.
+function shield(color) {
+  const width = 16;
+  const height = 14;
+  const outline = 1;
+  const r = 3;
+  const inner = { x0: outline, y0: outline, x1: width - outline, y1: height - outline, r };
+  const outer = { x0: 0, y0: 0, x1: width, y1: height, r: r + outline };
+  const fill = hexColor(color);
+  return {
+    width,
+    height,
+    // Colour and alpha at (x, y); px = size of one image pixel in CSS pixels, for anti-aliasing.
+    pixel: (x, y, px) => {
+      const coverage = (rect) => Math.min(1, Math.max(0, 0.5 - roundedRectDistance(x, y, rect) / px));
+      const a = coverage(inner);
+      return [...fill.map((c) => Math.round(c * a + 255 * (1 - a))), coverage(outer)];
+    },
+    stretchX: [[outline + r, width - outline - r]],
+    stretchY: [[outline + r, height - outline - r]],
+    content: [outline, outline, width - outline, height - outline],
+  };
+}
+
+// Cliff pattern (line-pattern). MapLibre centres the image on the line and repeats it along the line, so
+// the base line is in the middle and the ticks fill one half. The image top is drawn on the right side
+// of the line direction (tested in MapLibre Native and GL JS), which is the lower side in OSM.
+function cliff(color) {
+  const width = 4;
+  const height = 10;
+  const line = { x0: -1, y0: 4.4, x1: width + 1, y1: 5.6, r: 0 };
+  const tick = { x0: 1.5, y0: 1, x1: 2.5, y1: 5, r: 0 };
+  const rgb = hexColor(color);
+  return {
+    width,
+    height,
+    pixel: (x, y, px) => {
+      const coverage = (rect) => Math.min(1, Math.max(0, 0.5 - roundedRectDistance(x, y, rect) / px));
+      return [...rgb, Math.max(coverage(line), coverage(tick))];
+    },
+  };
+}
+
+// One image per colour used by any style variant.
+function images() {
+  const colors = (fn) => [...new Set(Object.values(THEMES).flatMap(fn).map((c) => c.toUpperCase()))].sort();
+  return {
+    ...Object.fromEntries(colors(shieldColors).map((c) => [shieldImage(c), shield(c)])),
+    ...Object.fromEntries(colors(cliffColors).map((c) => [cliffImage(c), cliff(c)])),
+  };
+}
 
 function encodePng(width, height, rgba) {
   const raw = Buffer.alloc((width * 4 + 1) * height);
@@ -76,7 +111,7 @@ function encodePng(width, height, rgba) {
 
 // Lay out all images in one row and draw them at the given pixel ratio.
 function buildSprite(ratio) {
-  const entries = Object.entries(IMAGES);
+  const entries = Object.entries(images());
   const width = entries.reduce((sum, [, img]) => sum + img.width * ratio, 0);
   const height = Math.max(...entries.map(([, img]) => img.height * ratio));
   const rgba = Buffer.alloc(width * height * 4);
@@ -87,12 +122,11 @@ function buildSprite(ratio) {
     const h = img.height * ratio;
     for (let y = 0; y < h; y++) {
       for (let x = 0; x < w; x++) {
-        const d = img.distance((x + 0.5) / ratio, (y + 0.5) / ratio);
-        const alpha = Math.min(1, Math.max(0, EDGE - d / SDF_PX));
+        const [r, g, b, alpha] = img.pixel((x + 0.5) / ratio, (y + 0.5) / ratio, 1 / ratio);
         const i = (y * width + left + x) * 4;
-        rgba[i] = 255;
-        rgba[i + 1] = 255;
-        rgba[i + 2] = 255;
+        rgba[i] = r;
+        rgba[i + 1] = g;
+        rgba[i + 2] = b;
         rgba[i + 3] = Math.round(alpha * 255);
       }
     }
@@ -103,10 +137,8 @@ function buildSprite(ratio) {
       width: w,
       height: h,
       pixelRatio: ratio,
-      sdf: true,
-      stretchX: scale(img.stretchX),
-      stretchY: scale(img.stretchY),
-      content: img.content.map((v) => v * ratio),
+      ...(img.stretchX ? { stretchX: scale(img.stretchX), stretchY: scale(img.stretchY) } : {}),
+      ...(img.content ? { content: img.content.map((v) => v * ratio) } : {}),
     };
     left += w;
   }

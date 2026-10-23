@@ -27,6 +27,7 @@ No POIs. Only land cover, water, transport, buildings, boundaries and names.
 | `roads` | line | `kind`: motorway, trunk, primary, secondary, tertiary, minor, pedestrian, service, track, path, cycleway, steps; `link`, `bridge`, `tunnel` (1); `grade` (track, 1–5); `ref`; `name` | 5–14 by kind |
 | `rail` | line | `kind`: rail, narrow, tram; `service`, `bridge`, `tunnel` (1). Parallel tram tracks (≤ 10 m apart) are one line | 8–13 |
 | `buildings` | polygon | – | 13 |
+| `cliffs` | line | `kind`: cliff (`natural=cliff`), bank (`natural=earth_bank`, `man_made=embankment`). The lower side is on the right of the line direction; lines are not merged, so the direction is kept | cliff 13, bank 14 |
 | `protected` | polygon | `kind`: national_park, landscape (CHKO), reserve; `name` | 7 / 11 |
 | `boundaries` | line | `level`: 2 (state), 6 (region) | 0 / 7 |
 | `places` | point | `kind`: city, town, village, suburb, hamlet, isolated_dwelling, locality; `name` | 5–14 |
@@ -66,3 +67,16 @@ Short closed loops (noise) are dropped.
 - Heights are rounded to 0.25 m (`--step`). This makes the tiles much smaller with no visible change in hillshading.
 - Tile format: lossless WebP, 256 px
 - Only tiles near the border of the OSM extract are stored.
+
+### Known limit: 30 m resolution
+
+The source has a resolution of 1" (about 30 m). The tiles end at zoom 12. Small landforms do not show at
+large zoom: Švédské valy in Brno (a hill about 20 m high and 150 m wide) is only a soft bump, and the cliffs of
+Stránská skála are not in the data at all. Mapy.cz shows both, because it uses a LiDAR model of about 2 m.
+Stronger hillshading in the style does not help: steep valleys (e.g. Karlštejn) then turn too dark.
+
+Possible fix (not done yet):
+- Add ČÚZK DMR5G (LiDAR, about 2 m, open data since 2023) as a source in `relief/build_relief.py`.
+- Build relief up to zoom 13–14, probably as pre-computed hillshading in lossy WebP, not as raw heights.
+- Estimated size: zoom 13 adds a few hundred MB, zoom 14 about 2 GB. Files over 500 MB must be split.
+- Test first on a small area (e.g. Brno: Stránská skála, Švédské valy).

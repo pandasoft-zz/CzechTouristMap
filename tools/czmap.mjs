@@ -48,6 +48,7 @@ Commands:
   release --base-url URL  Prepare a release in dist/: dist/latest.json (catalog) and styles with
           [--version ID]  absolute URLs into v/<version>/ (default version: UTC time, 20261020-0315)
   check                   Validate the styles (both maps) against the MapLibre style spec
+  check-native            Load the styles in MapLibre Native (Android, iOS) in Docker; fails on dropped layers
   sprite                  Generate the style sprite into sprite/ (after changing tools/sprite.mjs)
   info                    Show PMTiles sizes: 500 MB per file (cache limit), 10 GB in total (R2)
   places                  List render presets (regions/<country>/places.json)
@@ -396,11 +397,13 @@ async function renderCommand(opts) {
 async function check() {
   const { validateStyleMin } = await import('@maplibre/maplibre-gl-style-spec');
   const { buildStyle, THEMES } = await import('../style/index.mjs');
+  const { nativeProblems } = await import('../style/native.mjs');
   let failed = false;
   for (const id of Object.keys(THEMES)) {
     const style = buildStyle({ tiles: 'https://example.com/v/1', glyphs: 'https://example.com/{fontstack}/{range}.pbf',
       sprite: 'https://example.com/sprite', variant: id });
-    const errors = validateStyleMin(style);
+    // Rules for MapLibre Native that the spec validator does not know (style/native.mjs).
+    const errors = [...validateStyleMin(style), ...nativeProblems(style).map((message) => ({ message }))];
     console.log(`style ${id}: ${errors.length === 0 ? 'ok' : `${errors.length} errors`}`);
     for (const e of errors) {
       console.log(`  ${e.message}`);
@@ -410,6 +413,19 @@ async function check() {
   if (failed) {
     process.exitCode = 1;
   }
+}
+
+// Load the styles in MapLibre Native (docs/native.md). The Node binding runs only on Linux, so the
+// check runs in Docker everywhere. The image is built once and cached by Docker.
+function checkNative() {
+  if (!hasCommand('docker')) {
+    console.error('check-native needs Docker.');
+    process.exit(1);
+  }
+  run('docker', ['build', '-q', '-t', 'czmap-native', 'tools/native']);
+  // --init: xvfb-run as process 1 would wait forever for the X server it stopped.
+  run('docker', ['run', '--rm', '--init', '-v', `${ROOT}:/work:ro`, 'czmap-native',
+    'xvfb-run', '-a', 'node', '/work/tools/native/check.mjs']);
 }
 
 function info(parts) {
@@ -492,6 +508,8 @@ async function main() {
     }
     case 'check':
       return check();
+    case 'check-native':
+      return checkNative();
     case 'style':
       return style(values);
     case 'serve':

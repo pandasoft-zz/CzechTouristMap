@@ -1,28 +1,180 @@
 {
-  "shield": {
+  "shield-1040c8": {
     "x": 0,
     "y": 0,
-    "width": 44,
-    "height": 40,
+    "width": 32,
+    "height": 28,
     "pixelRatio": 2,
-    "sdf": true,
     "stretchX": [
       [
-        14,
-        30
+        8,
+        24
       ]
     ],
     "stretchY": [
       [
-        14,
-        26
+        8,
+        20
       ]
     ],
     "content": [
-      8,
-      8,
-      36,
-      32
+      2,
+      2,
+      30,
+      26
     ]
+  },
+  "shield-2f7d32": {
+    "x": 32,
+    "y": 0,
+    "width": 32,
+    "height": 28,
+    "pixelRatio": 2,
+    "stretchX": [
+      [
+        8,
+        24
+      ]
+    ],
+    "stretchY": [
+      [
+        8,
+        20
+      ]
+    ],
+    "content": [
+      2,
+      2,
+      30,
+      26
+    ]
+  },
+  "shield-6b4724": {
+    "x": 64,
+    "y": 0,
+    "width": 32,
+    "height": 28,
+    "pixelRatio": 2,
+    "stretchX": [
+      [
+        8,
+        24
+      ]
+    ],
+    "stretchY": [
+      [
+        8,
+        20
+      ]
+    ],
+    "content": [
+      2,
+      2,
+      30,
+      26
+    ]
+  },
+  "shield-f0c000": {
+    "x": 96,
+    "y": 0,
+    "width": 32,
+    "height": 28,
+    "pixelRatio": 2,
+    "stretchX": [
+      [
+        8,
+        24
+      ]
+    ],
+    "stretchY": [
+      [
+        8,
+        20
+      ]
+    ],
+    "content": [
+      2,
+      2,
+      30,
+      26
+    ]
+  },
+  "shield-f5e040": {
+    "x": 128,
+    "y": 0,
+    "width": 32,
+    "height": 28,
+    "pixelRatio": 2,
+    "stretchX": [
+      [
+        8,
+        24
+      ]
+    ],
+    "stretchY": [
+      [
+        8,
+        20
+      ]
+    ],
+    "content": [
+      2,
+      2,
+      30,
+      26
+    ]
+  },
+  "shield-ffffff": {
+    "x": 160,
+    "y": 0,
+    "width": 32,
+    "height": 28,
+    "pixelRatio": 2,
+    "stretchX": [
+      [
+        8,
+        24
+      ]
+    ],
+    "stretchY": [
+      [
+        8,
+        20
+      ]
+    ],
+    "content": [
+      2,
+      2,
+      30,
+      26
+    ]
+  },
+  "cliff-5e534c": {
+    "x": 192,
+    "y": 0,
+    "width": 8,
+    "height": 20,
+    "pixelRatio": 2
+  },
+  "cliff-6a6c6d": {
+    "x": 200,
+    "y": 0,
+    "width": 8,
+    "height": 20,
+    "pixelRatio": 2
+  },
+  "cliff-8c8178": {
+    "x": 208,
+    "y": 0,
+    "width": 8,
+    "height": 20,
+    "pixelRatio": 2
+  },
+  "cliff-8d8f90": {
+    "x": 216,
+    "y": 0,
+    "width": 8,
+    "height": 20,
+    "pixelRatio": 2
   }
 }

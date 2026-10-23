@@ -37,8 +37,14 @@ These values differ from the manuals on purpose. They come from the first MapLib
 | Road numbers | all road classes | only motorways and roads with one- or two-digit numbers | II. and III. class numbers are not useful for hiking |
 | Road number shields | halo around text; II./III. class green `#008700` | real shields with padding; motorway green, II./III. class in road colour | More room around numbers; II./III. shields do not look like motorway shields |
 
-The manuals do not cover boundaries, hillshading and cycle routes. These values are our own choice.
+The manuals do not cover boundaries, hillshading, hypsometric tint and cycle routes. These values are our own choice.
 The hillshading is strong and stays strong at large zoom, so steep valley sides read as steep.
+The elevation tiles end at zoom 12, and MapLibre flattens slopes of tiles below zoom 15. So the exaggeration
+is close to 1 from zoom 13; otherwise small hills disappear.
+The elevation data has only about 30 m resolution, so small landforms stay soft
+(see "Known limit" in `tile-schema.md`).
+At small zoom a hypsometric tint (layer `hypsometric-tint`, like OpenTopoMap) colours lowlands green and
+mountains brown. It fades out until zoom 12. Both maps have it; the topo tint is paler.
 
 ## Topografická (`topo`)
 
@@ -68,14 +74,16 @@ Not like ZTM10:
 - Waterways are drawn under water areas. A river with an area shows no centre line.
 - Pedestrian streets and squares are drawn under the buildings, so building outlines stay sharp.
 - Bridges have a thin grey outline instead of the road casing. It ends at the bridge and does not cover the road.
+- Cliffs and steep banks (`cliffs`): a line with short ticks on the lower side, like the ZTM10 symbol
+  "terénní stupeň". Cliffs are darker than banks. The pattern is a sprite image per colour (`cliff-<colour>`).
 - Railways are thin. Sidings and yard tracks (`service`) are thinner and lighter, so large stations stay readable.
   Tram lines are a thin line with small cross ties (from z15).
-- Number shields use the `shield` image from the sprite: all road numbers in the tourist map, only motorway
+- Number shields use the `shield-<colour>` images from the sprite: all road numbers in the tourist map, only motorway
   and expressway numbers (green) in the topographic map. Cycle route numbers have a yellow halo, no shield.
 
 ## Shared limits
 
 - The tourist map uses Noto Sans Regular, Bold and Italic. Bold italic and serif labels from the manuals are
   drawn in italic or bold.
-- The sprite has only the shield image so far, so area patterns and peak triangles are not drawn.
+- The sprite has only the shield images so far, so area patterns and peak triangles are not drawn.
 - The data has no capital flag. The capital rule matches the name "Praha".

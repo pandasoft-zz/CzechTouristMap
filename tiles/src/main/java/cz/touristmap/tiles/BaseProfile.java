@@ -259,7 +259,28 @@ public class BaseProfile implements Profile {
         String waterway = sf.getString("waterway");
         if (waterway != null) {
             processWaterway(sf, features, waterway);
+            return;
         }
+        processCliff(sf, features);
+    }
+
+    /**
+     * Cliffs and steep banks. In OSM the lower side is on the right of the way direction, so these lines keep
+     * their direction: they are not merged in {@link #postProcessLayerFeatures}.
+     */
+    private void processCliff(SourceFeature sf, FeatureCollector features) {
+        String kind;
+        if (sf.hasTag("natural", "cliff")) {
+            kind = "cliff";
+        } else if (sf.hasTag("natural", "earth_bank") || sf.hasTag("man_made", "embankment")) {
+            kind = "bank";
+        } else {
+            return;
+        }
+        features.line("cliffs")
+            .setAttr("kind", kind)
+            .setMinZoom(kind.equals("cliff") ? 13 : 14)
+            .setMinPixelSize(0);
     }
 
     private void processRoad(SourceFeature sf, FeatureCollector features, String highway) {

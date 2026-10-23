@@ -1,6 +1,6 @@
 // Text labels of the base map: places, peaks, water and road names.
 
-import { fonts, linear, matchKind, shieldLayout, shieldPaint } from '../theme.mjs';
+import { fonts, linear, matchKind, shieldImage, shieldLayout } from '../theme.mjs';
 
 const SOURCE = 'base';
 const group = { group: 'base' };
@@ -42,6 +42,10 @@ export function labelLayers(t) {
     Object.fromEntries(Object.entries(ref.kinds).map(([kind, s]) => [kind, s[key]])),
     ref.default[key],
   );
+  const refShield = matchKind(
+    Object.fromEntries(Object.entries(ref.kinds).map(([kind, s]) => [kind, shieldImage(s.shield)])),
+    shieldImage(ref.default.shield),
+  );
   // Road numbers. ref.shields: true = all numbers in shields, a list = only these road kinds,
   // false = no shields. Numbers without a shield get a halo in the shield colour.
   const roadRefLayers = () => {
@@ -60,10 +64,10 @@ export function labelLayers(t) {
         'text-font': refFont,
         'text-size': 10,
         'text-rotation-alignment': 'viewport',
-        ...(withShield ? shieldLayout() : {}),
+        ...(withShield ? shieldLayout(refShield) : {}),
       },
       paint: withShield
-        ? { 'text-color': refValue('text'), ...shieldPaint(refValue('shield')) }
+        ? { 'text-color': refValue('text') }
         : { 'text-color': refValue('text'), 'text-halo-color': refValue('shield'), 'text-halo-width': ref.haloWidth },
       metadata: group,
     });

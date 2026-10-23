@@ -3,6 +3,7 @@
 | File | Content |
 |---|---|
 | `tile-schema.md` | Layers and attributes in the PMTiles files |
+| `native.md` | MapLibre Native (mobile app): what the styles avoid and `czmap check-native` |
 | `publishing.md` | Release to Cloudflare R2, `latest.json` for web and mobile app, Cloudflare setup |
 | `style-variants.md` | The two maps (Turistická, Topografická), their sources and limits |
 | `adr/` | Architecture decision records |

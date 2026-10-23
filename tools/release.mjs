@@ -7,7 +7,7 @@
 //
 // Writes:
 //   dist/style-<map>.json  styles with absolute URLs into the version folder
-//   dist/latest.json       catalog: version, styles, countries, parts, files (size, sha256, updated)
+//   dist/latest.json       catalog: version, styles, assets (fonts, sprite), countries, parts, files
 //   dist/map.js            loader for web pages (viewer/map.js with viewer/tiles.js inside)
 //   dist/lib/              MapLibre and PMTiles for the loader, in folders named by version
 
@@ -66,6 +66,36 @@ function sha256(file) {
   });
 }
 
+// Fonts and sprite for offline use: the clients download them with the PMTiles.
+// Only font stacks that a style uses; all their glyph ranges (fonts/README.md). Paths are relative
+// to the version folder, the same as in the bucket (tools/publish-r2.sh).
+async function assets(versionUrl, styles) {
+  const used = JSON.stringify(styles);
+  const fonts = {};
+  for (const stack of fs.readdirSync(path.join(ROOT, 'fonts')).sort()) {
+    const dir = path.join(ROOT, 'fonts', stack);
+    if (fs.statSync(dir).isDirectory() && used.includes(`"${stack}"`)) {
+      fonts[stack] = fs.readdirSync(dir).filter((n) => n.endsWith('.pbf')).map((n) => n.slice(0, -4))
+        .sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+    }
+  }
+  const paths = [
+    ...Object.entries(fonts).flatMap(([stack, ranges]) => ranges.map((r) => `fonts/${stack}/${r}.pbf`)),
+    ...fs.readdirSync(path.join(ROOT, 'sprite')).sort().map((n) => `sprite/${n}`),
+  ];
+  const files = [];
+  for (const p of paths) {
+    const file = path.join(ROOT, p);
+    files.push({ path: p, url: `${versionUrl}/${p}`, size: fs.statSync(file).size, sha256: await sha256(file) });
+  }
+  return {
+    glyphs: `${versionUrl}/fonts/{fontstack}/{range}.pbf`,
+    sprite: `${versionUrl}/sprite/sprite`,
+    fonts,
+    files,
+  };
+}
+
 // The catalog that is live now, to keep the "updated" date of files that did not change.
 async function previousCatalog(baseUrl) {
   try {
@@ -105,6 +135,7 @@ export async function release({ baseUrl, version = versionId() }) {
   // Styles: everything they need (tiles, fonts, sprite) is in the version folder.
   const { buildStyle, THEMES } = await import('../style/index.mjs');
   const styles = {};
+  const styleJson = [];
   for (const id of Object.keys(THEMES)) {
     const style = buildStyle({
       tiles: versionUrl,
@@ -113,6 +144,7 @@ export async function release({ baseUrl, version = versionId() }) {
       variant: id,
     });
     fs.writeFileSync(path.join(DIST, `style-${id}.json`), `${JSON.stringify(style, null, 2)}\n`);
+    styleJson.push(style);
     styles[id] = { name: THEMES[id].name, url: `${versionUrl}/style-${id}.json` };
   }
 
@@ -148,6 +180,7 @@ export async function release({ baseUrl, version = versionId() }) {
     baseUrl: versionUrl,
     regions: `${versionUrl}/regions.json`,
     styles,
+    assets: await assets(versionUrl, styleJson),
     countries,
   };
   fs.writeFileSync(path.join(DIST, 'latest.json'), `${JSON.stringify(catalog, null, 2)}\n`);
