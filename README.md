@@ -65,6 +65,7 @@ All tasks use one CLI: `node tools/czmap.mjs <command>` (or `npx czmap <command>
 | `style --tiles https://example.com/map` | Write `dist/style-tourist.json` and `dist/style-topo.json` for production |
 | `release --base-url URL` | Prepare a release: `dist/latest.json` and styles for `v/<version>/` |
 | `check` | Validate the styles of both maps |
+| `check-native` | Load the styles in MapLibre Native (Docker), fail on dropped layers (docs/native.md) |
 | `info` | Show file sizes against the limits (500 MB per file, 10 GB in total) |
 
 ### Viewer

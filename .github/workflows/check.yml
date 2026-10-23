@@ -36,6 +36,9 @@ jobs:
       - name: Styles
         run: node tools/czmap.mjs check
 
+      - name: Styles in MapLibre Native
+        run: node tools/czmap.mjs check-native
+
       - name: JavaScript syntax
         run: for f in tools/*.mjs style/*.mjs style/*/*.mjs; do node --check "$f"; done
 

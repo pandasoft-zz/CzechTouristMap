@@ -26,23 +26,29 @@ export function linear(...stops) {
   return ['interpolate', ['linear'], ['zoom'], ...stops];
 }
 
-// Number shield: the "shield" sprite image stretched around the text (see tools/sprite.mjs).
+// Number shield: a rounded rectangle from the sprite, stretched around the text (see tools/sprite.mjs).
+// There is one image per colour ("shield-2f7d32"): MapLibre Native draws SDF images with stretch areas
+// far too big, so the shields are not coloured with icon-color.
+export function shieldImage(color) {
+  if (!/^#[0-9A-Fa-f]{6}$/.test(color)) {
+    throw new Error(`Shield colour must be #RRGGBB: ${color}`);
+  }
+  return `shield-${color.slice(1).toLowerCase()}`;
+}
+
+// Shield colours of a style variant. The sprite has an image for each of them.
+export function shieldColors(t) {
+  const ref = t.labels.roadRef;
+  return [...Object.values(ref.kinds), ref.default].map((s) => s.shield);
+}
+
 // The padding (top, right, bottom, left in px) gives the numbers room inside the shield.
-export function shieldLayout() {
+export function shieldLayout(image) {
   return {
-    'icon-image': 'shield',
+    'icon-image': image,
     'icon-text-fit': 'both',
     'icon-text-fit-padding': [2, 4, 2, 4],
     'icon-rotation-alignment': 'viewport',
-  };
-}
-
-// Shield fill colour and a thin white outline, so a shield is visible on a road of the same colour.
-export function shieldPaint(color) {
-  return {
-    'icon-color': color,
-    'icon-halo-color': '#FFFFFF',
-    'icon-halo-width': 1,
   };
 }
 

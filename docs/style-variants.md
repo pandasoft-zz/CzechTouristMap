@@ -76,12 +76,12 @@ Not like ZTM10:
 - Bridges have a thin grey outline instead of the road casing. It ends at the bridge and does not cover the road.
 - Railways are thin. Sidings and yard tracks (`service`) are thinner and lighter, so large stations stay readable.
   Tram lines are a thin line with small cross ties (from z15).
-- Number shields use the `shield` image from the sprite: all road numbers in the tourist map, only motorway
+- Number shields use the `shield-<colour>` images from the sprite: all road numbers in the tourist map, only motorway
   and expressway numbers (green) in the topographic map. Cycle route numbers have a yellow halo, no shield.
 
 ## Shared limits
 
 - The tourist map uses Noto Sans Regular, Bold and Italic. Bold italic and serif labels from the manuals are
   drawn in italic or bold.
-- The sprite has only the shield image so far, so area patterns and peak triangles are not drawn.
+- The sprite has only the shield images so far, so area patterns and peak triangles are not drawn.
 - The data has no capital flag. The capital rule matches the name "Praha".

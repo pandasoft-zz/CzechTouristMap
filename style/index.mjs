@@ -15,6 +15,7 @@ import { hikingLayers, cyclingLayers, cyclingLabelLayers } from './layers/routes
 import { labelLayers } from './layers/labels.mjs';
 import { contourLayers, contourLabelLayers } from './layers/contours.mjs';
 import { getTheme, THEMES, DEFAULT_THEME } from './themes/index.mjs';
+import { nativeLayers } from './native.mjs';
 
 export const GROUPS = ['base', 'relief', 'contours', 'hiking', 'cycling'];
 
@@ -76,7 +77,8 @@ export function buildStyle({ tiles, glyphs, sprite, variant = DEFAULT_THEME }) {
         tileSize: 256,
       },
     },
-    layers: [
+    // Layers are split where MapLibre Native needs it (style/native.mjs).
+    layers: nativeLayers([
       ...baseLayers(t),
       ...reliefLayers(t),
       ...contourLayers(t),
@@ -86,6 +88,6 @@ export function buildStyle({ tiles, glyphs, sprite, variant = DEFAULT_THEME }) {
       ...contourLabelLayers(t),
       ...labelLayers(t),
       ...cyclingLabelLayers(t),
-    ],
+    ]),
   };
 }
