@@ -1,0 +1,15 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "semanticCommits": "enabled",
+  "packageRules": [
+    {
+      "description": "Minor and patch updates merge themselves when CI is green; GitHub merges them when the required checks of the main ruleset pass. Majors and 0.x versions (where a minor can break) wait for a human.",
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchCurrentVersion": "!/^v?0\\./",
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true
+    }
+  ]
+}
