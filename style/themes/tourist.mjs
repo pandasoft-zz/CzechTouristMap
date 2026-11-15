@@ -58,12 +58,16 @@ export default {
     region: { color: '#A98AA9', width: [7, 0.6, 12, 1.2, 16, 2], dash: [6, 2, 1, 2] },
   },
 
-  // Kept from the first style: thin dashed lines and a light national park wash.
-  // The manual has solid lines with a glow (#588D42, #FF956A); the glow was too heavy around small reserves.
+  // Lines kept from the first style. The thin line alone got lost among forests and green roads,
+  // so an inner band marks the inside, as on KČT maps. Solid lines; military areas keep a dash-dot line.
+  // bandWidth: band width in px at zoom 7, 12, 16, times bandScale (narrower for reserves).
+  // label: colour of the name inside the area (default: color). Band values and the military colour: no source.
   protected: {
-    national_park: { color: '#4F8A3A', opacity: 0.7, dash: [4, 2], fill: 0.06 },
-    landscape: { color: '#4F8A3A', opacity: 0.7, dash: [4, 2], fill: 0 },
-    reserve: { color: '#E07A4F', opacity: 0.35, dash: [4, 2], fill: 0 },
+    national_park: { color: '#3E7A2A', opacity: 0.8, dash: [1, 0], fill: 0.06, band: 0.4, bandScale: 1 },
+    landscape: { color: '#3E7A2A', opacity: 0.8, dash: [1, 0], fill: 0, band: 0.4, bandScale: 1 },
+    reserve: { color: '#D2601A', opacity: 0.85, dash: [1, 0], fill: 0, band: 0.4, bandScale: 0.6, label: '#A84A10' },
+    military: { color: '#B0304A', opacity: 0.85, dash: [6, 2, 1, 2], fill: 0.05, band: 0.35, bandScale: 1 },
+    bandWidth: [7, 2, 12, 5, 16, 9],
   },
 
   road: {
@@ -103,11 +107,14 @@ export default {
       pedestrian: 1.8,
     },
     centreLine: null,
-    // Dash patterns: no source.
-    track: { color: '#8C5A1E', dashGraded: [1, 0], dash: [5, 2] },
-    path: { color: '#8C5A1E', dash: [3, 2] },
+    // Manual: #8C5A1E, but that has the lightness of the index contours (#C07030), so tracks
+    // disappear among them. Darker brown: no source. Dash patterns: no source.
+    track: { color: '#4A2C0C', dashGraded: [1, 0], dash: [5, 2] },
+    path: { color: '#4A2C0C', dash: [3, 2] },
     cycleway: { color: '#0040A0', dash: [3, 2] },
     steps: { color: '#A02030' },
+    // Crosses over ways without access on foot, as on mapy.cz. Colour: no source.
+    noAccess: { color: '#E0405A', minzoom: 14 },
   },
 
   // Tram and service track values: no source.
@@ -167,6 +174,9 @@ export default {
   },
 
   // Cliffs and steep banks: a line with ticks on the lower side, like the ZTM10 "terénní stupeň".
+  // Rock symbol and name, as on mapy.cz. Colours: no source.
+  rock: { color: '#7A5A3A', label: '#5A3A20', font: 'italic' },
+
   // Colours: no source. Cliffs are darker, so rock walls stand out from field edges and embankments.
   cliff: {
     cliff: { color: '#5E534C', width: 1 },
@@ -181,7 +191,8 @@ export default {
     width: 0.6,
     indexWidth: 0.9,
     opacity: 0.85,
-    label: { color: '#906010', font: 'italic', halo: 'rgba(255, 255, 255, 0)', haloWidth: 0 },
+    // Halo in a light land colour, so the contour line does not cross the number. No source.
+    label: { color: '#906010', font: 'italic', halo: 'rgba(250, 250, 215, 0.8)', haloWidth: 1.6 },
   },
 
   labels: {
@@ -199,6 +210,8 @@ export default {
     // Italic is kept from the first style (manual: bold), so peaks are less dominant.
     peak: { color: '#693600', font: 'italic', uppercase: false, eleColor: '#693600' },
     water: { color: '#1B5FA8', font: 'italic' },
+    // Names of national parks and CHKO along the boundary, in the boundary colour. No source.
+    protected: { font: 'italic' },
     roadName: { color: '#000000', font: 'bold' },
     // Road numbers in shields: text colour and shield colour.
     // Motorway shields follow the green motorway colour. II. and III. class shields use the road colour

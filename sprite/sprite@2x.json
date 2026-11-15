@@ -176,5 +176,26 @@
     "width": 8,
     "height": 20,
     "pixelRatio": 2
+  },
+  "noaccess-e0405a": {
+    "x": 224,
+    "y": 0,
+    "width": 48,
+    "height": 16,
+    "pixelRatio": 2
+  },
+  "rock-58595b": {
+    "x": 272,
+    "y": 0,
+    "width": 28,
+    "height": 22,
+    "pixelRatio": 2
+  },
+  "rock-7a5a3a": {
+    "x": 300,
+    "y": 0,
+    "width": 28,
+    "height": 22,
+    "pixelRatio": 2
   }
 }

@@ -1,6 +1,6 @@
 // Text labels of the base map: places, peaks, water and road names.
 
-import { fonts, linear, matchKind, shieldImage, shieldLayout } from '../theme.mjs';
+import { fonts, linear, matchKind, protectedKinds, rockImage, shieldImage, shieldLayout } from '../theme.mjs';
 
 const SOURCE = 'base';
 const group = { group: 'base' };
@@ -83,6 +83,57 @@ export function labelLayers(t) {
 
   return [
     {
+      // National park and CHKO names along the boundary. Large areas only, so not every reserve is named.
+      id: 'protected-label',
+      type: 'symbol',
+      source: SOURCE,
+      'source-layer': 'protected',
+      filter: ['all', ['has', 'name'], ['in', ['get', 'kind'], ['literal', ['national_park', 'landscape']]]],
+      minzoom: 10,
+      layout: {
+        'symbol-placement': 'line',
+        'symbol-spacing': 400,
+        'text-field': ['get', 'name'],
+        'text-font': fonts[l.protected.font],
+        'text-size': linear(10, 11, 15, 14),
+        'text-letter-spacing': 0.05,
+        'text-max-angle': 45,
+        // On the line: MapLibre turns labels upright, so an offset to one side would put half of
+        // them outside the area.
+      },
+      paint: {
+        ...halo,
+        'text-color': matchKind(
+          Object.fromEntries(Object.entries(protectedKinds(t)).map(([kind, p]) => [kind, p.color])),
+          t.protected.landscape.color,
+        ),
+      },
+      metadata: group,
+    },
+    {
+      // One name inside each protected or military area, as on mapy.cz.
+      id: 'protected-area-label',
+      type: 'symbol',
+      source: SOURCE,
+      'source-layer': 'protected_labels',
+      layout: {
+        'text-field': ['get', 'name'],
+        'text-font': fonts[l.protected.font],
+        // Reserves smaller than parks and CHKO.
+        'text-size': linear(8, ['match', ['get', 'kind'], 'reserve', 9, 11], 14, ['match', ['get', 'kind'], 'reserve', 12, 14]),
+        'text-max-width': 8,
+        'text-padding': 4,
+      },
+      paint: {
+        ...halo,
+        'text-color': matchKind(
+          Object.fromEntries(Object.entries(protectedKinds(t)).map(([kind, p]) => [kind, p.label ?? p.color])),
+          t.protected.landscape.color,
+        ),
+      },
+      metadata: group,
+    },
+    {
       id: 'waterway-label',
       type: 'symbol',
       source: SOURCE,
@@ -128,6 +179,27 @@ export function labelLayers(t) {
         'text-size': linear(13, 9, 17, 12),
       },
       paint: { ...halo, 'text-color': l.roadName.color },
+      metadata: group,
+    },
+    {
+      // Rocks: symbol, and the name below when there is room.
+      id: 'rock',
+      type: 'symbol',
+      source: SOURCE,
+      'source-layer': 'rocks',
+      layout: {
+        'icon-image': rockImage(t.rock.color),
+        'icon-size': linear(13, 0.8, 16, 1.1),
+        'icon-allow-overlap': false,
+        'text-field': ['coalesce', ['get', 'name'], ''],
+        'text-font': fonts[t.rock.font],
+        'text-size': linear(13, 10, 16, 12),
+        'text-anchor': 'top',
+        'text-offset': [0, 0.6],
+        'text-max-width': 8,
+        'text-optional': true,
+      },
+      paint: { ...halo, 'text-color': t.rock.label },
       metadata: group,
     },
     {

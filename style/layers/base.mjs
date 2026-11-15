@@ -1,7 +1,7 @@
 // Base map layers: land cover, water, boundaries, buildings, roads and railways.
 // Labels are in labels.mjs, so they stay on top of the route overlays.
 
-import { width, linear, matchKind, cliffImage } from '../theme.mjs';
+import { width, linear, matchKind, cliffImage, noAccessImage, protectedKinds } from '../theme.mjs';
 
 const SOURCE = 'base';
 const group = { group: 'base' };
@@ -38,7 +38,8 @@ const widthByKind = (values) => Object.fromEntries(Object.entries(values).map(([
 // Value per protected area kind from the theme, e.g. protectedValue(t, 'color').
 function protectedValue(t, key, literal = false) {
   const wrap = (v) => (literal ? ['literal', v] : v);
-  const values = Object.fromEntries(Object.entries(t.protected).map(([kind, p]) => [kind, wrap(p[key] ?? 0)]));
+  const kinds = Object.entries(protectedKinds(t));
+  const values = Object.fromEntries(kinds.map(([kind, p]) => [kind, wrap(p[key] ?? 0)]));
   return matchKind(values, wrap(t.protected.landscape[key] ?? 0));
 }
 
@@ -73,6 +74,25 @@ function roadLayers(t, structure) {
       },
       metadata: group,
     },
+    // Bridges of tracks and paths: a light deck with a thin outline under the dashed line,
+    // because these ways have no fill that would cover the middle of the outline.
+    ...(isBridge ? [['casing', t.road.bridge.color, t.road.bridge.width], ['deck', t.background, 0]]
+      .map(([name, color, extra]) => ({
+        id: id(`minor-${name}`),
+        type: 'line',
+        source: SOURCE,
+        'source-layer': 'roads',
+        filter: ['all', filterStructure, ['in', ['get', 'kind'], ['literal', ['track', 'path', 'cycleway', 'steps']]]],
+        minzoom: 14,
+        layout: { 'line-cap': 'butt', 'line-join': 'round' },
+        paint: {
+          'line-color': color,
+          // no source
+          'line-width': linear(14, 3 + extra, 17, 6 + extra),
+          'line-opacity': name === 'casing' ? t.road.bridge.opacity : 1,
+        },
+        metadata: group,
+      })) : []),
     {
       id: id('track'),
       type: 'line',
@@ -101,6 +121,23 @@ function roadLayers(t, structure) {
           'steps', ['literal', [0.4, 0.4]],
           'cycleway', ['literal', cycleway.dash],
           ['literal', path.dash]],
+        'line-opacity': isTunnel ? 0.5 : 1,
+      },
+      metadata: group,
+    },
+    {
+      // Crosses over tracks and paths without access on foot.
+      id: id('noaccess'),
+      type: 'line',
+      source: SOURCE,
+      'source-layer': 'roads',
+      filter: ['all', filterStructure, ['==', ['get', 'access'], 'no']],
+      minzoom: t.road.noAccess.minzoom,
+      paint: {
+        'line-pattern': noAccessImage(t.road.noAccess.color),
+        // The pattern is 8 px high. MapLibre stretches the pattern height to the line width but keeps
+        // its length, so the width stays 8 px and the crosses keep their shape.
+        'line-width': 8,
         'line-opacity': isTunnel ? 0.5 : 1,
       },
       metadata: group,
@@ -246,7 +283,12 @@ export function baseLayers(t) {
 
 // Water, boundaries, buildings and roads. They are drawn above the relief.
 export function baseOverlayLayers(t) {
-  const hasGlow = Object.values(t.protected).some((p) => p.glow);
+  const { bandWidth } = t.protected;
+  // Band width (or offset, with half = 0.5) by zoom, times the band scale of the kind.
+  const bandStops = (half) => ['interpolate', ['exponential', 1.6], ['zoom'],
+    ...bandWidth.flatMap((v, i) => (i % 2 ? [['*', v * half, protectedValue(t, 'bandScale')]] : [v]))];
+  // Small reserves only from zoom 12, so they do not look like tracks.
+  const protectedFilter = ['any', ['!=', ['get', 'kind'], 'reserve'], ['>=', ['zoom'], 12]];
   return [
     // Waterways are drawn under the water areas: where a river has an area, the centre line is hidden.
     {
@@ -301,26 +343,28 @@ export function baseOverlayLayers(t) {
       },
       metadata: group,
     },
-    ...(hasGlow ? [{
-      id: 'protected-glow',
+    {
+      // Band on the inner side. Outer rings of vector tile polygons are clockwise, holes
+      // counter-clockwise, so a positive offset (right of the line direction) is always inside.
+      id: 'protected-band',
       type: 'line',
       source: SOURCE,
       'source-layer': 'protected',
-      filter: ['any', ['!=', ['get', 'kind'], 'reserve'], ['>=', ['zoom'], 12]],
+      filter: protectedFilter,
       paint: {
         'line-color': protectedValue(t, 'color'),
-        'line-width': width(7, 2, 12, 4, 16, 7),
-        'line-opacity': protectedValue(t, 'glow'),
+        'line-width': bandStops(1),
+        'line-offset': bandStops(0.5),
+        'line-opacity': protectedValue(t, 'band'),
       },
       metadata: group,
-    }] : []),
+    },
     {
       id: 'protected-line',
       type: 'line',
       source: SOURCE,
       'source-layer': 'protected',
-      // Small reserves only from zoom 12, so they do not look like tracks.
-      filter: ['any', ['!=', ['get', 'kind'], 'reserve'], ['>=', ['zoom'], 12]],
+      filter: protectedFilter,
       paint: {
         'line-color': protectedValue(t, 'color'),
         'line-width': width(7, 0.8, 12, 1.5, 16, 3),

@@ -24,14 +24,16 @@ No POIs. Only land cover, water, transport, buildings, boundaries and names.
 | `water` | polygon | – | 6 |
 | `water_labels` | point | `name` | by area |
 | `waterway` | line | `kind`: river, stream; `intermittent`, `tunnel` (1), `name` | river 8, stream 12, ditch 14 |
-| `roads` | line | `kind`: motorway, trunk, primary, secondary, tertiary, minor, pedestrian, service, track, path, cycleway, steps; `link`, `bridge`, `tunnel` (1); `grade` (track, 1–5); `ref`; `name` | 5–14 by kind |
+| `roads` | line | `kind`: motorway, trunk, primary, secondary, tertiary, minor, pedestrian, service, track, path, cycleway, steps; `link`, `bridge`, `tunnel` (1); `grade` (track, 1–5); `access`: no (track, path, cycleway, steps without access on foot: `foot=no/private`, or `access=no/private` without `foot`; z13+); `ref`; `name` | 5–14 by kind |
 | `rail` | line | `kind`: rail, narrow, tram; `service`, `bridge`, `tunnel` (1). Parallel tram tracks (≤ 10 m apart) are one line | 8–13 |
 | `buildings` | polygon | – | 13 |
 | `cliffs` | line | `kind`: cliff (`natural=cliff`), bank (`natural=earth_bank`, `man_made=embankment`). The lower side is on the right of the line direction; lines are not merged, so the direction is kept | cliff 13, bank 14 |
-| `protected` | polygon | `kind`: national_park, landscape (CHKO), reserve; `name` | 7 / 11 |
+| `protected` | polygon | `kind`: national_park, landscape (CHKO), reserve (also natural monuments PP, NPP: `protect_class` 3), military (`landuse=military`, `military=training_area`/`danger_area`); `name` | 7; reserve 11; military 8 (training area), 12 |
+| `protected_labels` | point | `kind` (as `protected`); `name`: `short_name`, or the name with the usual abbreviation (PR, NPR, PP, NPP, CHKO, NP, VÚ). One point inside each area | kind min zoom, or later until the area is about 100 px wide; 14 at the latest |
 | `boundaries` | line | `level`: 2 (state), 6 (region) | 0 / 7 |
 | `places` | point | `kind`: city, town, village, suburb, hamlet, isolated_dwelling, locality; `name` | 5–14 |
 | `peaks` | point | `name`, `ele` | 10 (≥ 1000 m), 12 |
+| `rocks` | point | `name` (optional). `natural=rock`, `natural=stone` and `natural=cliff` points; named `natural=rock` areas as one point | 13 (named), 15 |
 
 Farmland is not stored. It is the map background colour.
 

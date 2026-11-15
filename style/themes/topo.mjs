@@ -59,10 +59,13 @@ export default {
   },
 
   // ZTM10 "hranice chráněného území velkoplošného / maloplošného".
+  // Inner band (see tourist.mjs) and military values: no source.
   protected: {
-    national_park: { color: '#AB9544', opacity: 0.9, dash: [4, 2], fill: 0 },
-    landscape: { color: '#AB9544', opacity: 0.9, dash: [4, 2], fill: 0 },
-    reserve: { color: '#AB9544', opacity: 0.6, dash: [3, 1, 1, 1], fill: 0 },
+    national_park: { color: '#AB9544', opacity: 0.9, dash: [4, 2], fill: 0, band: 0.25, bandScale: 1 },
+    landscape: { color: '#AB9544', opacity: 0.9, dash: [4, 2], fill: 0, band: 0.25, bandScale: 1 },
+    reserve: { color: '#AB9544', opacity: 0.6, dash: [3, 1, 1, 1], fill: 0, band: 0.2, bandScale: 0.6, label: '#8A7530' },
+    military: { color: '#A0406A', opacity: 0.9, dash: [6, 2, 1, 2], fill: 0, band: 0.2, bandScale: 1 },
+    bandWidth: [7, 2, 12, 4, 16, 8],
   },
 
   road: {
@@ -104,6 +107,8 @@ export default {
     cycleway: { color: '#86888A', dash: [3, 3] },
     // no source
     steps: { color: '#86888A' },
+    // Crosses over ways without access on foot. Not in ZTM10; colour: no source.
+    noAccess: { color: '#E0405A', minzoom: 14 },
   },
 
   // ZTM10 tram line: thin, same grey. Service track opacity: no source.
@@ -159,6 +164,9 @@ export default {
     },
   },
 
+  // Rock symbol and name. Not in this form in ZTM10; colours: no source.
+  rock: { color: '#58595B', label: '#231F20', font: 'sansItalic' },
+
   // ZTM10 "terénní stupeň, násep, zářez, srázný břeh": grey line with short ticks (#8D8F90, sampled from
   // docs/standards/znacky10.pdf). ZTM10 draws rock walls as brown rock hachures; the map uses the same
   // line in a darker grey for cliffs instead (no source).
@@ -176,7 +184,8 @@ export default {
     width: 0.6,
     indexWidth: 1.2,
     opacity: 1,
-    label: { color: '#D9A27A', font: 'narrow', halo: 'rgba(255, 255, 255, 0)', haloWidth: 0 },
+    // Halo in the background colour, so the contour line does not cross the number. No source.
+    label: { color: '#D9A27A', font: 'narrow', halo: 'rgba(255, 255, 255, 0.8)', haloWidth: 1.6 },
   },
 
   labels: {
@@ -202,6 +211,8 @@ export default {
     peak: { color: '#994739', font: 'sans', uppercase: true, eleColor: '#994739', eleFont: 'narrow' },
     // "vodní tok a plocha": Arial Italic, blue.
     water: { color: '#00AEEF', font: 'sansItalic' },
+    // Names of national parks and CHKO along the boundary, in the boundary colour. No source.
+    protected: { font: 'sansItalic' },
     roadName: { color: '#231F20', font: 'sans' },
     // Road numbers: Arial Bold.
     refFont: 'sansBold',
