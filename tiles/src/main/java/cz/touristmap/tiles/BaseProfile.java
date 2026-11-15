@@ -202,14 +202,33 @@ public class BaseProfile implements Profile {
                 .setPixelTolerance(0.4);
         }
 
-        // Protected areas (national parks, CHKO, nature reserves)
+        // Named rocks drawn as areas: one rock symbol inside.
+        if (sf.hasTag("natural", "rock") && sf.hasTag("name")) {
+            features.pointOnSurface("rocks")
+                .setAttr("name", sf.getString("name"))
+                .setMinZoom(13)
+                .setPointLabelGridSizeAndLimit(13, 32, 2);
+        }
+
+        // Protected areas (national parks, CHKO, nature reserves) and military areas
         String protectedKind = protectedKind(sf);
         if (protectedKind != null) {
             features.polygon("protected")
                 .setAttr("kind", protectedKind)
                 .setAttr("name", sf.getString("name"))
-                .setMinZoom(protectedKind.equals("reserve") ? 11 : 7)
+                .setMinZoom(protectedMinZoom(sf, protectedKind))
                 .setMinPixelSize(4);
+            String name = sf.getString("name");
+            if (name != null) {
+                // One label inside the area, when the area is about 100 px wide. Small areas get it at
+                // zoom 14, the last tile zoom; a later min zoom would drop the label.
+                int labelZoom = Math.min(14, features.getMinZoomForPixelSize(100));
+                features.pointOnSurface("protected_labels")
+                    .setAttr("kind", protectedKind)
+                    .setAttr("name", sf.hasTag("short_name") ? sf.getString("short_name") : shortProtectedName(name))
+                    .setMinZoom(Math.max(protectedMinZoom(sf, protectedKind), labelZoom))
+                    .setPointLabelGridSizeAndLimit(13, 64, 1);
+            }
         }
     }
 
@@ -226,7 +245,40 @@ public class BaseProfile implements Profile {
         return null;
     }
 
+    /** Usual Czech abbreviations at the start of a name, e.g. "přírodní rezervace Koda" -> "PR Koda". */
+    private static final List<String[]> PROTECTED_ABBREVIATIONS = List.of(
+        new String[] {"národní přírodní rezervace ", "NPR "},
+        new String[] {"přírodní rezervace ", "PR "},
+        new String[] {"národní přírodní památka ", "NPP "},
+        new String[] {"přírodní památka ", "PP "},
+        new String[] {"chráněná krajinná oblast ", "CHKO "},
+        new String[] {"národní park ", "NP "},
+        new String[] {"vojenský újezd ", "VÚ "}
+    );
+
+    static String shortProtectedName(String name) {
+        String lower = name.toLowerCase(java.util.Locale.ROOT);
+        for (String[] abbreviation : PROTECTED_ABBREVIATIONS) {
+            if (lower.startsWith(abbreviation[0])) {
+                return abbreviation[1] + name.substring(abbreviation[0].length());
+            }
+        }
+        return name;
+    }
+
+    private static int protectedMinZoom(SourceFeature sf, String kind) {
+        return switch (kind) {
+            case "reserve" -> 11;
+            // Training areas (vojenské újezdy) are large; barracks and ranges are small.
+            case "military" -> sf.hasTag("military", "training_area") ? 8 : 12;
+            default -> 7;
+        };
+    }
+
     private static String protectedKind(SourceFeature sf) {
+        if (sf.hasTag("landuse", "military") || sf.hasTag("military", "training_area", "danger_area")) {
+            return "military";
+        }
         if (sf.hasTag("boundary", "national_park")) {
             return "national_park";
         }
@@ -235,7 +287,8 @@ public class BaseProfile implements Profile {
             return switch (cls) {
                 case "2" -> "national_park";
                 case "5" -> "landscape";
-                case "1", "1a", "1b", "4" -> "reserve";
+                // 3: natural monuments (PP, NPP).
+                case "1", "1a", "1b", "3", "4" -> "reserve";
                 default -> null;
             };
         }
@@ -289,8 +342,11 @@ public class BaseProfile implements Profile {
             return;
         }
         // Skip details that only add size: sidewalks, crossings, parking aisles, driveways.
+        // Private service roads and pedestrian areas are skipped too. Tracks and paths without
+        // access on foot are kept with access=no, so walkers see where they must not go.
+        boolean noFoot = noFootAccess(sf);
         if (sf.hasTag("footway", "sidewalk", "crossing") || sf.hasTag("service", "parking_aisle", "driveway")
-            || sf.hasTag("area", "yes") || sf.hasTag("access", "private", "no") && road.rank < 4) {
+            || sf.hasTag("area", "yes") || noFoot && road.rank == 3) {
             return;
         }
         int minZoom = road.minZoom;
@@ -311,6 +367,9 @@ public class BaseProfile implements Profile {
                 feature.setAttrWithMinzoom("grade", Parse.parseIntOrNull(grade.substring(5)), 13);
             }
         }
+        if (noFoot && road.rank < 3) {
+            feature.setAttrWithMinzoom("access", "no", 13);
+        }
         setStructure(sf, feature, 12);
         if (road.rank >= 5) {
             feature.setAttrWithMinzoom("ref", sf.getString("ref"), 10);
@@ -318,6 +377,13 @@ public class BaseProfile implements Profile {
         if (road.rank >= 3) {
             feature.setAttrWithMinzoom("name", sf.getString("name"), road.rank >= 5 ? 13 : 15);
         }
+    }
+
+    /** True when walkers must not use the way: foot=no/private, or access=no/private without a foot tag. */
+    private static boolean noFootAccess(SourceFeature sf) {
+        String foot = sf.getString("foot");
+        String value = foot != null ? foot : sf.getString("access");
+        return "no".equals(value) || "private".equals(value);
     }
 
     private void processRail(SourceFeature sf, FeatureCollector features, String railway) {
@@ -402,6 +468,16 @@ public class BaseProfile implements Profile {
                 .setMinZoom(minZoom)
                 .setSortKeyDescending((int) Math.min(pop / 100, 100_000))
                 .setPointLabelGridSizeAndLimit(12, 32, 4);
+            return;
+        }
+        // Rocks and big stones: terrain features like peaks. Named ones from zoom 13, others from 15.
+        // Single rocks and climbing towers are often natural=cliff points.
+        if (sf.hasTag("natural", "rock", "stone", "cliff")) {
+            features.point("rocks")
+                .setAttr("name", name)
+                .setMinZoom(name != null ? 13 : 15)
+                .setSortKeyDescending(name != null ? 1 : 0)
+                .setPointLabelGridSizeAndLimit(13, 32, 2);
             return;
         }
         if (sf.hasTag("natural", "peak") && name != null) {

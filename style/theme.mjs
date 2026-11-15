@@ -55,6 +55,29 @@ export function cliffColors(t) {
   return Object.values(t.cliff).map((c) => c.color);
 }
 
+// Protected area kinds of a style variant ({ kind: values }), without the shared settings.
+export function protectedKinds(t) {
+  return Object.fromEntries(Object.entries(t.protected).filter(([, v]) => !Array.isArray(v)));
+}
+
+// Line pattern for ways without access on foot: small crosses (see tools/sprite.mjs).
+export function noAccessImage(color) {
+  return `noaccess-${hex(color)}`;
+}
+
+export function noAccessColors(t) {
+  return [t.road.noAccess.color];
+}
+
+// Rock symbol, one image per colour (see tools/sprite.mjs).
+export function rockImage(color) {
+  return `rock-${hex(color)}`;
+}
+
+export function rockColors(t) {
+  return [t.rock.color];
+}
+
 // The padding (top, right, bottom, left in px) gives the numbers room inside the shield.
 export function shieldLayout(image) {
   return {

@@ -6,13 +6,17 @@
 //                    (icon-text-fit). Not SDF: MapLibre Native draws SDF images with stretch areas
 //                    far too big (docs/native.md).
 //   cliff-<rrggbb>   line pattern for cliffs and banks: a line with ticks on the lower side.
+//   noaccess-<rrggbb> line pattern for ways without access on foot: small crosses.
+//   rock-<rrggbb>    symbol for rocks: two rock teeth.
 
 import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
 import { ROOT } from './paths.mjs';
 import { THEMES } from '../style/themes/index.mjs';
-import { cliffColors, cliffImage, shieldColors, shieldImage } from '../style/theme.mjs';
+import {
+  cliffColors, cliffImage, noAccessColors, noAccessImage, rockColors, rockImage, shieldColors, shieldImage,
+} from '../style/theme.mjs';
 
 const SPRITE_DIR = path.join(ROOT, 'sprite');
 
@@ -73,12 +77,69 @@ function cliff(color) {
   };
 }
 
+// No-access pattern (line-pattern): one small cross per image, drawn over the way, as on mapy.cz.
+// The image is wide, so the crosses are far apart.
+function noAccess(color) {
+  const width = 24;
+  const height = 8;
+  const rgb = hexColor(color);
+  // Distance from (x, y) to a segment from (ax, ay) to (bx, by).
+  const segment = (x, y, ax, ay, bx, by) => {
+    const dx = bx - ax;
+    const dy = by - ay;
+    const k = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy)));
+    return Math.hypot(x - ax - k * dx, y - ay - k * dy);
+  };
+  const half = 0.6;
+  return {
+    width,
+    height,
+    pixel: (x, y, px) => {
+      const d = Math.min(segment(x, y, 9, 1, 15, 7), segment(x, y, 9, 7, 15, 1));
+      return [...rgb, Math.min(1, Math.max(0, 0.5 - (d - half) / px))];
+    },
+  };
+}
+
+// Rock symbol: two filled teeth, a big one and a small one, with a white outline.
+function rock(color) {
+  const width = 14;
+  const height = 11;
+  const rgb = hexColor(color);
+  // Signed distance to a triangle (negative inside), from the distances to its three edges.
+  const triangle = (x, y, pts) => {
+    let d = -Infinity;
+    for (let i = 0; i < 3; i++) {
+      const [ax, ay] = pts[i];
+      const [bx, by] = pts[(i + 1) % 3];
+      const len = Math.hypot(bx - ax, by - ay);
+      // Points are clockwise on screen (y down), so this is positive outside the edge.
+      d = Math.max(d, ((x - ax) * (by - ay) - (y - ay) * (bx - ax)) / len);
+    }
+    return d;
+  };
+  const big = [[1.5, 9.5], [5.5, 1.5], [9.5, 9.5]];
+  const small = [[7, 9.5], [9.8, 4.5], [12.5, 9.5]];
+  return {
+    width,
+    height,
+    pixel: (x, y, px) => {
+      const d = Math.min(triangle(x, y, big), triangle(x, y, small));
+      const fill = Math.min(1, Math.max(0, 0.5 - d / px));
+      const outline = Math.min(1, Math.max(0, 0.5 - (d - 1) / px));
+      return [...rgb.map((c) => Math.round(c * fill + 255 * (1 - fill))), outline];
+    },
+  };
+}
+
 // One image per colour used by any style variant.
 function images() {
   const colors = (fn) => [...new Set(Object.values(THEMES).flatMap(fn).map((c) => c.toUpperCase()))].sort();
   return {
     ...Object.fromEntries(colors(shieldColors).map((c) => [shieldImage(c), shield(c)])),
     ...Object.fromEntries(colors(cliffColors).map((c) => [cliffImage(c), cliff(c)])),
+    ...Object.fromEntries(colors(noAccessColors).map((c) => [noAccessImage(c), noAccess(c)])),
+    ...Object.fromEntries(colors(rockColors).map((c) => [rockImage(c), rock(c)])),
   };
 }
 
