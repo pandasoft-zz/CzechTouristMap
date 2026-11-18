@@ -17,7 +17,15 @@ import { contourLayers, contourLabelLayers } from './layers/contours.mjs';
 import { getTheme, THEMES, DEFAULT_THEME } from './themes/index.mjs';
 import { nativeLayers } from './native.mjs';
 
-export const GROUPS = ['base', 'relief', 'contours', 'hiking', 'cycling'];
+// MapLibre places symbols from the top layer down, so upper layers win collisions.
+// Route numbers go above road names and peaks, but below place names: a number repeats along
+// its route and can move, a town name has only one place (e.g. Velké Meziříčí and route 5234).
+function withPlacesOnTop(labels, routeLabels) {
+  const i = labels.findIndex((l) => l['source-layer'] === 'places');
+  return [...labels.slice(0, i), ...routeLabels, ...labels.slice(i)];
+}
+
+export const GROUPS =['base', 'relief', 'contours', 'hiking', 'cycling'];
 
 export { THEMES, DEFAULT_THEME };
 
@@ -86,8 +94,7 @@ export function buildStyle({ tiles, glyphs, sprite, variant = DEFAULT_THEME }) {
       ...cyclingLayers(t),
       ...hikingLayers(t),
       ...contourLabelLayers(t),
-      ...labelLayers(t),
-      ...cyclingLabelLayers(t),
+      ...withPlacesOnTop(labelLayers(t), cyclingLabelLayers(t)),
     ]),
   };
 }
